@@ -740,21 +740,20 @@ class ExcelWindow(QWidget):
         # Combobox chiave esportazione
         
         self.CB_export_key = QComboBox(self)
-        self.CB_export_key.addItems(["Data tessera"])
+        self.CB_export_key.addItems(["Codice fiscale", "Nome", "Cognome", "Data di nascita", "Luogo di nascita", "Sesso", "Città di residenza",
+                                     "Indirizzo di residenza", "CAP", "e-mail", "Numero tessera", "Data tessera"])
+        self.CB_export_key.currentTextChanged.connect(self.export_key_change)
         self.lay.addWidget(self.CB_export_key, 3, 0, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         
         # Combobox esportazione
         
         self.CB_export = QComboBox(self)
-        self.CB_export.addItems(["Uguale a", "Maggiore di", "Minore di"])
         self.CB_export.currentTextChanged.connect(self.export_change)
         self.lay.addWidget(self.CB_export, 3, 1, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         
         # Casella inserimento
         
         self.LE_export = QLineEdit(self)
-        date = datetime.now()
-        self.LE_export.setText(date.strftime("%d/%m/%Y"))
         self.lay.addWidget(self.LE_export, 3, 2, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         
         # Pulsante esportazione
@@ -762,6 +761,8 @@ class ExcelWindow(QWidget):
         self.B_export = QPushButton(self, text="Esporta in excel")
         self.B_export.clicked.connect(self.export_button)
         self.lay.addWidget(self.B_export, 3, 3, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
+        
+        self.export_key_change() # Avvio della funzione di riempimento Combobox
         
     # -*-* Funzione impostazione colonne *-*-
     
@@ -897,9 +898,88 @@ class ExcelWindow(QWidget):
             self.T_preview.setItem(1, 11, QTableWidgetItem("DB:Numero tessera"))
             self.T_preview.setItem(0, 12, QTableWidgetItem("CODICE AFFILIAZIONE"))
     
+    # -*-* Funzione cambio Combobox chiave per export
+    
+    def export_key_change(self):
+        self.LE_export.clear()
+        if self.CB_export_key.currentText() == "Codice fiscale" or self.CB_export_key.currentText() == "Nome" or self.CB_export_key.currentText() == "Cognome"\
+            or self.CB_export_key.currentText() == "Luogo di nascita" or self.CB_export_key.currentText() == "Città di residenza" or self.CB_export_key.currentText() == "Indirizzo di residenza"\
+            or self.CB_export_key.currentText() == "CAP" or self.CB_export_key.currentText() == "e-mail":
+            self.CB_export.clear()
+            self.CB_export.addItems(["Uguale a", "Contiene"])
+        if self.CB_export_key.currentText() == "Data tessera" or self.CB_export_key.currentText() == "Data di nascita" or self.CB_export_key.currentText() == "Numero tessera":
+            self.CB_export.clear()
+            self.CB_export.addItems(["Uguale a", "Maggiore di", "Minore di"])
+        if self.CB_export_key.currentText() == "Sesso":
+            self.CB_export.clear()
+            self.CB_export.addItems(["MASCHIO", "FEMMINA"])
+    
     # -*-* Funzione cambio Combobox export
     
     def export_change(self):
+        self.LE_export.clear()
+        if self.CB_export_key.currentText() == "Codice fiscale":
+            if self.CB_export.currentText() == "Uguale a":
+                self.LE_export.setPlaceholderText("Codice fiscale completo")
+            if self.CB_export.currentText() == "Contiene":
+                self.LE_export.setPlaceholderText("Parte di codice fiscale")
+        
+        if self.CB_export_key.currentText() == "Nome":
+            if self.CB_export.currentText() == "Uguale a":
+                self.LE_export.setPlaceholderText("Nome completo")
+            if self.CB_export.currentText() == "Contiene":
+                self.LE_export.setPlaceholderText("Parte del nome")
+        
+        if self.CB_export_key.currentText() == "Cognome":
+            if self.CB_export.currentText() == "Uguale a":
+                self.LE_export.setPlaceholderText("Cognome completo")
+            if self.CB_export.currentText() == "Contiene":
+                self.LE_export.setPlaceholderText("Parte del cognome")
+        
+        if self.CB_export_key.currentText() == "Data di nascita":
+            self.LE_export.setPlaceholderText("Esempio: 18/09/1980")
+        
+        if self.CB_export_key.currentText() == "Luogo di nascita":
+            if self.CB_export.currentText() == "Uguale a":
+                self.LE_export.setPlaceholderText("Luogo di nascita completo")
+            if self.CB_export.currentText() == "Contiene":
+                self.LE_export.setPlaceholderText("Parte del luogo di nascita")
+        
+        if self.CB_export_key.currentText() == "Sesso":
+            self.LE_export.setPlaceholderText("Casella non necessaria")
+        
+        if self.CB_export_key.currentText() == "Città di residenza":
+            if self.CB_export.currentText() == "Uguale a":
+                self.LE_export.setPlaceholderText("Città di residenza completa")
+            if self.CB_export.currentText() == "Contiene":
+                self.LE_export.setPlaceholderText("Parte della città di residenza")
+        
+        if self.CB_export_key.currentText() == "Indirizzo di residenza":
+            if self.CB_export.currentText() == "Uguale a":
+                self.LE_export.setPlaceholderText("Indirizzo di residenza completo")
+            if self.CB_export.currentText() == "Contiene":
+                self.LE_export.setPlaceholderText("Parte dell'indirizzo di residenza")
+        
+        if self.CB_export_key.currentText() == "CAP":
+            if self.CB_export.currentText() == "Uguale a":
+                self.LE_export.setPlaceholderText("CAP completo")
+            if self.CB_export.currentText() == "Contiene":
+                self.LE_export.setPlaceholderText("Parte del CAP")
+        
+        if self.CB_export_key.currentText() == "e-mail":
+            if self.CB_export.currentText() == "Uguale a":
+                self.LE_export.setPlaceholderText("e-mail completa")
+            if self.CB_export.currentText() == "Contiene":
+                self.LE_export.setPlaceholderText("Parte della e-mail")
+        
+        if self.CB_export_key.currentText() == "Numero tessera":
+            if self.CB_export.currentText() == "Uguale a":
+                self.LE_export.setPlaceholderText("Numero tessera specifico")
+            if self.CB_export.currentText() == "Maggiore di":
+                self.LE_export.setPlaceholderText("Maggiore del numero inserito")
+            if self.CB_export.currentText() == "Minore di":
+                self.LE_export.setPlaceholderText("Minore del numero inserito")
+            
         if self.CB_export_key.currentText() == "Data tessera":
             date = datetime.now()
             if self.CB_export.currentText() == "Uguale a":
@@ -939,80 +1019,165 @@ class ExcelWindow(QWidget):
             err_msg.setText("Nella tabella ci deve essere almeno un valore da controllare nel database!")
             return err_msg.exec()
         
-        # Con data tesseramento
+        # Interrogazione database
+        col = self.db["cards"]
         
-        if self.CB_export_key.currentText() == "Data tessera":
+        if self.CB_export_key.currentText() == "Codice fiscale": # Tramite codice fiscale
+            if self.CB_export.currentText() == "Uguale a" and len(self.LE_export.text()) != 16:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Codice fiscale non corretto")
+                return err_msg.exec()
+            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"tax_id_code": self.LE_export.text().upper().replace(" ", "")}, {"_id": 0})
+            if self.CB_export.currentText() == "Contiene": self.query_db = col.find({"tax_id_code": {"$regex": self.LE_export.text().upper().replace(" ", "")}}, {"_id": 0})
+        
+        if self.CB_export_key.currentText() == "Nome": # Tramite nome
+            if self.has_numbers(self.LE_export.text().upper().strip()) == True:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Inserimento non corretto")
+                return err_msg.exec()
+            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"name": self.LE_export.text().upper().strip()}, {"_id": 0})
+            if self.CB_export.currentText() == "Contiene": self.query_db = col.find({"name": {"$regex": self.LE_export.text().upper().strip()}}, {"_id": 0})
+        
+        if self.CB_export_key.currentText() == "Cognome": # Tramite cognome
+            if self.has_numbers(self.LE_export.text().upper().strip()) == True:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Inserimento non corretto")
+                return err_msg.exec()
+            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"surname": self.LE_export.text().upper().strip()}, {"_id": 0})
+            if self.CB_export.currentText() == "Contiene": self.query_db = col.find({"surname": {"$regex": self.LE_export.text().upper().strip()}}, {"_id": 0})
+        
+        if self.CB_export_key.currentText() == "Data di nascita": # Tramite data di nascita
             date = self.LE_export.text().replace(" ", "")
             if date.count("/") != 2 or len(date) != 10: # Controllo data inserita
                 err_msg = QMessageBox(self)
                 err_msg.setWindowTitle("Errore")
                 err_msg.setText("Data non corretta")
+                return err_msg.exec()
             date = date.split("/")
             date = f"{date[2]}{date[1]}{date[0]}"
             
-            # Inizio interrogazione database
+            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"date_of_birth": date}, {"_id": 0})
+            if self.CB_export.currentText() == "Maggiore di": self.query_db = col.find({"date_of_birth": {"$gte": date}}, {"_id": 0})
+            if self.CB_export.currentText() == "Minore di": self.query_db = col.find({"date_of_birth": {"$lte": date}}, {"_id": 0})
+        
+        if self.CB_export_key.currentText() == "Luogo di nascita": # Tramite luogo di nascita
+            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"birth_place": self.LE_export.text().upper().strip()}, {"_id": 0})
+            if self.CB_export.currentText() == "Contiene": self.query_db = col.find({"birth_place": {"$regex": self.LE_export.text().upper().strip()}}, {"_id": 0})
+        
+        if self.CB_export_key.currentText() == "Sesso": # Tramite sesso
+            if self.CB_export.currentText() == "MASCHIO": self.query_db = col.find({"sex": "MASCHIO"}, {"_id": 0})
+            if self.CB_export.currentText() == "FEMMINA": self.query_db = col.find({"sex": "FEMMINA"}, {"_id": 0})
+        
+        if self.CB_export_key.currentText() == "Città di residenza": # Tramite città di residenza
+            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"city_of_residence": self.LE_export.text().upper().strip()}, {"_id": 0})
+            if self.CB_export.currentText() == "Contiene": self.query_db = col.find({"city_of_residence": {"$regex": self.LE_export.text().upper().strip()}}, {"_id": 0})
+        
+        if self.CB_export_key.currentText() == "Indirizzo di residenza": # Tramite indirizzo di residenza
+            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"residential_address": self.LE_export.text().upper().strip()}, {"_id": 0})
+            if self.CB_export.currentText() == "Contiene": self.query_db = col.find({"residential_address": {"$regex": self.LE_export.text().upper().strip()}}, {"_id": 0})
+        
+        if self.CB_export_key.currentText() == "CAP": # Tramite CAP
+            try: int(self.LE_export.text().replace(" ", ""))
+            except:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Inserimento non corretto")
+                return err_msg.exec()
+            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"postal_code": self.LE_export.text().upper().replace(" ", "")}, {"_id": 0})
+            if self.CB_export.currentText() == "Contiene": self.query_db = col.find({"postal_code": {"$regex": self.LE_export.text().upper().replace(" ", "")}}, {"_id": 0})
+        
+        if self.CB_export_key.currentText() == "e-mail": # Tramite e-mail
+            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"email": self.LE_export.text().upper().replace(" ", "")}, {"_id": 0})
+            if self.CB_export.currentText() == "Contiene": self.query_db = col.find({"email": {"$regex": self.LE_export.text().upper().replace(" ", "")}}, {"_id": 0})
+        
+        if self.CB_export_key.currentText() == "Numero tessera": # Tramite numero tessera
+            try: int(self.LE_export.text().replace(" ", ""))
+            except:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Inserimento non corretto")
+                return err_msg.exec()
+            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"card_number": self.LE_export.text().replace(" ", "")}, {"_id": 0})
+            if self.CB_export.currentText() == "Maggiore di": self.query_db = col.find({"card_number": {"$gte": self.LE_export.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0})
+            if self.CB_export.currentText() == "Minore di": self.query_db = col.find({"card_number": {"$lte": self.LE_export.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0})
+        
+        if self.CB_export_key.currentText() == "Data tessera": # Tramite data tessera
+            date = self.LE_export.text().replace(" ", "")
+            if date.count("/") != 2 or len(date) != 10: # Controllo data inserita
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Data non corretta")
+                return err_msg.exec()
+            date = date.split("/")
+            date = f"{date[2]}{date[1]}{date[0]}"
             
-            col = self.db["cards"]
-            query_db = ""
-            if self.CB_export.currentText() == "Uguale a": query_db = col.find({"date_of_membership": date}, {"_id": 0})
-            if self.CB_export.currentText() == "Maggiore di": query_db = col.find({"date_of_membership": {"$gte": date, "$ne": "-"}}, {"_id": 0})
-            if self.CB_export.currentText() == "Minore di": query_db = col.find({"date_of_membership": {"$lte": date, "$ne": "-"}}, {"_id": 0})
+            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"date_of_membership": date}, {"_id": 0})
+            if self.CB_export.currentText() == "Maggiore di": self.query_db = col.find({"date_of_membership": {"$gte": date, "$ne": "-"}}, {"_id": 0})
+            if self.CB_export.currentText() == "Minore di": self.query_db = col.find({"date_of_membership": {"$lte": date, "$ne": "-"}}, {"_id": 0})
             
-            # Esportazione in excel                
+        # Esportazione in excel                
+        
+        wb = openpyxl.Workbook()
+        ws = wb.active
+        
+        for row in range(self.T_preview.rowCount() - 1): # Scrittura righe senza accesso al database
+            for column in range(self.T_preview.columnCount()):
+                if self.T_preview.item(row, column) == None: continue
+                ws[f"{excel_column_list[column]}{row+1}"] = self.T_preview.item(row, column).text()
+        
+        row = self.T_preview.rowCount() - 1 # Scrittura ultima riga con accesso al database
+        excel_row = self.T_preview.rowCount()
+        for person in self.query_db:
+            for column in range(self.T_preview.columnCount()):
+                if self.T_preview.item(row, column) == None: continue
+                if "DB:" not in self.T_preview.item(row, column).text():
+                    ws[f"{excel_column_list[column]}{excel_row}"] = self.T_preview.item(row, column).text()
+                else:
+                    if self.T_preview.item(row, column).text() == "DB:Codice fiscale":
+                        ws[f"{excel_column_list[column]}{excel_row}"] = person["tax_id_code"]
+                    if self.T_preview.item(row, column).text() == "DB:Nome":
+                        ws[f"{excel_column_list[column]}{excel_row}"] = person["name"]
+                    if self.T_preview.item(row, column).text() == "DB:Cognome":
+                        ws[f"{excel_column_list[column]}{excel_row}"] = person["surname"]
+                    if self.T_preview.item(row, column).text() == "DB:Data di nascita":
+                        ws[f"{excel_column_list[column]}{excel_row}"] = person["date_of_birth"]
+                    if self.T_preview.item(row, column).text() == "DB:Luogo di nascita":
+                        ws[f"{excel_column_list[column]}{excel_row}"] = person["birth_place"]
+                    if self.T_preview.item(row, column).text() == "DB:Sesso":
+                        ws[f"{excel_column_list[column]}{excel_row}"] = person["sex"]
+                    if self.T_preview.item(row, column).text() == "DB:Città di residenza":
+                        ws[f"{excel_column_list[column]}{excel_row}"] = person["city_of_residence"]
+                    if self.T_preview.item(row, column).text() == "DB:Indirizzo di residenza":
+                        ws[f"{excel_column_list[column]}{excel_row}"] = person["residential_address"]
+                    if self.T_preview.item(row, column).text() == "DB:CAP":
+                        ws[f"{excel_column_list[column]}{excel_row}"] = person["postal_code"]
+                    if self.T_preview.item(row, column).text() == "DB:e-mail":
+                        ws[f"{excel_column_list[column]}{excel_row}"] = person["email"]
+                    if self.T_preview.item(row, column).text() == "DB:Numero tessera":
+                        ws[f"{excel_column_list[column]}{excel_row}"] = person["card_number"]
+                    if self.T_preview.item(row, column).text() == "DB:Data di tesseramento":
+                        date = person["date_of_membership"]
+                        date = f"{date[6:]}/{date[4:6]}/{date[:4]}"
+                        ws[f"{excel_column_list[column]}{excel_row}"] = date
+            excel_row += 1
             
-            wb = openpyxl.Workbook()
-            ws = wb.active
-            
-            for row in range(self.T_preview.rowCount() - 1): # Scrittura righe senza accesso al database
-                for column in range(self.T_preview.columnCount()):
-                    if self.T_preview.item(row, column) == None: continue
-                    ws[f"{excel_column_list[column]}{row+1}"] = self.T_preview.item(row, column).text()
-            
-            row = self.T_preview.rowCount() - 1 # Scrittura ultima riga con accesso al database
-            excel_row = self.T_preview.rowCount()
-            for person in query_db:
-                for column in range(self.T_preview.columnCount()):
-                    if self.T_preview.item(row, column) == None: continue
-                    if "DB:" not in self.T_preview.item(row, column).text():
-                        ws[f"{excel_column_list[column]}{excel_row}"] = self.T_preview.item(row, column).text()
-                    else:
-                        if self.T_preview.item(row, column).text() == "DB:Codice fiscale":
-                            ws[f"{excel_column_list[column]}{excel_row}"] = person["tax_id_code"]
-                        if self.T_preview.item(row, column).text() == "DB:Nome":
-                            ws[f"{excel_column_list[column]}{excel_row}"] = person["name"]
-                        if self.T_preview.item(row, column).text() == "DB:Cognome":
-                            ws[f"{excel_column_list[column]}{excel_row}"] = person["surname"]
-                        if self.T_preview.item(row, column).text() == "DB:Data di nascita":
-                            ws[f"{excel_column_list[column]}{excel_row}"] = person["date_of_birth"]
-                        if self.T_preview.item(row, column).text() == "DB:Luogo di nascita":
-                            ws[f"{excel_column_list[column]}{excel_row}"] = person["birth_place"]
-                        if self.T_preview.item(row, column).text() == "DB:Sesso":
-                            ws[f"{excel_column_list[column]}{excel_row}"] = person["sex"]
-                        if self.T_preview.item(row, column).text() == "DB:Città di residenza":
-                            ws[f"{excel_column_list[column]}{excel_row}"] = person["city_of_residence"]
-                        if self.T_preview.item(row, column).text() == "DB:Indirizzo di residenza":
-                            ws[f"{excel_column_list[column]}{excel_row}"] = person["residential_address"]
-                        if self.T_preview.item(row, column).text() == "DB:CAP":
-                            ws[f"{excel_column_list[column]}{excel_row}"] = person["postal_code"]
-                        if self.T_preview.item(row, column).text() == "DB:e-mail":
-                            ws[f"{excel_column_list[column]}{excel_row}"] = person["email"]
-                        if self.T_preview.item(row, column).text() == "DB:Numero tessera":
-                            ws[f"{excel_column_list[column]}{excel_row}"] = person["card_number"]
-                        if self.T_preview.item(row, column).text() == "DB:Data di tesseramento":
-                            date = person["date_of_membership"]
-                            date = f"{date[6:]}/{date[4:6]}/{date[:4]}"
-                            ws[f"{excel_column_list[column]}{excel_row}"] = date
-                excel_row += 1
-            
-            # Salvataggio file excel
-            date = datetime.now()
-            date = date.strftime("%Y%m%d")
-            wb.save(f"{os.environ['HOME']}/Memberships/template_{date}.xlsx")
-            
-            msg = QMessageBox(self)
-            msg.setWindowTitle("File salvato")
-            msg.setText(f"File salvato correttamente:\n{os.environ['HOME']}/Memberships/template_{date}.xlsx")
-            return msg.exec()
+        # Salvataggio file excel
+        date = datetime.now()
+        date = date.strftime("%Y%m%d")
+        wb.save(f"{os.environ['HOME']}/Memberships/template_{date}.xlsx")
+        
+        msg = QMessageBox(self)
+        msg.setWindowTitle("File salvato")
+        msg.setText(f"File salvato correttamente:\n{os.environ['HOME']}/Memberships/template_{date}.xlsx")
+        return msg.exec()
+    
+    # *-*-* Funzione controllo numeri *-*-*
+    
+    def has_numbers(self, st:str):
+        return any(char.isdigit() for char in st)
 
     # -*-* Funzione di ridimensionamento finestra *-*-
     
