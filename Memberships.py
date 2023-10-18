@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from PyQt6.QtWidgets import (QWidget,QApplication,QGridLayout,QVBoxLayout,QLabel,QLineEdit,QPushButton,QComboBox,QTableWidget,QAbstractItemView,
                              QHeaderView,QMessageBox,QTextEdit,QFileDialog,QCheckBox,QSpinBox,QMenu,QInputDialog,QTableWidgetItem)
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QPixmap,QAction,QCursor
+from PyQt6.QtGui import QPixmap,QAction,QCursor,QIcon
 
 # Versione 1.0
 
@@ -15,6 +15,7 @@ heading = ""
 dbclient = ""
 interface = ""
 logo_path = ""
+icon_path = ""
 first_start_application = 0
 
 class MainWindow(QWidget):
@@ -24,7 +25,8 @@ class MainWindow(QWidget):
         
         # *-*-* Impostazioni iniziali *-*-*
         
-        self.setWindowTitle(f"Tessere {heading}")
+        self.setWindowIcon(QIcon(icon_path))
+        self.setWindowTitle(f"{heading}")
         self.setMinimumSize(640, 540) # Risoluzione minima per schermi piccoli
         self.lay = QGridLayout(self)
         self.setLayout(self.lay)
@@ -144,6 +146,12 @@ class MainWindow(QWidget):
         self.B_search.clicked.connect(self.search_db)
         self.lay.addWidget(self.B_search, 12, 1, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
+        # Pulsante esporta in Excel
+        
+        self.B_excel_export = QPushButton(self, text="Esporta excel")
+        self.B_excel_export.clicked.connect(self.excel_export)
+        self.lay.addWidget(self.B_excel_export, 12, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        
         # Combobox strumenti di controllo e esportazione (Parte bassa sinistra)
         
         self.CB_control_export = QComboBox(self)
@@ -155,12 +163,6 @@ class MainWindow(QWidget):
         self.B_query_db = QPushButton(self, text="Interroga")
         self.B_query_db.clicked.connect(self.query_db)
         self.lay.addWidget(self.B_query_db, 13, 1, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
-        
-        # Pulsante esporta in Excel
-        
-        self.B_excel_export = QPushButton(self, text="Esporta excel")
-        self.B_excel_export.clicked.connect(self.excel_export)
-        self.lay.addWidget(self.B_excel_export, 13, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Box interrogazione database (Parte centrale destra)
         
@@ -678,6 +680,7 @@ class ExcelWindow(QWidget):
         
         # *-*-* Impostazioni iniziali *-*-*
         
+        self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle(f"Esportazione excel {heading}")
         self.setMinimumSize(640, 540) # Risoluzione minima per schermi piccoli
         self.lay = QGridLayout(self)
@@ -1199,6 +1202,7 @@ class OptionsMenu(QWidget):
         self.heading = ""
         self.interface_style = ""
         self.logo_path = ""
+        self.icon_path = ""
         
         # Lettura file e impostazione variabili
     
@@ -1208,9 +1212,11 @@ class OptionsMenu(QWidget):
             self.heading = options_file.readline().replace("heading=", "").replace("\n", "")
             self.interface_style = options_file.readline().replace("interface=", "").replace("\n", "")
             self.logo_path = options_file.readline().replace("logo=", "").replace("\n", "")
+            self.icon_path = options_file.readline().replace("icon=", "").replace("\n", "")
             options_file.close()
         
-        self.setWindowTitle(f"Comande {heading} - opzioni")
+        self.setWindowIcon(QIcon(self.icon_path))
+        self.setWindowTitle(f"{heading} - opzioni")
         self.lay = QVBoxLayout(self)
         self.setStyleSheet(sis.interface_style(self.interface_style))
         
@@ -1277,6 +1283,21 @@ Attualmente stai usando il file: {self.logo_path}""")
         self.B_logo.clicked.connect(self.logo_selection)
         self.lay.addWidget(self.B_logo)
         
+        L_icon = QLabel(self, text="Icona")
+        L_icon.setAccessibleName("an_section_title")
+        self.lay.addWidget(L_icon)
+        
+        self.L_icon_instructions = QLabel(self)
+        self.L_icon_instructions.setText(f"""Seleziona un immagine png per l'icona
+L'icona la troverai su ogni finestra
+Le dimensioni ideali sono: 51 x 21 pixel
+Attualmente stai usando il file: {self.icon_path}""")
+        self.lay.addWidget(self.L_icon_instructions)
+        
+        self.B_icon = QPushButton(self, text="Seleziona")
+        self.B_icon.clicked.connect(self.icon_selection)
+        self.lay.addWidget(self.B_icon)
+        
         self.B_close_and_save = QPushButton(self, text="Chiudi e salva")
         self.B_close_and_save.clicked.connect(self.close_and_save)
         self.lay.addWidget(self.B_close_and_save)
@@ -1306,6 +1327,19 @@ Il logo verrà posizionato in alto a sinistra nell'interfaccia
 Le dimensioni ideali sono: 190 x 85 pixel
 Attualmente stai usando il file: {self.logo_path}""")
     
+    def icon_selection(self):
+        icon = QFileDialog()
+        icon.setFileMode(QFileDialog.FileMode.AnyFile)
+        icon.setNameFilter("Immagini (*.png)")
+        icon.setViewMode(QFileDialog.ViewMode.List)
+        icon_path = QFileDialog.getOpenFileName(icon)
+        icon_path = Path(icon_path[0])
+        self.icon_path = icon_path
+        self.L_icon_instructions.setText(f"""Seleziona un immagine png per l'icona
+L'icona la troverai su ogni finestra
+Le dimensioni ideali sono: 51 x 21 pixel
+Attualmente stai usando il file: {self.icon_path}""")
+    
     def close_and_save(self):
         if self.LE_database_connection.text() == "":
             err_msg = QMessageBox(self)
@@ -1323,7 +1357,7 @@ Attualmente stai usando il file: {self.logo_path}""")
         # Salvataggio file
         
         options_file = open(f"{os.environ['HOME']}/Memberships/options.txt", "w")
-        options_file.write(f"db_connection={self.LE_database_connection.text()}\nheading={self.LE_heading.text()}\ninterface={self.CB_interface_style.currentText()}\nlogo={self.logo_path}")
+        options_file.write(f"db_connection={self.LE_database_connection.text()}\nheading={self.LE_heading.text()}\ninterface={self.CB_interface_style.currentText()}\nlogo={self.logo_path}\nicon={self.icon_path}")
         options_file.close()
         
         # -*-* Riavvio applicazione *-*-
@@ -1346,6 +1380,8 @@ Attualmente stai usando il file: {self.logo_path}""")
         interface = options_file.readline().replace("interface=", "").replace("\n", "")
         global logo_path
         logo_path = options_file.readline().replace("logo=", "").replace("\n", "")
+        global icon_path
+        icon_path = options_file.readline().replace("icon=", "").replace("\n", "")
         options_file.close()
         
         # Test di connessione
