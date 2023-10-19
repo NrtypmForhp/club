@@ -24,7 +24,7 @@ total_rows = 11
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.db = dbclient["98OttaniBar"] # Apertura database
+        self.db = dbclient["Bar"] # Apertura database
         
         # *-*-* Impostazioni iniziali *-*-*
         
@@ -701,7 +701,7 @@ class MainWindow(QWidget):
 class DatabaseWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.db = dbclient["98OttaniBar"] # Apertura database
+        self.db = dbclient["Bar"] # Apertura database
         
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle(f"Database {heading}")

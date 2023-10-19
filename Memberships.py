@@ -21,7 +21,7 @@ first_start_application = 0
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
-        self.db = dbclient["98OttaniTessere"] # Apertura database
+        self.db = dbclient["Memberships"] # Apertura database
         
         # *-*-* Impostazioni iniziali *-*-*
         
@@ -52,12 +52,18 @@ class MainWindow(QWidget):
         
         L_title = QLabel(self, text=f"{heading}")
         L_title.setAccessibleName("an_title")
-        self.lay.addWidget(L_title, 0, 1, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.lay.addWidget(L_title, 0, 1, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Checkbox per ricerca automatica (Parte superiore centrale)
         
         self.CHB_auto_search = QCheckBox(self, text="Ricerca automatica")
-        self.lay.addWidget(self.CHB_auto_search, 0, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignCenter)
+        self.lay.addWidget(self.CHB_auto_search, 0, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignCenter)
+        
+        # Pulsante Database
+        
+        self.B_database_management = QPushButton(self, text="Apri database")
+        self.B_database_management.clicked.connect(self.database_management_open)
+        self.lay.addWidget(self.B_database_management, 0, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)
         
         # Pulsante Opzioni (Parte superiore destra)
         
@@ -152,26 +158,14 @@ class MainWindow(QWidget):
         self.B_excel_export.clicked.connect(self.excel_export)
         self.lay.addWidget(self.B_excel_export, 12, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
-        # Combobox strumenti di controllo e esportazione (Parte bassa sinistra)
-        
-        self.CB_control_export = QComboBox(self)
-        self.CB_control_export.addItems(["Tessere ancora valide", "Tessere non valide", "Non tesserati"])
-        self.lay.addWidget(self.CB_control_export, 13, 0, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
-        
-        # Pulsante interrogazione database (Parte bassa sinistra)
-        
-        self.B_query_db = QPushButton(self, text="Interroga")
-        self.B_query_db.clicked.connect(self.query_db)
-        self.lay.addWidget(self.B_query_db, 13, 1, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
-        
-        # Box interrogazione database (Parte centrale destra)
+        # Box database (Parte centrale destra)
         
         self.TE_db_response = QTextEdit(self)
         self.TE_db_response.setReadOnly(True)
         self.TE_db_response.setPlainText(f"""Gestione tesseramenti {heading}\n\n
 ** Funzioni rapide **
 Pulsante F5: Pulisce tutti i campi a sinistra""")
-        self.lay.addWidget(self.TE_db_response, 1, 3, 13, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)
+        self.lay.addWidget(self.TE_db_response, 1, 3, 12, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)
     
     # *-*-* Funzioni per il ridimensionamento della finestra *-*-*
 
@@ -552,75 +546,8 @@ Indirizzo di residenza: {person['residential_address']}
 CAP: {person['postal_code']}
 email: {person['email']}
 Numero tessera: {person['card_number']}
-Data tesseramento: {date_of_membership}\n\n------------------------------\n\n""")
-    
-    # *-*-* Funzione ricerca massiva nel database *-*-*
-            
-    def query_db(self):
-        date = datetime.now()
-        col = self.db["cards"]
-        if self.CB_control_export.currentText() == "Tessere ancora valide":
-            date -= timedelta(days=365)
-            date = date.strftime("%Y%m%d")
-            self.TE_db_response.clear()
-            self.TE_db_response.insertPlainText("-*-* Persone trovate *-*-\n\n")
-            for person in col.find({"date_of_membership": {"$gte": date, "$ne": "-"}}, {"_id": 0}):
-                date_of_membership = person["date_of_membership"] # Trasformazione data in formato leggibile
-                if date_of_membership != "-": date_of_membership = f"{date_of_membership[6:]}/{date_of_membership[4:6]}/{date_of_membership[:4]}"
-                self.TE_db_response.append(f"""Codice fiscale: {person['tax_id_code']}
-Nome: {person['name']}
-Cognome: {person['surname']}
-Data di nascita: {person['date_of_birth']}
-Luogo di nascita: {person['birth_place']}
-Sesso: {person['sex']}
-Comune di residenza: {person['city_of_residence']}
-Indirizzo di residenza: {person['residential_address']}
-CAP: {person['postal_code']}
-email: {person['email']}
-Numero tessera: {person['card_number']}
-Data tesseramento: {date_of_membership}\n\n------------------------------\n\n""")
-        
-        if self.CB_control_export.currentText() == "Tessere non valide":
-            date -= timedelta(days=365)
-            date = date.strftime("%Y%m%d")
-            self.TE_db_response.clear()
-            self.TE_db_response.insertPlainText("-*-* Persone trovate *-*-\n\n")
-            for person in col.find({"date_of_membership": {"$lte": date, "$ne": "-"}}, {"_id": 0}):
-                date_of_membership = person["date_of_membership"] # Trasformazione data in formato leggibile
-                if date_of_membership != "-": date_of_membership = f"{date_of_membership[6:]}/{date_of_membership[4:6]}/{date_of_membership[:4]}"
-                self.TE_db_response.append(f"""Codice fiscale: {person['tax_id_code']}
-Nome: {person['name']}
-Cognome: {person['surname']}
-Data di nascita: {person['date_of_birth']}
-Luogo di nascita: {person['birth_place']}
-Sesso: {person['sex']}
-Comune di residenza: {person['city_of_residence']}
-Indirizzo di residenza: {person['residential_address']}
-CAP: {person['postal_code']}
-email: {person['email']}
-Numero tessera: {person['card_number']}
-Data tesseramento: {date_of_membership}\n\n------------------------------\n\n""")
-        
-        if self.CB_control_export.currentText() == "Non tesserati":
-            self.TE_db_response.clear()
-            self.TE_db_response.insertPlainText("-*-* Persone trovate *-*-\n\n")
-            for person in col.find({"date_of_membership": "-", "card_number": "-"}, {"_id": 0}):
-                date_of_membership = person["date_of_membership"] # Trasformazione data in formato leggibile
-                if date_of_membership != "-": date_of_membership = f"{date_of_membership[6:]}/{date_of_membership[4:6]}/{date_of_membership[:4]}"
-                self.TE_db_response.append(f"""Codice fiscale: {person['tax_id_code']}
-Nome: {person['name']}
-Cognome: {person['surname']}
-Data di nascita: {person['date_of_birth']}
-Luogo di nascita: {person['birth_place']}
-Sesso: {person['sex']}
-Comune di residenza: {person['city_of_residence']}
-Indirizzo di residenza: {person['residential_address']}
-CAP: {person['postal_code']}
-email: {person['email']}
-Numero tessera: {person['card_number']}
-Data tesseramento: {date_of_membership}\n\n------------------------------\n\n""")
-        
-    
+Data tesseramento: {date_of_membership}\n\n------------------------------\n\n""")       
+
     # *-*-* Funzione pulizia campi *-*-*
     
     def clear_box(self):
@@ -652,6 +579,12 @@ Data tesseramento: {date_of_membership}\n\n------------------------------\n\n"""
     def excel_export(self):
         self.excel_window = ExcelWindow()
         self.excel_window.show()
+    
+    # *-*-* Funzione apertura finestra database *-*-*
+    
+    def database_management_open(self):
+        self.database_window = DatabaseWindow()
+        self.database_window.show()
         
     # *-*-* Funzione apertura finestra opzioni *-*-*
     
@@ -669,6 +602,469 @@ Data tesseramento: {date_of_membership}\n\n------------------------------\n\n"""
     
     def keyPressEvent(self, event):
         if event.key() == 16777268: self.clear_box()
+        
+# -*-* Finestra Database *-*-
+
+class DatabaseWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        
+        self.db = dbclient["Memberships"] # Apertura database
+        
+        # *-*-* Impostazioni iniziali *-*-*
+        
+        self.setWindowIcon(QIcon(icon_path))
+        self.setWindowTitle(f"Database {heading}")
+        self.setMinimumSize(640, 540) # Risoluzione minima per schermi piccoli
+        self.lay = QGridLayout(self)
+        self.setLayout(self.lay)
+        self.lay.setContentsMargins(10,10,10,10)
+        self.lay.setSpacing(1)
+        
+        # *-*-* Grafica dei widgets *-*-*
+        
+        self.setStyleSheet(sis.interface_style(interface))
+        
+        # *-*-* Widgets *-*-*
+        
+        # Combobox chiave esportazione
+        
+        self.CB_database_key = QComboBox(self)
+        self.CB_database_key.addItems(["Codice fiscale", "Nome", "Cognome", "Data di nascita", "Luogo di nascita", "Sesso", "Città di residenza",
+                                     "Indirizzo di residenza", "CAP", "e-mail", "Numero tessera", "Data tessera", "Non tesserati"])
+        self.CB_database_key.currentTextChanged.connect(self.database_key_change)
+        self.lay.addWidget(self.CB_database_key, 0, 0, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        
+        # Combobox esportazione
+        
+        self.CB_database = QComboBox(self)
+        self.CB_database.currentTextChanged.connect(self.database_change)
+        self.lay.addWidget(self.CB_database, 0, 1, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        
+        # Casella inserimento
+        
+        self.LE_database = QLineEdit(self)
+        self.lay.addWidget(self.LE_database, 0, 2, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        
+        # Pulsante cerca
+        
+        self.B_search = QPushButton(self, text="Cerca")
+        self.B_search.clicked.connect(self.search_database)
+        self.lay.addWidget(self.B_search, 1, 0, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        
+        # Pulsante elimina
+        
+        self.B_delete = QPushButton(self, text="Elimina")
+        self.B_delete.clicked.connect(self.delete_database)
+        self.lay.addWidget(self.B_delete, 1, 1, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        
+        # Tabella risultati
+        
+        self.T_results = QTableWidget(self)
+        self.T_results.setColumnCount(5)
+        self.T_results.setHorizontalHeaderLabels(["Codice Fiscale", "Nome", "Cognome", "Numero tessera", "Data tesseramento"])
+        self.T_results.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.T_results.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.T_results.customContextMenuRequested.connect(self.T_results_CM)
+        self.T_results_headers = self.T_results.horizontalHeader()
+        self.lay.addWidget(self.T_results, 2, 0, 1, 3, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        
+        self.database_key_change() # Avvio della funzione di riempimento Combobox
+    
+     # -*-* Funzione cambio Combobox chiave per database
+    
+    def database_key_change(self):
+        self.LE_database.clear()
+        if self.CB_database_key.currentText() == "Codice fiscale" or self.CB_database_key.currentText() == "Nome" or self.CB_database_key.currentText() == "Cognome"\
+            or self.CB_database_key.currentText() == "Luogo di nascita" or self.CB_database_key.currentText() == "Città di residenza" or self.CB_database_key.currentText() == "Indirizzo di residenza"\
+            or self.CB_database_key.currentText() == "CAP" or self.CB_database_key.currentText() == "e-mail":
+            self.CB_database.clear()
+            self.CB_database.addItems(["Uguale a", "Contiene"])
+        if self.CB_database_key.currentText() == "Data tessera" or self.CB_database_key.currentText() == "Data di nascita" or self.CB_database_key.currentText() == "Numero tessera":
+            self.CB_database.clear()
+            self.CB_database.addItems(["Uguale a", "Maggiore di", "Minore di"])
+        if self.CB_database_key.currentText() == "Sesso":
+            self.CB_database.clear()
+            self.CB_database.addItems(["MASCHIO", "FEMMINA"])
+        if self.CB_database_key.currentText() == "Non tesserati":
+            self.CB_database.clear()
+    
+    # -*-* Funzione cambio Combobox database
+    
+    def database_change(self):
+        self.LE_database.clear()
+        if self.CB_database_key.currentText() == "Codice fiscale":
+            if self.CB_database.currentText() == "Uguale a":
+                self.LE_database.setPlaceholderText("Codice fiscale completo")
+            if self.CB_database.currentText() == "Contiene":
+                self.LE_database.setPlaceholderText("Parte di codice fiscale")
+        
+        if self.CB_database_key.currentText() == "Nome":
+            if self.CB_database.currentText() == "Uguale a":
+                self.LE_database.setPlaceholderText("Nome completo")
+            if self.CB_database.currentText() == "Contiene":
+                self.LE_database.setPlaceholderText("Parte del nome")
+        
+        if self.CB_database_key.currentText() == "Cognome":
+            if self.CB_database.currentText() == "Uguale a":
+                self.LE_database.setPlaceholderText("Cognome completo")
+            if self.CB_database.currentText() == "Contiene":
+                self.LE_database.setPlaceholderText("Parte del cognome")
+        
+        if self.CB_database_key.currentText() == "Data di nascita":
+            self.LE_database.setPlaceholderText("Esempio: 18/09/1980")
+        
+        if self.CB_database_key.currentText() == "Luogo di nascita":
+            if self.CB_database.currentText() == "Uguale a":
+                self.LE_database.setPlaceholderText("Luogo di nascita completo")
+            if self.CB_database.currentText() == "Contiene":
+                self.LE_database.setPlaceholderText("Parte del luogo di nascita")
+        
+        if self.CB_database_key.currentText() == "Sesso":
+            self.LE_database.setPlaceholderText("Casella non necessaria")
+        
+        if self.CB_database_key.currentText() == "Città di residenza":
+            if self.CB_database.currentText() == "Uguale a":
+                self.LE_database.setPlaceholderText("Città di residenza completa")
+            if self.CB_database.currentText() == "Contiene":
+                self.LE_database.setPlaceholderText("Parte della città di residenza")
+        
+        if self.CB_database_key.currentText() == "Indirizzo di residenza":
+            if self.CB_database.currentText() == "Uguale a":
+                self.LE_database.setPlaceholderText("Indirizzo di residenza completo")
+            if self.CB_database.currentText() == "Contiene":
+                self.LE_database.setPlaceholderText("Parte dell'indirizzo di residenza")
+        
+        if self.CB_database_key.currentText() == "CAP":
+            if self.CB_database.currentText() == "Uguale a":
+                self.LE_database.setPlaceholderText("CAP completo")
+            if self.CB_database.currentText() == "Contiene":
+                self.LE_database.setPlaceholderText("Parte del CAP")
+        
+        if self.CB_database_key.currentText() == "e-mail":
+            if self.CB_database.currentText() == "Uguale a":
+                self.LE_database.setPlaceholderText("e-mail completa")
+            if self.CB_database.currentText() == "Contiene":
+                self.LE_database.setPlaceholderText("Parte della e-mail")
+        
+        if self.CB_database_key.currentText() == "Numero tessera":
+            if self.CB_database.currentText() == "Uguale a":
+                self.LE_database.setPlaceholderText("Numero tessera specifico")
+            if self.CB_database.currentText() == "Maggiore di":
+                self.LE_database.setPlaceholderText("Maggiore del numero inserito")
+            if self.CB_database.currentText() == "Minore di":
+                self.LE_database.setPlaceholderText("Minore del numero inserito")
+            
+        if self.CB_database_key.currentText() == "Data tessera":
+            date = datetime.now()
+            if self.CB_database.currentText() == "Uguale a":
+                date = date.strftime("%d/%m/%Y")
+                self.LE_database.setText(date)
+            if self.CB_database.currentText() == "Maggiore di":
+                date -= timedelta(days=365)
+                date = date.strftime("%d/%m/%Y")
+                self.LE_database.setText(date)
+            if self.CB_database.currentText() == "Minore di":
+                date = date.strftime("%d/%m/%Y")
+                self.LE_database.setText(date)
+        
+        if self.CB_database_key.currentText() == "Non tesserati":
+            self.LE_database.setPlaceholderText("Casella non necessaria")
+    
+    # -*-* Funzione di ricerca nel database *-*-
+    
+    def search_database(self):
+        
+        # Pulizia tabella
+        if self.T_results.rowCount() != 0:
+            for row in reversed(range(self.T_results.rowCount())):
+                self.T_results.removeRow(row)
+        
+        # Interrogazione database
+        col = self.db["cards"]
+        
+        if self.CB_database_key.currentText() == "Codice fiscale": # Tramite codice fiscale
+            if self.CB_database.currentText() == "Uguale a" and len(self.LE_database.text()) != 16:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Codice fiscale non corretto")
+                return err_msg.exec()
+            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"tax_id_code": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0})
+            if self.CB_database.currentText() == "Contiene": self.query_db = col.find({"tax_id_code": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0})
+        
+        if self.CB_database_key.currentText() == "Nome": # Tramite nome
+            if self.has_numbers(self.LE_database.text().upper().strip()) == True:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Inserimento non corretto")
+                return err_msg.exec()
+            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"name": self.LE_database.text().upper().strip()}, {"_id": 0})
+            if self.CB_database.currentText() == "Contiene": self.query_db = col.find({"name": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0})
+        
+        if self.CB_database_key.currentText() == "Cognome": # Tramite cognome
+            if self.has_numbers(self.LE_database.text().upper().strip()) == True:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Inserimento non corretto")
+                return err_msg.exec()
+            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"surname": self.LE_database.text().upper().strip()}, {"_id": 0})
+            if self.CB_database.currentText() == "Contiene": self.query_db = col.find({"surname": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0})
+        
+        if self.CB_database_key.currentText() == "Data di nascita": # Tramite data di nascita
+            date = self.LE_database.text().replace(" ", "")
+            if date.count("/") != 2 or len(date) != 10: # Controllo data inserita
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Data non corretta")
+                return err_msg.exec()
+            
+            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"date_of_birth": date}, {"_id": 0})
+            if self.CB_database.currentText() == "Maggiore di": self.query_db = col.find({"date_of_birth": {"$gte": date}}, {"_id": 0})
+            if self.CB_database.currentText() == "Minore di": self.query_db = col.find({"date_of_birth": {"$lte": date}}, {"_id": 0})
+        
+        if self.CB_database_key.currentText() == "Luogo di nascita": # Tramite luogo di nascita
+            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"birth_place": self.LE_database.text().upper().strip()}, {"_id": 0})
+            if self.CB_database.currentText() == "Contiene": self.query_db = col.find({"birth_place": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0})
+        
+        if self.CB_database_key.currentText() == "Sesso": # Tramite sesso
+            if self.CB_database.currentText() == "MASCHIO": self.query_db = col.find({"sex": "MASCHIO"}, {"_id": 0})
+            if self.CB_database.currentText() == "FEMMINA": self.query_db = col.find({"sex": "FEMMINA"}, {"_id": 0})
+        
+        if self.CB_database_key.currentText() == "Città di residenza": # Tramite città di residenza
+            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"city_of_residence": self.LE_database.text().upper().strip()}, {"_id": 0})
+            if self.CB_database.currentText() == "Contiene": self.query_db = col.find({"city_of_residence": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0})
+        
+        if self.CB_database_key.currentText() == "Indirizzo di residenza": # Tramite indirizzo di residenza
+            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"residential_address": self.LE_database.text().upper().strip()}, {"_id": 0})
+            if self.CB_database.currentText() == "Contiene": self.query_db = col.find({"residential_address": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0})
+        
+        if self.CB_database_key.currentText() == "CAP": # Tramite CAP
+            try: int(self.LE_database.text().replace(" ", ""))
+            except:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Inserimento non corretto")
+                return err_msg.exec()
+            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"postal_code": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0})
+            if self.CB_database.currentText() == "Contiene": self.query_db = col.find({"postal_code": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0})
+        
+        if self.CB_database_key.currentText() == "e-mail": # Tramite e-mail
+            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"email": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0})
+            if self.CB_database.currentText() == "Contiene": self.query_db = col.find({"email": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0})
+        
+        if self.CB_database_key.currentText() == "Numero tessera": # Tramite numero tessera
+            try: int(self.LE_database.text().replace(" ", ""))
+            except:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Inserimento non corretto")
+                return err_msg.exec()
+            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"card_number": self.LE_database.text().replace(" ", "")}, {"_id": 0})
+            if self.CB_database.currentText() == "Maggiore di": self.query_db = col.find({"card_number": {"$gte": self.LE_database.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0})
+            if self.CB_database.currentText() == "Minore di": self.query_db = col.find({"card_number": {"$lte": self.LE_database.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0})
+        
+        if self.CB_database_key.currentText() == "Data tessera": # Tramite data tessera
+            date = self.LE_database.text().replace(" ", "")
+            if date.count("/") != 2 or len(date) != 10: # Controllo data inserita
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Data non corretta")
+                return err_msg.exec()
+            date = date.split("/")
+            date = f"{date[2]}{date[1]}{date[0]}"
+            
+            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"date_of_membership": date}, {"_id": 0})
+            if self.CB_database.currentText() == "Maggiore di": self.query_db = col.find({"date_of_membership": {"$gte": date, "$ne": "-"}}, {"_id": 0})
+            if self.CB_database.currentText() == "Minore di": self.query_db = col.find({"date_of_membership": {"$lte": date, "$ne": "-"}}, {"_id": 0})
+        
+        if self.CB_database_key.currentText() == "Non tesserati": # Tutti i non tesserati
+            self.query_db = col.find({"date_of_membership": "-"}, {"_id": 0})
+            
+        # Inserimento nella tabella
+        
+        for person in self.query_db:
+            row = self.T_results.rowCount()
+            self.T_results.insertRow(row)
+            self.T_results.setItem(row, 0, QTableWidgetItem(person["tax_id_code"]))
+            self.T_results.setItem(row, 1, QTableWidgetItem(person["name"]))
+            self.T_results.setItem(row, 2, QTableWidgetItem(person["surname"]))
+            self.T_results.setItem(row, 3, QTableWidgetItem(person["card_number"]))
+            date = person["date_of_membership"] # Trasformazione data
+            date = f"{date[6:]}/{date[4:6]}/{date[:4]}"
+            self.T_results.setItem(row, 4, QTableWidgetItem(date))
+    
+     # -*-* Funzione di eliminazione nel database *-*-
+    
+    def delete_database(self):
+        
+        # Preparazione query per il database
+        
+        if self.CB_database_key.currentText() == "Codice fiscale": # Tramite codice fiscale
+            if self.CB_database.currentText() == "Uguale a" and len(self.LE_database.text()) != 16:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Codice fiscale non corretto")
+                return err_msg.exec()
+            if self.CB_database.currentText() == "Uguale a": self.query_db = {"tax_id_code": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0}
+            if self.CB_database.currentText() == "Contiene": self.query_db = {"tax_id_code": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0}
+        
+        if self.CB_database_key.currentText() == "Nome": # Tramite nome
+            if self.has_numbers(self.LE_database.text().upper().strip()) == True:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Inserimento non corretto")
+                return err_msg.exec()
+            if self.CB_database.currentText() == "Uguale a": self.query_db = {"name": self.LE_database.text().upper().strip()}, {"_id": 0}
+            if self.CB_database.currentText() == "Contiene": self.query_db = {"name": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0}
+        
+        if self.CB_database_key.currentText() == "Cognome": # Tramite cognome
+            if self.has_numbers(self.LE_database.text().upper().strip()) == True:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Inserimento non corretto")
+                return err_msg.exec()
+            if self.CB_database.currentText() == "Uguale a": self.query_db = {"surname": self.LE_database.text().upper().strip()}, {"_id": 0}
+            if self.CB_database.currentText() == "Contiene": self.query_db = {"surname": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0}
+        
+        if self.CB_database_key.currentText() == "Data di nascita": # Tramite data di nascita
+            date = self.LE_database.text().replace(" ", "")
+            if date.count("/") != 2 or len(date) != 10: # Controllo data inserita
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Data non corretta")
+                return err_msg.exec()
+            
+            if self.CB_database.currentText() == "Uguale a": self.query_db = {"date_of_birth": date}, {"_id": 0}
+            if self.CB_database.currentText() == "Maggiore di": self.query_db = {"date_of_birth": {"$gte": date}}, {"_id": 0}
+            if self.CB_database.currentText() == "Minore di": self.query_db = {"date_of_birth": {"$lte": date}}, {"_id": 0}
+        
+        if self.CB_database_key.currentText() == "Luogo di nascita": # Tramite luogo di nascita
+            if self.CB_database.currentText() == "Uguale a": self.query_db = {"birth_place": self.LE_database.text().upper().strip()}, {"_id": 0}
+            if self.CB_database.currentText() == "Contiene": self.query_db = {"birth_place": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0}
+        
+        if self.CB_database_key.currentText() == "Sesso": # Tramite sesso
+            if self.CB_database.currentText() == "MASCHIO": self.query_db = {"sex": "MASCHIO"}, {"_id": 0}
+            if self.CB_database.currentText() == "FEMMINA": self.query_db = {"sex": "FEMMINA"}, {"_id": 0}
+        
+        if self.CB_database_key.currentText() == "Città di residenza": # Tramite città di residenza
+            if self.CB_database.currentText() == "Uguale a": self.query_db = {"city_of_residence": self.LE_database.text().upper().strip()}, {"_id": 0}
+            if self.CB_database.currentText() == "Contiene": self.query_db = {"city_of_residence": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0}
+        
+        if self.CB_database_key.currentText() == "Indirizzo di residenza": # Tramite indirizzo di residenza
+            if self.CB_database.currentText() == "Uguale a": self.query_db = {"residential_address": self.LE_database.text().upper().strip()}, {"_id": 0}
+            if self.CB_database.currentText() == "Contiene": self.query_db = {"residential_address": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0}
+        
+        if self.CB_database_key.currentText() == "CAP": # Tramite CAP
+            try: int(self.LE_database.text().replace(" ", ""))
+            except:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Inserimento non corretto")
+                return err_msg.exec()
+            if self.CB_database.currentText() == "Uguale a": self.query_db = {"postal_code": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0}
+            if self.CB_database.currentText() == "Contiene": self.query_db = {"postal_code": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0}
+        
+        if self.CB_database_key.currentText() == "e-mail": # Tramite e-mail
+            if self.CB_database.currentText() == "Uguale a": self.query_db = {"email": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0}
+            if self.CB_database.currentText() == "Contiene": self.query_db = {"email": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0}
+        
+        if self.CB_database_key.currentText() == "Numero tessera": # Tramite numero tessera
+            try: int(self.LE_database.text().replace(" ", ""))
+            except:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Inserimento non corretto")
+                return err_msg.exec()
+            if self.CB_database.currentText() == "Uguale a": self.query_db = {"card_number": self.LE_database.text().replace(" ", "")}, {"_id": 0}
+            if self.CB_database.currentText() == "Maggiore di": self.query_db = {"card_number": {"$gte": self.LE_database.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0}
+            if self.CB_database.currentText() == "Minore di": self.query_db = {"card_number": {"$lte": self.LE_database.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0}
+        
+        if self.CB_database_key.currentText() == "Data tessera": # Tramite data tessera
+            date = self.LE_database.text().replace(" ", "")
+            if date.count("/") != 2 or len(date) != 10: # Controllo data inserita
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Data non corretta")
+                return err_msg.exec()
+            date = date.split("/")
+            date = f"{date[2]}{date[1]}{date[0]}"
+            
+            if self.CB_database.currentText() == "Uguale a": self.query_db = {"date_of_membership": date}, {"_id": 0}
+            if self.CB_database.currentText() == "Maggiore di": self.query_db = {"date_of_membership": {"$gte": date, "$ne": "-"}}, {"_id": 0}
+            if self.CB_database.currentText() == "Minore di": self.query_db = {"date_of_membership": {"$lte": date, "$ne": "-"}}, {"_id": 0}
+            
+        if self.CB_database_key.currentText() == "Non tesserati": # Tutti i non tesserati
+            self.query_db = {"date_of_membership": "-"}, {"_id": 0}
+        
+        # Messagebox per eliminazione definitiva
+        
+        msg = QMessageBox(self)
+        msg.setWindowTitle("Attenzione")
+        msg.setText("Stai per eliminare i dati richiesti dal database!\nL'operazione non è reversibile.\nSei sicuro?")
+        msg.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.No)
+        msg.buttonClicked.connect(self.delete_database_confirm)
+        return msg.exec()
+    
+    # -*-* Funzione di conferma eliminazione database *-*-
+    
+    def delete_database_confirm(self, button):
+        if button.text() == "&OK" or button.text() == "OK":
+            col = self.db["cards"] # Connessione alla collezione del database
+            col.delete_many(self.query_db[0])
+            
+            # Pulizia tabella
+            if self.T_results.rowCount() != 0:
+                for row in reversed(range(self.T_results.rowCount())):
+                    self.T_results.removeRow(row)
+    
+    # -*-* Custom menu tabella *-*-
+    
+    def T_results_CM(self):
+        if self.T_results.currentRow() == -1: return
+        menu = QMenu(self)
+        delete_action = QAction("Elimina", self)
+        delete_action.triggered.connect(self.delete_person)
+        menu.addAction(delete_action)
+        menu.popup(QCursor.pos())
+    
+    # Funzione elimina
+    
+    def delete_person(self):
+        # Ricerca della persona alla pressione del tasto
+        
+        row = self.T_results.currentRow()       
+        tax_id_code = self.T_results.item(row, 0).text()
+        name = self.T_results.item(row, 1).text()
+        surname = self.T_results.item(row, 2).text()
+        
+        col = self.db["cards"] # Connessione alla collezione del database
+        col.delete_one({"tax_id_code": tax_id_code, "name": name, "surname": surname})
+        
+        # Eliminazione dalla tabella
+        
+        self.T_results.removeRow(row)
+        self.T_results.setCurrentCell(-1, -1)
+    
+    # -*-* Funzione di ridimensionamento finestra *-*-
+    
+    def resizeEvent(self, event):
+        W_width = self.width()
+        W_height = self.height()
+        
+        try:
+            self.LE_database.setMinimumWidth(int(W_width / 2) - 60)
+            self.T_results.setMinimumSize(int(W_width - 15), int(W_height - 130))
+            self.T_results_headers.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+            self.T_results_headers.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+            self.T_results_headers.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+            self.T_results_headers.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+            self.T_results_headers.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
+        except AttributeError: pass
+    
+    # *-*-* Funzione controllo numeri *-*-*
+    
+    def has_numbers(self, st:str):
+        return any(char.isdigit() for char in st)
 
 # -*-* Finestra Excel *-*-
 
@@ -676,7 +1072,7 @@ class ExcelWindow(QWidget):
     def __init__(self):
         super().__init__()
         
-        self.db = dbclient["98OttaniTessere"] # Apertura database
+        self.db = dbclient["Memberships"] # Apertura database
         
         # *-*-* Impostazioni iniziali *-*-*
         
@@ -1059,8 +1455,6 @@ class ExcelWindow(QWidget):
                 err_msg.setWindowTitle("Errore")
                 err_msg.setText("Data non corretta")
                 return err_msg.exec()
-            date = date.split("/")
-            date = f"{date[2]}{date[1]}{date[0]}"
             
             if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"date_of_birth": date}, {"_id": 0})
             if self.CB_export.currentText() == "Maggiore di": self.query_db = col.find({"date_of_birth": {"$gte": date}}, {"_id": 0})
