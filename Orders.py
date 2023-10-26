@@ -9,7 +9,11 @@ from PyQt6.QtCore import Qt,QDate
 from PyQt6.QtGui import QPixmap,QAction,QCursor,QTextCharFormat,QColor,QTextCursor,QIcon
 if platform == "win32": import win32print # Importazione del modulo stampa per sistemi operativi Windows
 
-# Versione 1.0
+# Versione 1.0.1
+
+# Debug mode
+
+debug_mode = True
 
 # Variabili globali
 
@@ -18,6 +22,7 @@ dbclient = ""
 interface = ""
 logo_path = ""
 icon_path = ""
+menu_dict = {}
 first_start_application = 0
 total_rows = 11
 
@@ -133,7 +138,8 @@ class MainWindow(QWidget):
         self.lay.addWidget(L_print_save, 10, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         self.CB_printer_list = QComboBox(self) # ComboBox lista stampanti
-        printers_list = []        
+        printers_list = []
+        if debug_mode == True: self.CB_printer_list.addItem("DEBUG")
         if platform == "linux" or platform == "linux2": # Lista stampanti disponibili per sistemi operativi Linux
             printers_list = subprocess.check_output(["lpstat", "-e"], encoding="utf-8")
             printers_list = printers_list.split("\n")[:-1]
@@ -386,16 +392,19 @@ class MainWindow(QWidget):
         move_down = QAction("Sposta giù", self)
         add = QAction("Aggiungi ++", self)
         remove = QAction("Togli --", self)
+        create_menu = QAction("Crea un menu", self)
         delete_action.triggered.connect(self.delete_product)
         move_up.triggered.connect(self.move_up_product)
         move_down.triggered.connect(self.move_down_product)
         add.triggered.connect(self.add_product)
         remove.triggered.connect(self.remove_product)
+        create_menu.triggered.connect(self.create_menu)
         menu.addAction(delete_action)
         menu.addAction(move_up)
         menu.addAction(move_down)
         menu.addAction(add)
         menu.addAction(remove)
+        menu.addAction(create_menu)
         menu.popup(QCursor.pos())
     
     # Funzione elimina
@@ -551,6 +560,12 @@ class MainWindow(QWidget):
         
         self.set_total_price() # Aggiornamento prezzo totale
     
+    # Funzione crea menu
+    
+    def create_menu(self):
+        self.create_menu_window = CreateMenuWindow(self.T_products.item(self.T_products.currentRow(), 0).text(), self.CB_category_selection.currentText())
+        self.create_menu_window.show()
+    
     # *-*-* Funzioni della tabella ricevute *-*-*
     
     # Funzione togli una quantità dalla tabella scontrino (click con sinistro del mouse)
@@ -626,6 +641,18 @@ class MainWindow(QWidget):
             total_price = self.T_receipt.item(row, 2).text()
             printer_total += float(total_price) # Aggiornamento totale scontrino
             printer_string = printer_string + f"\n{description} - qta {quantity} - Euro {total_price}" # Inserimento prodotto nello scontrino
+            # Se è presente un menu per il prodotto
+            dic_key = description + self.CB_category_selection.currentText()
+            if dic_key in menu_dict:
+                line = menu_dict[dic_key].split("@nl@")
+                for detailed_product in line:
+                    detail = detailed_product.split("@sp@")
+                    detailed_description = detail[0]
+                    detailed_quantity = detail[1]
+                    detailed_price = detail[2]
+                    if detailed_quantity != "-": detailed_quantity = f"{float(detailed_quantity) * float(quantity):.2f}"
+                    if detailed_price != "-" and detailed_quantity != "-": detailed_price = f"{float(detailed_price) * float(detailed_quantity):.2f}"
+                    printer_string = printer_string + f"\n *-*-* {detailed_description} - qta {detailed_quantity} - prezzo {detailed_price}"
         printer_string = printer_string + "\n\n---------------------------------" # Divisorio
         printer_string = printer_string + f"\nTotale {printer_total:.2f} Euro"
         printer_string = printer_string + "\n\n---------------------------------" # Divisorio
@@ -644,6 +671,12 @@ class MainWindow(QWidget):
         for row in reversed(range(self.T_receipt.rowCount())):
             self.T_receipt.removeRow(row)
         self.set_total_price()
+        
+        # Debug mode
+        
+        if debug_mode == True and printer == "DEBUG":
+            print(printer_string)
+            return
         
         # Stampa
         
@@ -996,6 +1029,188 @@ class DatabaseWindow(QWidget):
             self.TE_database_response.clear()
             self.TE_database_response.insertPlainText("-*-* Eliminazione effettuata *-*-\n\n")
 
+# -*-* Creazione menu articolo *-*-
+
+class CreateMenuWindow(QWidget):
+    def __init__(self, product:str, category:str):
+        super().__init__()
+        self.db = dbclient["Bar"] # Apertura database
+        
+        self.setWindowIcon(QIcon(icon_path))
+        self.setWindowTitle(f"Menu {heading}")
+        self.setFixedSize(480, 640)
+        self.lay = QGridLayout(self)
+        self.setLayout(self.lay)
+        self.lay.setContentsMargins(10,10,10,10)
+        self.lay.setSpacing(1)
+        self.setStyleSheet(sis.interface_style(interface))
+        self.product = product
+        self.category = category
+        self.menu_product = product + category
+        
+        L_product = QLabel(self, text=f"Creazione menu per il prodotto {self.product}")
+        L_product.setAccessibleName("an_section_title")
+        self.lay.addWidget(L_product, 0, 0, 1, 3, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        
+        self.LE_description = QLineEdit(self)
+        self.LE_description.setPlaceholderText("Descrizione")
+        self.lay.addWidget(self.LE_description, 1, 0, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        
+        self.LE_quantity = QLineEdit(self)
+        self.LE_quantity.setPlaceholderText("Quantità")
+        self.lay.addWidget(self.LE_quantity, 1, 1, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        
+        self.LE_price = QLineEdit(self)
+        self.LE_price.setPlaceholderText("Prezzo unitario")
+        self.lay.addWidget(self.LE_price, 1, 2, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        
+        self.B_insert = QPushButton(self, text="Inserisci >>")
+        self.B_insert.clicked.connect(self.insert_menu)
+        self.lay.addWidget(self.B_insert, 2, 0, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        
+        self.B_create = QPushButton(self, text="Crea")
+        self.B_create.clicked.connect(self.create_menu)
+        self.lay.addWidget(self.B_create, 2, 1, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        
+        self.B_delete = QPushButton(self, text="Elimina")
+        self.B_delete.clicked.connect(self.delete_menu)
+        self.lay.addWidget(self.B_delete, 2, 2, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        
+        self.T_menu = QTableWidget(self)
+        self.T_menu.setColumnCount(3)
+        self.T_menu.setFixedSize(450, 500)
+        self.T_menu.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.T_menu.setHorizontalHeaderLabels(["Descrizione", "Quantità", "Prezzo un"])
+        self.T_menu.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.T_menu.customContextMenuRequested.connect(self.T_menu_CM)
+        self.T_menu_header = self.T_menu.horizontalHeader()
+        self.T_menu_header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+        self.T_menu_header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        self.T_menu_header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+        self.lay.addWidget(self.T_menu, 3, 0, 1, 3, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        
+        # Controllo dizionario menu e aggiunta alla tabella
+        
+        if self.menu_product in menu_dict:
+            lines = menu_dict[self.menu_product].split("@nl@")
+            for line in lines:
+                detail = line.split("@sp@")
+                detailed_product = detail[0]
+                try: detailed_quantity = f"{float(detail[1]):.2f}"
+                except: detailed_quantity = "-"
+                try: detailed_price = f"{float(detail[2]):.2f}"
+                except: detailed_price = "-"
+                row = self.T_menu.rowCount()
+                self.T_menu.insertRow(row)
+                self.T_menu.setItem(row, 0, QTableWidgetItem(detailed_product))
+                self.T_menu.setItem(row, 1, QTableWidgetItem(detailed_quantity))
+                self.T_menu.setItem(row, 2, QTableWidgetItem(detailed_price))
+                   
+    # -*-* Funzione inserimento prodotto *-*-
+    
+    def insert_menu(self):
+        if self.LE_description.text().strip().upper() == "": # Controllo casella descrizione
+            err_msg = QMessageBox(self)
+            err_msg.setWindowTitle("Errore")
+            err_msg.setText("La descrizione non può essere vuota")
+            return err_msg.exec()
+        
+        description = self.LE_description.text().strip().upper()
+        quantity = self.LE_quantity.text().strip()
+        price = self.LE_price.text().strip()
+        
+        if quantity == "": quantity = "-" # Controllo quantità
+        else:
+            try: quantity = float(quantity)
+            except: quantity = "-"
+        if price == "": price = "-" # Controllo prezzo
+        else:
+            try: price = float(price)
+            except: price = "-"
+        
+        # Inserimento nella tabella
+        row = self.T_menu.rowCount()
+        self.T_menu.insertRow(row)
+        self.T_menu.setItem(row, 0, QTableWidgetItem(description))
+        if type(quantity) == float: self.T_menu.setItem(row, 1, QTableWidgetItem(f"{quantity:.2f}"))
+        else: self.T_menu.setItem(row, 1, QTableWidgetItem(f"{quantity}"))
+        if type(price) == float: self.T_menu.setItem(row, 2, QTableWidgetItem(f"{price:.2f}"))
+        else: self.T_menu.setItem(row, 2, QTableWidgetItem(f"{price}"))
+        
+        # Pulizia caselle
+        
+        self.LE_description.clear()
+        self.LE_quantity.clear()
+        self.LE_price.clear()
+    
+    # -*-* Funzione creazione menu *-*-
+    
+    def create_menu(self):
+        if self.T_menu.rowCount() == 0:
+            err_msg = QMessageBox(self)
+            err_msg.setWindowTitle("Errore")
+            err_msg.setText("Il menu non può essere vuoto")
+            return err_msg.exec()
+        
+        # Preparazione stringa
+        
+        menu_string = ""
+        for row in range(self.T_menu.rowCount()):
+            menu_string = menu_string + f"{self.T_menu.item(row, 0).text()}@sp@{self.T_menu.item(row, 1).text()}@sp@{self.T_menu.item(row, 2).text()}@nl@"
+        menu_string = menu_string[:-4]
+        
+        # Inserimento nel database
+        
+        global menu_dict
+        col = self.db["maincategory"]
+        col.update_one({"description": self.product, "category": self.category}, {"$set": {"menu": menu_string}}, upsert=True)
+        
+        # Inserimento nel dizionario
+        menu_dict.update({self.menu_product: menu_string})
+        
+        # Chiusura finestra
+        
+        self.close()
+    
+    # -*-* Funzione eliminazione menu *-*-
+    
+    def delete_menu(self):
+        global menu_dict
+        if self.menu_product not in menu_dict: # Controllo se il menu non è presente
+            err_msg = QMessageBox(self)
+            err_msg.setWindowTitle("Errore")
+            err_msg.setText("Il menu che stai tentando di eliminare non esiste")
+            return err_msg.exec()
+        
+        # Rimozione dal database
+        
+        col = self.db["maincategory"]
+        col.update_one({"description": self.product, "category": self.category}, {"$unset": {"menu": ""}})
+        
+        # Rimozione dal dizionario
+        
+        menu_dict.pop(self.menu_product)
+        
+        # Chiusura finestra
+        
+        self.close()
+
+    # -*-* Funzioni del menu tabella prodotti *-*-
+    
+    def T_menu_CM(self):
+        if self.T_menu.currentRow() == -1: return
+        menu = QMenu(self)
+        delete_action = QAction("Elimina", self)
+        delete_action.triggered.connect(self.delete_product)
+        menu.addAction(delete_action)
+        menu.popup(QCursor.pos())
+    
+    # Eliminazione prodotto
+    
+    def delete_product(self):
+        self.T_menu.removeRow(self.T_menu.currentRow())
+        self.T_menu.setCurrentCell(-1, -1)
+
 # -*-* Menu opzioni *-*-
 
 class OptionsMenu(QWidget):
@@ -1192,6 +1407,19 @@ Attualmente stai usando il file: {self.icon_path}""")
         try:
             dbclient.server_info()
             # Avvio se la connessione al database avviene
+            
+            # Inserimento prodotti nel dizionario
+
+            db = dbclient["Bar"]
+            col = db["maincategory"]
+            global menu_dict
+            for product in col.find():
+                try:
+                    st_menu = str(product["menu"])
+                    dic_product = str(product["description"]) + str(product["category"])
+                    menu_dict.update({dic_product: st_menu})
+                except: pass
+            
             self.window = MainWindow()
             self.window.show()
             self.close()
