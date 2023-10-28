@@ -4,7 +4,7 @@ from sys import platform
 from pathlib import Path
 from datetime import datetime
 from PyQt6.QtWidgets import (QWidget,QApplication,QGridLayout,QVBoxLayout,QLabel,QLineEdit,QPushButton,QComboBox,QTableWidget,QAbstractItemView,
-                             QHeaderView,QMessageBox,QTableWidgetItem,QMenu,QSpinBox,QTextEdit,QCalendarWidget,QFileDialog)
+                             QHeaderView,QMessageBox,QTableWidgetItem,QMenu,QSpinBox,QTextEdit,QCalendarWidget,QFileDialog,QInputDialog)
 from PyQt6.QtCore import Qt,QDate
 from PyQt6.QtGui import QPixmap,QAction,QCursor,QTextCharFormat,QColor,QTextCursor,QIcon
 if platform == "win32": import win32print # Importazione del modulo stampa per sistemi operativi Windows
@@ -198,6 +198,7 @@ class MainWindow(QWidget):
         self.T_receipt.customContextMenuRequested.connect(self.remove_row_from_receipt)
         self.T_receipt_headers = self.T_receipt.horizontalHeader()
         self.lay.addWidget(self.T_receipt, 2, 4, total_rows-1, 1, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)
+        self.category_in_receipt = [] # Salvataggio delle categorie quando si inserisce un articolo allo scontrino
         
         # Label per il totale (Parte bassa destra)
         
@@ -390,18 +391,21 @@ class MainWindow(QWidget):
         delete_action = QAction("Elimina", self)
         move_up = QAction("Sposta su", self)
         move_down = QAction("Sposta giù", self)
-        add = QAction("Aggiungi ++", self)
-        remove = QAction("Togli --", self)
+        add_specific_quantity = QAction("Aggiungi quantità specifica", self)
+        add = QAction("Aggiungi + 1 (doppio click sx)", self)
+        remove = QAction("Togli - 1 (click dx)", self)
         create_menu = QAction("Crea un menu", self)
         delete_action.triggered.connect(self.delete_product)
         move_up.triggered.connect(self.move_up_product)
         move_down.triggered.connect(self.move_down_product)
+        add_specific_quantity.triggered.connect(self.add_product_specific_quantity)
         add.triggered.connect(self.add_product)
         remove.triggered.connect(self.remove_product)
         create_menu.triggered.connect(self.create_menu)
         menu.addAction(delete_action)
         menu.addAction(move_up)
         menu.addAction(move_down)
+        menu.addAction(add_specific_quantity)
         menu.addAction(add)
         menu.addAction(remove)
         menu.addAction(create_menu)
@@ -499,6 +503,53 @@ class MainWindow(QWidget):
         self.T_products.setItem(row, 1, QTableWidgetItem(product_price_m))
         self.T_products.setItem(row +1, 0, QTableWidgetItem(product_desc))
         self.T_products.setItem(row +1, 1, QTableWidgetItem(product_price))
+    
+    # Funzione aggiungi quantità specifica
+    
+    def add_product_specific_quantity(self):
+        msg = QInputDialog(self)
+        msg.setWindowTitle("Quantità specifica")
+        msg.setLabelText("Inserisci un numero intero che verrà aggiunto alla quantità nella tabella scontrino")
+        msg.setOkButtonText("Inserisci")
+        msg.setCancelButtonText("Annulla")
+        if msg.exec() == 1:
+            number = msg.textValue()
+            try: number = int(number)
+            except:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle("Errore")
+                err_msg.setText("Devi inserire un numero!")
+                return err_msg.exec()
+            
+            # Inserimento nella tabella a destra
+            row = self.T_products.currentRow()
+            receipt_row = self.T_receipt.rowCount()
+            
+            if receipt_row == 0:
+                self.T_receipt.insertRow(receipt_row)
+                total_price = f"{float(self.T_products.item(row, 1).text()) * number:.2f}"
+                self.T_receipt.setItem(receipt_row, 0, QTableWidgetItem(self.T_products.item(row, 0).text()))
+                self.T_receipt.setItem(receipt_row, 1, QTableWidgetItem(f"{number}"))
+                self.T_receipt.setItem(receipt_row, 2, QTableWidgetItem(total_price))
+                self.category_in_receipt.append(self.CB_category_selection.currentText()) # Aggiunta categoria in lista
+            else:
+                for product in range(receipt_row): # Controllo se l'articolo esiste già
+                    if self.T_products.item(row, 0).text() == self.T_receipt.item(product, 0).text():
+                        quantity = int(self.T_receipt.item(product, 1).text())
+                        quantity += number
+                        total_price = f"{float(self.T_products.item(row, 1).text()) * quantity:.2f}"
+                        self.T_receipt.setItem(product, 1, QTableWidgetItem(str(quantity)))
+                        self.T_receipt.setItem(product, 2, QTableWidgetItem(str(total_price)))
+                        break
+                else: # Se non esiste
+                    self.T_receipt.insertRow(receipt_row)
+                    total_price = f"{float(self.T_products.item(row, 1).text()) * number:.2f}"
+                    self.T_receipt.setItem(receipt_row, 0, QTableWidgetItem(self.T_products.item(row, 0).text()))
+                    self.T_receipt.setItem(receipt_row, 1, QTableWidgetItem(f"{number}"))
+                    self.T_receipt.setItem(receipt_row, 2, QTableWidgetItem(total_price))
+                    self.category_in_receipt.append(self.CB_category_selection.currentText()) # Aggiunta categoria in lista
+            self.set_total_price() # Aggiornamento prezzo totale
+            
         
     # Funzione aggiungi
     
@@ -517,6 +568,7 @@ class MainWindow(QWidget):
             self.T_receipt.setItem(receipt_row, 0, QTableWidgetItem(self.T_products.item(row, 0).text()))
             self.T_receipt.setItem(receipt_row, 1, QTableWidgetItem("1"))
             self.T_receipt.setItem(receipt_row, 2, QTableWidgetItem(self.T_products.item(row, 1).text()))
+            self.category_in_receipt.append(self.CB_category_selection.currentText()) # Aggiunta categoria in lista
         else:
             for product in range(receipt_row): # Controllo se l'articolo esiste già
                 if self.T_products.item(row, 0).text() == self.T_receipt.item(product, 0).text():
@@ -531,6 +583,7 @@ class MainWindow(QWidget):
                 self.T_receipt.setItem(receipt_row, 0, QTableWidgetItem(self.T_products.item(row, 0).text()))
                 self.T_receipt.setItem(receipt_row, 1, QTableWidgetItem("1"))
                 self.T_receipt.setItem(receipt_row, 2, QTableWidgetItem(self.T_products.item(row, 1).text()))
+                self.category_in_receipt.append(self.CB_category_selection.currentText()) # Aggiunta categoria in lista
         self.set_total_price() # Aggiornamento prezzo totale
     
     # Funzione togli
@@ -549,6 +602,7 @@ class MainWindow(QWidget):
             if self.T_products.item(row, 0).text() == self.T_receipt.item(product, 0).text(): # Controllo se l'articolo è a quantità 1 o diversa
                 if self.T_receipt.item(product, 1).text() == "1":
                     self.T_receipt.removeRow(product)
+                    self.category_in_receipt.pop(product) # Rimozione dalla lista categorie
                     break
                 else:
                     quantity = int(self.T_receipt.item(product, 1).text())
@@ -578,6 +632,7 @@ class MainWindow(QWidget):
         if row == -1: return # Blocco delle funzioni se nulla è selezionato
         
         if self.T_receipt.item(row, 1).text() == "1": # Rimozione dalla tabella se l'articolo è a quantità 1
+            self.category_in_receipt.pop(row) # Rimozione dalla lista categorie
             self.T_receipt.removeRow(row)
         else:
             quantity = int(self.T_receipt.item(row, 1).text())
@@ -599,6 +654,7 @@ class MainWindow(QWidget):
         if row == -1: return # Blocco delle funzioni se nulla è selezionato
         
         self.T_receipt.removeRow(row)
+        self.category_in_receipt.pop(row) # Rimozione dalla lista categorie
         self.set_total_price()
     
     # *-*-* Funzioni di stampa e salvataggio *-*-*
@@ -642,7 +698,7 @@ class MainWindow(QWidget):
             printer_total += float(total_price) # Aggiornamento totale scontrino
             printer_string = printer_string + f"\n{description} - qta {quantity} - Euro {total_price}" # Inserimento prodotto nello scontrino
             # Se è presente un menu per il prodotto
-            dic_key = description + self.CB_category_selection.currentText()
+            dic_key = description + self.category_in_receipt[row]
             if dic_key in menu_dict:
                 line = menu_dict[dic_key].split("@nl@")
                 for detailed_product in line:
@@ -663,11 +719,12 @@ class MainWindow(QWidget):
         printer_string = printer_string + f"\n\n-*-* {printer_date_time} *-*-" # Data e ora scontrino
         printer_string = printer_string + "\n\n\n\n\n\n\n\n\n\n\n" # Fine scontrino
         
-        # Pulizia caselle e tabella
+        # Pulizia caselle, tabella e lista
         
         self.LE_customer_name.clear()
         self.SB_table_select.setValue(-1)
         self.TE_additional_note.clear()
+        self.category_in_receipt.clear()
         for row in reversed(range(self.T_receipt.rowCount())):
             self.T_receipt.removeRow(row)
         self.set_total_price()
@@ -715,6 +772,12 @@ class MainWindow(QWidget):
         for row in reversed(range(self.T_receipt.rowCount())):
             self.T_receipt.removeRow(row)
         self.set_total_price()
+    
+    # *-*-* Funzione pressione tasti *-*-*
+    
+    def keyPressEvent(self, event):
+        #print(event.key())
+        pass
     
     # *-*-* Funzione apertura finestra database *-*-*
     
