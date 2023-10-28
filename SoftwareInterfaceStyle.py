@@ -76,7 +76,7 @@ def interface_style(name_of_style:str):
                         border: 2px solid black;
                     }
                     QMenu{
-                        border: 1px solid black;
+                        border: 1px solid #A6AB13;
                     }
                     QMenu::item{
                         background-color: black;
