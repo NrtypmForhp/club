@@ -1,7 +1,7 @@
 def interface_style(name_of_style:str):
     style_string = ""
-    if name_of_style == "": name_of_style = "Stile 98" # Impostazione allo stile di default
-    if name_of_style == "Stile 98":
+    if name_of_style == "": name_of_style = "98 Style" # Impostazione allo stile di default
+    if name_of_style == "98 Style":
         style_string = """
                     QWidget{
                         background-color: #404040;
@@ -128,7 +128,7 @@ def interface_style(name_of_style:str):
                         background-color: none;
                     }
                     """
-    if name_of_style == "Stile Tech":
+    if name_of_style == "Tech Style":
         style_string = """
                     QWidget{
                         background-color: black;
@@ -253,7 +253,7 @@ def interface_style(name_of_style:str):
                         background-color: none;
                     }
                     """
-    if name_of_style == "Stile Elegante Chiaro":
+    if name_of_style == "Clear Elegant Style":
         style_string = """
                     QWidget{
                         background-color: #EEEAEA;
@@ -377,7 +377,7 @@ def interface_style(name_of_style:str):
                         background-color: none;
                     }
                     """
-    if name_of_style == "Stile Elegante Scuro":
+    if name_of_style == "Dark Elegant Style":
         style_string = """
                     QWidget{
                         background-color: #444342;
