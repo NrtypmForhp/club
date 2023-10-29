@@ -365,7 +365,7 @@ class MainWindow(QWidget):
 {lang.msg(language, 13, 'MainWindow')}: {self.email}
 {lang.msg(language, 14, 'MainWindow')}: {self.card_number}
 {lang.msg(language, 29, 'MainWindow')}: {date_of_membership}""")
-        self.clear_box()
+            self.clear_box()
     
     # *-*-* Funzione ricerca automatica nel database *-*-*
     

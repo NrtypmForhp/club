@@ -1,3 +1,5 @@
+# File di debug, serve a cercare l'index nelle liste dei file lingua
+
 import Memberships_Languages as ML
 import Orders_Language as OL
 

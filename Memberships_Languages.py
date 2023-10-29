@@ -32,16 +32,16 @@ ita_ew = ["Esportazione Excel","Colonne","Formato ASI","Imposta","Aggiungi riga"
           "Seleziona una riga (click sopra)!","Personalizza","Inserimento personalizzato",
           "L'inserimento personalizzato ti permette di\ninserire un valore extra alla cella.\nQuesto valore in fase di esportazione verrà solo copiato!","Annulla",
           "La dicitura DB: non può essere inserita manualmente!","Questa riga inizia la ricerca nel database\nDeve essere necessariamente inserita nell'ultima riga!",
-          "STAGIONE","DISCIPLINA","QUALIFICA","TIPO TESSERA","DB:nome","DB:cognome","DB:codice fiscale","DB:città di residenza","DB:indirizzo di residenza","DB:CAP",
-          "DB:e-mail","DB:numero tessera","CODICE AFFILIAZIONE","La tabella non può essere vuota!","Nella tabella ci deve essere almeno un valore da controllare nel database!",
-          "DB:data di nascita","DB:luogo di nascita","DB:sesso","DB:data di tesseramento","File salvato","Percorso"]
+          "STAGIONE","DISCIPLINA","QUALIFICA","TIPO TESSERA","DB:Nome","DB:Cognome","DB:Codice fiscale","DB:Città di residenza","DB:Indirizzo di residenza","DB:CAP - Codice di avviamento postale",
+          "DB:e-mail","DB:Numero tessera","CODICE AFFILIAZIONE","La tabella non può essere vuota!","Nella tabella ci deve essere almeno un valore da controllare nel database!",
+          "DB:Data di nascita","DB:Luogo di nascita","DB:Sesso","DB:Data di tesseramento","File salvato","Percorso"]
 eng_ew = ["Excel Export","Columns","ASI Format","Set","Add row","Remove row","Export to excel","No columns present!",
           "Select a row (click on)!","Customize","Custom insertion",
           "Custom insertion allows you to\nenter an extra value to the cell.\nThis value during exportation will be only copied!","Cancel",
           "The wording DB: cannot be entered manually","This row starts the database searching\nIt must be entered in the last row!",
-          "SEASON","DISCIPLINE","QUALIFICATION","CARD TYPE","DB:name","DB:surname","DB:tax id code","DB:city of residence","DB:residential address","DB:postal code",
-          "DB:e-mail","DB:card number","AFFILIATION CODE","The table cannot be empty!","In the table there must be at least one value to control in the database!",
-          "DB:date of birth","DB:birth place","DB:sex","DB:date of membership","File saved","Path"]
+          "SEASON","DISCIPLINE","QUALIFICATION","CARD TYPE","DB:Name","DB:Surname","DB:Tax id code","DB:City of residence","DB:Residential address","DB:Postal code",
+          "DB:e-mail","DB:Card number","AFFILIATION CODE","The table cannot be empty!","In the table there must be at least one value to control in the database!",
+          "DB:Date of birth","DB:Birth place","DB:Sex","DB:Date of membership","File saved","Path"]
 
 # OptionsMenuWindow
 
