@@ -352,7 +352,7 @@ Data tesseramento: {date_of_membership}""")
             self.TE_db_response.clear()
             date_of_membership = self.date_of_membership # Trasformazione data in formato leggibile
             if date_of_membership != "-": date_of_membership = f"{date_of_membership[6:]}/{date_of_membership[4:6]}/{date_of_membership[:4]}"
-        self.TE_db_response.insertPlainText(f"""-*-* Modifica effettuata *-*-
+            self.TE_db_response.insertPlainText(f"""-*-* Modifica effettuata *-*-
 \nCodice fiscale: {self.tax_id_code}
 Nome: {self.name}
 Cognome: {self.surname}
