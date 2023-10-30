@@ -6,7 +6,7 @@ from PyQt6.QtWidgets import (QWidget,QApplication,QGridLayout,QVBoxLayout,QLabel
                              QHeaderView,QMessageBox,QTextEdit,QFileDialog,QCheckBox,QSpinBox,QMenu,QInputDialog,QTableWidgetItem)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap,QAction,QCursor,QIcon
-import Memberships_Languages as lang
+import Memberships_Language as lang
 
 # Versione 1.0.1
 
@@ -853,15 +853,16 @@ class DatabaseWindow(QWidget):
             if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"email": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0})
         
         if self.CB_database_key.currentText() == lang.msg(language, 14, "MainWindow"): # Tramite numero tessera
-            try: int(self.LE_database.text().replace(" ", ""))
+            card_number = self.LE_database.text().replace(" ", "")
+            try: card_number = int(card_number)
             except:
                 err_msg = QMessageBox(self)
                 err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
                 err_msg.setText(lang.msg(language, 29, "DatabaseWindow"))
                 return err_msg.exec()
-            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"card_number": self.LE_database.text().replace(" ", "")}, {"_id": 0})
-            if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$gte": self.LE_database.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0})
-            if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$lte": self.LE_database.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-"}, "$expr":{"$eq": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-"}, "$expr":{"$gte": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-"}, "$expr":{"$lte": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
         
         if self.CB_database_key.currentText() == lang.msg(language, 29, "MainWindow"): # Tramite data tessera
             date = self.LE_database.text().replace(" ", "")
@@ -872,10 +873,16 @@ class DatabaseWindow(QWidget):
                 return err_msg.exec()
             date = date.split("/")
             date = f"{date[2]}{date[1]}{date[0]}"
+            try: date = int(date)
+            except:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 27, "DatabaseWindow"))
+                return err_msg.exec()
             
-            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": date}, {"_id": 0})
-            if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": {"$gte": date, "$ne": "-"}}, {"_id": 0})
-            if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": {"$lte": date, "$ne": "-"}}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": {"$ne": "-"}, "$expr":{"$eq": [{"$toDouble": "$date_of_membership"}, date]}}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": {"$ne": "-"}, "$expr":{"$gte": [{"$toDouble": "$date_of_membership"}, date]}}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": {"$ne": "-"}, "$expr":{"$lte": [{"$toDouble": "$date_of_membership"}, date]}}, {"_id": 0})
         
         if self.CB_database_key.currentText() == lang.msg(language, 0, "DatabaseWindow"): # Tutti i non tesserati
             self.query_db = col.find({"date_of_membership": "-"}, {"_id": 0})
@@ -1493,15 +1500,16 @@ class ExcelWindow(QWidget):
             if self.CB_export.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"email": {"$regex": self.LE_export.text().upper().replace(" ", "")}}, {"_id": 0})
         
         if self.CB_export_key.currentText() == lang.msg(language, 14, "MainWindow"): # Tramite numero tessera
-            try: int(self.LE_export.text().replace(" ", ""))
+            card_number = self.LE_export.text().replace(" ", "")
+            try: card_number = int(card_number)
             except:
                 err_msg = QMessageBox(self)
                 err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
                 err_msg.setText(lang.msg(language, 29, "DatabaseWindow"))
                 return err_msg.exec()
-            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"card_number": self.LE_export.text().replace(" ", "")}, {"_id": 0})
-            if self.CB_export.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$gte": self.LE_export.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0})
-            if self.CB_export.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$lte": self.LE_export.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-"}, "$expr":{"$eq": [{"$toDouble": "$card_number"}, card_number]}}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-"}, "$expr":{"$gte": [{"$toDouble": "$card_number"}, card_number]}}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-"}, "$expr":{"$lte": [{"$toDouble": "$card_number"}, card_number]}}, {"_id": 0})
         
         if self.CB_export_key.currentText() == lang.msg(language, 29, "MainWindow"): # Tramite data tessera
             date = self.LE_export.text().replace(" ", "")
@@ -1512,10 +1520,16 @@ class ExcelWindow(QWidget):
                 return err_msg.exec()
             date = date.split("/")
             date = f"{date[2]}{date[1]}{date[0]}"
-            
-            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": date}, {"_id": 0})
-            if self.CB_export.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": {"$gte": date, "$ne": "-"}}, {"_id": 0})
-            if self.CB_export.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": {"$lte": date, "$ne": "-"}}, {"_id": 0})
+            try: date = int(date)
+            except:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 27, "DatabaseWindow"))
+                return err_msg.exec()
+                        
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": {"$ne": "-"}, "$expr":{"$eq": [{"$toDouble": "$date_of_membership"}, date]}}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": {"$ne": "-"}, "$expr":{"$gte": [{"$toDouble": "$date_of_membership"}, date]}}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": {"$ne": "-"}, "$expr":{"$lte": [{"$toDouble": "$date_of_membership"}, date]}}, {"_id": 0})
             
         # Esportazione in excel                
         

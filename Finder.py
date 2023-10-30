@@ -1,9 +1,9 @@
 # File di debug, serve a cercare l'index nelle liste dei file lingua
 
-import Memberships_Languages as ML
+import Memberships_Language as ML
 import Orders_Language as OL
 
-st = "DB:data di tesseramento"
+st = "Data non corretta!"
 ty = "Memberships"
 
 if ty == "Orders":

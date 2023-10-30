@@ -14,7 +14,7 @@ if platform == "win32": import win32print # Importazione del modulo stampa per s
 
 # Debug mode
 
-debug_mode = True
+debug_mode = False
 
 # Variabili globali
 
