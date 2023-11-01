@@ -404,13 +404,7 @@ class MainWindow(QWidget):
         add.triggered.connect(self.add_product)
         remove.triggered.connect(self.remove_product)
         create_menu.triggered.connect(self.create_menu)
-        menu.addAction(delete_action)
-        menu.addAction(move_up)
-        menu.addAction(move_down)
-        menu.addAction(add_specific_quantity)
-        menu.addAction(add)
-        menu.addAction(remove)
-        menu.addAction(create_menu)
+        menu.addActions([delete_action, move_up, move_down, add_specific_quantity, add, remove, create_menu])
         menu.popup(QCursor.pos())
     
     # Funzione elimina
