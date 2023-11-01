@@ -1632,52 +1632,53 @@ class OptionsMenu(QWidget):
         self.lay = QVBoxLayout(self)
         self.setStyleSheet(sis.interface_style(self.interface_style))
         
-        L_title = QLabel(self, text=lang.msg(self.language, 0, "OptionsMenuWindow"))
-        L_title.setAccessibleName("an_title")
-        self.lay.addWidget(L_title)
+        self.L_title = QLabel(self, text=lang.msg(self.language, 0, "OptionsMenuWindow"))
+        self.L_title.setAccessibleName("an_title")
+        self.lay.addWidget(self.L_title)
         
-        L_language = QLabel(self, text=lang.msg(self.language, 1, "OptionsMenuWindow"))
-        L_language.setAccessibleName("an_section_title")
-        self.lay.addWidget(L_language)
+        self.L_language = QLabel(self, text=lang.msg(self.language, 1, "OptionsMenuWindow"))
+        self.L_language.setAccessibleName("an_section_title")
+        self.lay.addWidget(self.L_language)
         
         self.CB_language = QComboBox(self)
         self.CB_language.addItems(["ENGLISH", "ITALIANO"])
         self.CB_language.setCurrentText(self.language)
+        self.CB_language.currentTextChanged.connect(self.language_change)
         self.lay.addWidget(self.CB_language)
         
-        L_database_connection = QLabel(self, text=lang.msg(self.language, 2, "OptionsMenuWindow"))
-        L_database_connection.setAccessibleName("an_section_title")
-        self.lay.addWidget(L_database_connection)
+        self.L_database_connection = QLabel(self, text=lang.msg(self.language, 2, "OptionsMenuWindow"))
+        self.L_database_connection.setAccessibleName("an_section_title")
+        self.lay.addWidget(self.L_database_connection)
         
-        L_database_connection_instructions = QLabel(self)
-        L_database_connection_instructions.setText(lang.msg(self.language, 3, "OptionsMenuWindow"))
-        self.lay.addWidget(L_database_connection_instructions)
+        self.L_database_connection_instructions = QLabel(self)
+        self.L_database_connection_instructions.setText(lang.msg(self.language, 3, "OptionsMenuWindow"))
+        self.lay.addWidget(self.L_database_connection_instructions)
         
         self.LE_database_connection = QLineEdit(self)
         self.LE_database_connection.setPlaceholderText(lang.msg(self.language, 4, "OptionsMenuWindow"))
         self.LE_database_connection.setText(self.mongodb_connection)
         self.lay.addWidget(self.LE_database_connection)
         
-        L_heading = QLabel(self, text=lang.msg(self.language, 5, "OptionsMenuWindow"))
-        L_heading.setAccessibleName("an_section_title")
-        self.lay.addWidget(L_heading)
+        self.L_heading = QLabel(self, text=lang.msg(self.language, 5, "OptionsMenuWindow"))
+        self.L_heading.setAccessibleName("an_section_title")
+        self.lay.addWidget(self.L_heading)
         
-        L_heading_instructions = QLabel(self)
-        L_heading_instructions.setText(lang.msg(self.language, 6, "OptionsMenuWindow"))
-        self.lay.addWidget(L_heading_instructions)
+        self.L_heading_instructions = QLabel(self)
+        self.L_heading_instructions.setText(lang.msg(self.language, 6, "OptionsMenuWindow"))
+        self.lay.addWidget(self.L_heading_instructions)
         
         self.LE_heading = QLineEdit(self)
         self.LE_heading.setPlaceholderText(lang.msg(self.language, 5, "OptionsMenuWindow"))
         self.LE_heading.setText(self.heading)
         self.lay.addWidget(self.LE_heading)
         
-        L_interface_style = QLabel(self, text=lang.msg(self.language, 7, "OptionsMenuWindow"))
-        L_interface_style.setAccessibleName("an_section_title")
-        self.lay.addWidget(L_interface_style)
+        self.L_interface_style = QLabel(self, text=lang.msg(self.language, 7, "OptionsMenuWindow"))
+        self.L_interface_style.setAccessibleName("an_section_title")
+        self.lay.addWidget(self.L_interface_style)
         
-        L_interface_style_instructions = QLabel(self)
-        L_interface_style_instructions.setText(lang.msg(self.language, 8, "OptionsMenuWindow"))
-        self.lay.addWidget(L_interface_style_instructions)
+        self.L_interface_style_instructions = QLabel(self)
+        self.L_interface_style_instructions.setText(lang.msg(self.language, 8, "OptionsMenuWindow"))
+        self.lay.addWidget(self.L_interface_style_instructions)
         
         self.CB_interface_style = QComboBox(self)
         self.CB_interface_style.addItems(["98 Style", "Tech Style", "Clear Elegant Style", "Dark Elegant Style"])
@@ -1685,24 +1686,22 @@ class OptionsMenu(QWidget):
         self.CB_interface_style.currentIndexChanged.connect(self.interface_change)
         self.lay.addWidget(self.CB_interface_style)
         
-        L_logo = QLabel(self, text=lang.msg(self.language, 9, "OptionsMenuWindow"))
-        L_logo.setAccessibleName("an_section_title")
-        self.lay.addWidget(L_logo)
+        self.L_logo = QLabel(self, text=lang.msg(self.language, 9, "OptionsMenuWindow"))
+        self.L_logo.setAccessibleName("an_section_title")
+        self.lay.addWidget(self.L_logo)
         
-        self.L_logo_instructions = QLabel(self)
-        self.L_logo_instructions.setText(f"{lang.msg(self.language, 10, 'OptionsMenuWindow')}: {self.logo_path}")
+        self.L_logo_instructions = QLabel(self, text=f"{lang.msg(self.language, 10, 'OptionsMenuWindow')}: {self.logo_path}")
         self.lay.addWidget(self.L_logo_instructions)
         
         self.B_logo = QPushButton(self, text=lang.msg(self.language, 11, "OptionsMenuWindow"))
         self.B_logo.clicked.connect(self.logo_selection)
         self.lay.addWidget(self.B_logo)
         
-        L_icon = QLabel(self, text=lang.msg(self.language, 12, "OptionsMenuWindow"))
-        L_icon.setAccessibleName("an_section_title")
-        self.lay.addWidget(L_icon)
+        self.L_icon = QLabel(self, text=lang.msg(self.language, 12, "OptionsMenuWindow"))
+        self.L_icon.setAccessibleName("an_section_title")
+        self.lay.addWidget(self.L_icon)
         
-        self.L_icon_instructions = QLabel(self)
-        self.L_icon_instructions.setText(f"{lang.msg(self.language, 13, 'OptionsMenuWindow')}: {self.icon_path}")
+        self.L_icon_instructions = QLabel(self, text=f"{lang.msg(self.language, 13, 'OptionsMenuWindow')}: {self.icon_path}")
         self.lay.addWidget(self.L_icon_instructions)
         
         self.B_icon = QPushButton(self, text=lang.msg(self.language, 11, "OptionsMenuWindow"))
@@ -1745,11 +1744,32 @@ class OptionsMenu(QWidget):
         self.icon_path = icon_path
         self.L_icon_instructions.setText(f"{lang.msg(self.language, 13, 'OptionsMenuWindow')}: {self.icon_path}")
     
+    def language_change(self):
+        self.language = self.CB_language.currentText()
+        self.setWindowTitle(f"{heading} - {lang.msg(self.language, 0, 'OptionsMenuWindow')}")
+        self.L_title.setText(lang.msg(self.language, 0, "OptionsMenuWindow"))
+        self.L_language.setText(lang.msg(self.language, 1, "OptionsMenuWindow"))
+        self.L_database_connection.setText(lang.msg(self.language, 2, "OptionsMenuWindow"))
+        self.L_database_connection_instructions.setText(lang.msg(self.language, 3, "OptionsMenuWindow"))
+        self.LE_database_connection.setPlaceholderText(lang.msg(self.language, 4, "OptionsMenuWindow"))
+        self.L_heading.setText(lang.msg(self.language, 5, "OptionsMenuWindow"))
+        self.L_heading_instructions.setText(lang.msg(self.language, 6, "OptionsMenuWindow"))
+        self.LE_heading.setPlaceholderText(lang.msg(self.language, 5, "OptionsMenuWindow"))
+        self.L_interface_style.setText(lang.msg(self.language, 7, "OptionsMenuWindow"))
+        self.L_interface_style_instructions.setText(lang.msg(self.language, 8, "OptionsMenuWindow"))
+        self.L_logo.setText(lang.msg(self.language, 9, "OptionsMenuWindow"))
+        self.L_logo_instructions.setText(f"{lang.msg(self.language, 10, 'OptionsMenuWindow')}: {self.logo_path}")
+        self.B_logo.setText(lang.msg(self.language, 11, "OptionsMenuWindow"))
+        self.L_icon.setText(lang.msg(self.language, 12, "OptionsMenuWindow"))
+        self.L_icon_instructions.setText(f"{lang.msg(self.language, 13, 'OptionsMenuWindow')}: {self.icon_path}")
+        self.B_icon.setText(lang.msg(self.language, 11, "OptionsMenuWindow"))
+        self.B_close_and_save.setText(lang.msg(self.language, 14, "OptionsMenuWindow"))
+    
     def close_and_save(self):
         global language
         if self.LE_database_connection.text() == "":
             err_msg = QMessageBox(self)
-            err_msg.setWindowTitle(lang.msg(self.language, 20, "MainWindow"))
+            err_msg.setWindowTitle(lang.msg(self.language, 19, "MainWindow"))
             err_msg.setText(lang.msg(self.language, 16, "OptionsMenuWindow"))
             return err_msg.exec()
         
@@ -1796,6 +1816,19 @@ class OptionsMenu(QWidget):
         try:
             dbclient.server_info()
             # Avvio se la connessione al database avviene
+            
+            # Inserimento prodotti nel dizionario
+
+            db = dbclient["Bar"]
+            col = db["maincategory"]
+            global menu_dict
+            for product in col.find():
+                try:
+                    st_menu = str(product["menu"])
+                    dic_product = str(product["description"]) + str(product["category"])
+                    menu_dict.update({dic_product: st_menu})
+                except: pass
+            
             self.window = MainWindow()
             self.window.show()
             self.close()
