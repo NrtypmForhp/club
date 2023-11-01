@@ -1628,15 +1628,15 @@ class OptionsMenu(QWidget):
             options_file.close()
         
         self.setWindowIcon(QIcon(self.icon_path))
-        self.setWindowTitle(f"{heading} - {lang.msg(language, 0, 'MainWindow')}")
+        self.setWindowTitle(f"{heading} - {lang.msg(self.language, 0, 'MainWindow')}")
         self.lay = QVBoxLayout(self)
         self.setStyleSheet(sis.interface_style(self.interface_style))
         
-        L_title = QLabel(self, text=lang.msg(language, 0, "OptionsMenuWindow"))
+        L_title = QLabel(self, text=lang.msg(self.language, 0, "OptionsMenuWindow"))
         L_title.setAccessibleName("an_title")
         self.lay.addWidget(L_title)
         
-        L_language = QLabel(self, text=lang.msg(language, 1, "OptionsMenuWindow"))
+        L_language = QLabel(self, text=lang.msg(self.language, 1, "OptionsMenuWindow"))
         L_language.setAccessibleName("an_section_title")
         self.lay.addWidget(L_language)
         
@@ -1645,38 +1645,38 @@ class OptionsMenu(QWidget):
         self.CB_language.setCurrentText(self.language)
         self.lay.addWidget(self.CB_language)
         
-        L_database_connection = QLabel(self, text=lang.msg(language, 2, "OptionsMenuWindow"))
+        L_database_connection = QLabel(self, text=lang.msg(self.language, 2, "OptionsMenuWindow"))
         L_database_connection.setAccessibleName("an_section_title")
         self.lay.addWidget(L_database_connection)
         
         L_database_connection_instructions = QLabel(self)
-        L_database_connection_instructions.setText(lang.msg(language, 3, "OptionsMenuWindow"))
+        L_database_connection_instructions.setText(lang.msg(self.language, 3, "OptionsMenuWindow"))
         self.lay.addWidget(L_database_connection_instructions)
         
         self.LE_database_connection = QLineEdit(self)
-        self.LE_database_connection.setPlaceholderText(lang.msg(language, 4, "OptionsMenuWindow"))
+        self.LE_database_connection.setPlaceholderText(lang.msg(self.language, 4, "OptionsMenuWindow"))
         self.LE_database_connection.setText(self.mongodb_connection)
         self.lay.addWidget(self.LE_database_connection)
         
-        L_heading = QLabel(self, text=lang.msg(language, 5, "OptionsMenuWindow"))
+        L_heading = QLabel(self, text=lang.msg(self.language, 5, "OptionsMenuWindow"))
         L_heading.setAccessibleName("an_section_title")
         self.lay.addWidget(L_heading)
         
         L_heading_instructions = QLabel(self)
-        L_heading_instructions.setText(lang.msg(language, 6, "OptionsMenuWindow"))
+        L_heading_instructions.setText(lang.msg(self.language, 6, "OptionsMenuWindow"))
         self.lay.addWidget(L_heading_instructions)
         
         self.LE_heading = QLineEdit(self)
-        self.LE_heading.setPlaceholderText(lang.msg(language, 5, "OptionsMenuWindow"))
+        self.LE_heading.setPlaceholderText(lang.msg(self.language, 5, "OptionsMenuWindow"))
         self.LE_heading.setText(self.heading)
         self.lay.addWidget(self.LE_heading)
         
-        L_interface_style = QLabel(self, text=lang.msg(language, 7, "OptionsMenuWindow"))
+        L_interface_style = QLabel(self, text=lang.msg(self.language, 7, "OptionsMenuWindow"))
         L_interface_style.setAccessibleName("an_section_title")
         self.lay.addWidget(L_interface_style)
         
         L_interface_style_instructions = QLabel(self)
-        L_interface_style_instructions.setText(lang.msg(language, 8, "OptionsMenuWindow"))
+        L_interface_style_instructions.setText(lang.msg(self.language, 8, "OptionsMenuWindow"))
         self.lay.addWidget(L_interface_style_instructions)
         
         self.CB_interface_style = QComboBox(self)
@@ -1685,31 +1685,31 @@ class OptionsMenu(QWidget):
         self.CB_interface_style.currentIndexChanged.connect(self.interface_change)
         self.lay.addWidget(self.CB_interface_style)
         
-        L_logo = QLabel(self, text=lang.msg(language, 9, "OptionsMenuWindow"))
+        L_logo = QLabel(self, text=lang.msg(self.language, 9, "OptionsMenuWindow"))
         L_logo.setAccessibleName("an_section_title")
         self.lay.addWidget(L_logo)
         
         self.L_logo_instructions = QLabel(self)
-        self.L_logo_instructions.setText(f"{lang.msg(language, 10, 'OptionsMenuWindow')}: {self.logo_path}")
+        self.L_logo_instructions.setText(f"{lang.msg(self.language, 10, 'OptionsMenuWindow')}: {self.logo_path}")
         self.lay.addWidget(self.L_logo_instructions)
         
-        self.B_logo = QPushButton(self, text=lang.msg(language, 11, "OptionsMenuWindow"))
+        self.B_logo = QPushButton(self, text=lang.msg(self.language, 11, "OptionsMenuWindow"))
         self.B_logo.clicked.connect(self.logo_selection)
         self.lay.addWidget(self.B_logo)
         
-        L_icon = QLabel(self, text=lang.msg(language, 12, "OptionsMenuWindow"))
+        L_icon = QLabel(self, text=lang.msg(self.language, 12, "OptionsMenuWindow"))
         L_icon.setAccessibleName("an_section_title")
         self.lay.addWidget(L_icon)
         
         self.L_icon_instructions = QLabel(self)
-        self.L_icon_instructions.setText(f"{lang.msg(language, 13, 'OptionsMenuWindow')}: {self.icon_path}")
+        self.L_icon_instructions.setText(f"{lang.msg(self.language, 13, 'OptionsMenuWindow')}: {self.icon_path}")
         self.lay.addWidget(self.L_icon_instructions)
         
-        self.B_icon = QPushButton(self, text=lang.msg(language, 11, "OptionsMenuWindow"))
+        self.B_icon = QPushButton(self, text=lang.msg(self.language, 11, "OptionsMenuWindow"))
         self.B_icon.clicked.connect(self.icon_selection)
         self.lay.addWidget(self.B_icon)
         
-        self.B_close_and_save = QPushButton(self, text=lang.msg(language, 14, "OptionsMenuWindow"))
+        self.B_close_and_save = QPushButton(self, text=lang.msg(self.language, 14, "OptionsMenuWindow"))
         self.B_close_and_save.clicked.connect(self.close_and_save)
         self.lay.addWidget(self.B_close_and_save)
         
@@ -1728,35 +1728,35 @@ class OptionsMenu(QWidget):
     def logo_selection(self):
         logo = QFileDialog()
         logo.setFileMode(QFileDialog.FileMode.AnyFile)
-        logo.setNameFilter(f"{lang.msg(language, 15, 'OptionsMenuWindow')} (*.png)")
+        logo.setNameFilter(f"{lang.msg(self.language, 15, 'OptionsMenuWindow')} (*.png)")
         logo.setViewMode(QFileDialog.ViewMode.List)
         logo_path = QFileDialog.getOpenFileName(logo)
         logo_path = Path(logo_path[0])
         self.logo_path = logo_path
-        self.L_logo_instructions.setText(f"{lang.msg(language, 10, 'OptionsMenuWindow')}: {self.logo_path}")
+        self.L_logo_instructions.setText(f"{lang.msg(self.language, 10, 'OptionsMenuWindow')}: {self.logo_path}")
     
     def icon_selection(self):
         icon = QFileDialog()
         icon.setFileMode(QFileDialog.FileMode.AnyFile)
-        icon.setNameFilter(f"{lang.msg(language, 15, 'OptionsMenuWindow')} (*.png)")
+        icon.setNameFilter(f"{lang.msg(self.language, 15, 'OptionsMenuWindow')} (*.png)")
         icon.setViewMode(QFileDialog.ViewMode.List)
         icon_path = QFileDialog.getOpenFileName(icon)
         icon_path = Path(icon_path[0])
         self.icon_path = icon_path
-        self.L_icon_instructions.setText(f"{lang.msg(language, 13, 'OptionsMenuWindow')}: {self.icon_path}")
+        self.L_icon_instructions.setText(f"{lang.msg(self.language, 13, 'OptionsMenuWindow')}: {self.icon_path}")
     
     def close_and_save(self):
         global language
         if self.LE_database_connection.text() == "":
             err_msg = QMessageBox(self)
-            err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
-            err_msg.setText(lang.msg(language, 16, "OptionsMenuWindow"))
+            err_msg.setWindowTitle(lang.msg(self.language, 20, "MainWindow"))
+            err_msg.setText(lang.msg(self.language, 16, "OptionsMenuWindow"))
             return err_msg.exec()
         
         # Impostazione del messaggio di connessione
         
         self.L_database_connection_st.setStyleSheet("color: #FF7800; font: 18px bold Arial;")
-        self.L_database_connection_st.setText(lang.msg(language, 17, "OptionsMenuWindow"))
+        self.L_database_connection_st.setText(lang.msg(self.language, 17, "OptionsMenuWindow"))
         self.L_database_connection_st.show()
         self.L_database_connection_st.repaint()
         
@@ -1777,7 +1777,7 @@ class OptionsMenu(QWidget):
         except:
             options_file.close()
             self.L_database_connection_st.setStyleSheet("color: #8B0B0B; font: 18px bold Arial;")
-            self.L_database_connection_st.setText(lang.msg(language, 18, "OptionsMenuWindow"))
+            self.L_database_connection_st.setText(lang.msg(self.language, 18, "OptionsMenuWindow"))
             self.L_database_connection_st.show()
             return
         global heading
@@ -1801,7 +1801,7 @@ class OptionsMenu(QWidget):
             self.close()
         except:
             self.L_database_connection_st.setStyleSheet("color: #8B0B0B; font: 18px bold Arial;")
-            self.L_database_connection_st.setText(lang.msg(language, 18, "OptionsMenuWindow"))
+            self.L_database_connection_st.setText(lang.msg(self.language, 18, "OptionsMenuWindow"))
             self.L_database_connection_st.show()
 
 # -*-* Avvio applicazione *-*-
