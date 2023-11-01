@@ -1,10 +1,14 @@
 Software for small organisations like clubs.
 Simplify management of bar, kitchen, memberships and more.
-Made in Python for now only in italian language.
+Made in Python.
 
 # Software Interface Style
 
 Contain PyQt6 css strings for style the other programs interface.
+
+# Language files
+
+Contain English and Italian language strings for both the programs.
 
 # Orders
 
