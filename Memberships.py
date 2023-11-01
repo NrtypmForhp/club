@@ -1628,7 +1628,7 @@ class OptionsMenu(QWidget):
             options_file.close()
         
         self.setWindowIcon(QIcon(self.icon_path))
-        self.setWindowTitle(f"{heading} - {lang.msg(self.language, 0, 'MainWindow')}")
+        self.setWindowTitle(f"{heading} - {lang.msg(self.language, 0, 'OptionsMenuWindow')}")
         self.lay = QVBoxLayout(self)
         self.setStyleSheet(sis.interface_style(self.interface_style))
         
