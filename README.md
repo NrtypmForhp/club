@@ -23,3 +23,7 @@ It's a cards manager for associations.
 Save people details on a Mongodb database.
 You can manage directly from the program.
 You can export in Excel all the people inside the database or with a filter.
+
+# Download linux executable files
+
+https://sourceforge.net/projects/club/
