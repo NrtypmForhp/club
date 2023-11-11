@@ -1,4 +1,4 @@
-import pymongo,sys,os,openpyxl
+import pymongo,sys,os,openpyxl,re
 import SoftwareInterfaceStyle as sis
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -854,15 +854,19 @@ class DatabaseWindow(QWidget):
         
         if self.CB_database_key.currentText() == lang.msg(language, 14, "MainWindow"): # Tramite numero tessera
             card_number = self.LE_database.text().replace(" ", "")
-            try: card_number = int(card_number)
-            except:
-                err_msg = QMessageBox(self)
-                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
-                err_msg.setText(lang.msg(language, 29, "DatabaseWindow"))
-                return err_msg.exec()
-            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-"}, "$expr":{"$eq": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
-            if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-"}, "$expr":{"$gte": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
-            if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-"}, "$expr":{"$lte": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
+            numeric_card_number = True
+            try: float(card_number)
+            except: numeric_card_number = False
+            if numeric_card_number == True:
+                number_expression = re.compile(r"^\d+$")
+                card_number = float(card_number)
+                if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$regex": number_expression}, "$expr":{"$eq": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
+                if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$regex": number_expression}, "$expr":{"$gte": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
+                if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$regex": number_expression}, "$expr":{"$lte": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
+            else:
+                if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"card_number": card_number}, {"_id": 0})
+                if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-", "$gte": card_number}}, {"_id": 0})
+                if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-", "$lte": card_number}}, {"_id": 0})
         
         if self.CB_database_key.currentText() == lang.msg(language, 29, "MainWindow"): # Tramite data tessera
             date = self.LE_database.text().replace(" ", "")
@@ -976,15 +980,19 @@ class DatabaseWindow(QWidget):
             if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = {"email": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0}
         
         if self.CB_database_key.currentText() == lang.msg(language, 14, "MainWindow"): # Tramite numero tessera
-            try: int(self.LE_database.text().replace(" ", ""))
-            except:
-                err_msg = QMessageBox(self)
-                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
-                err_msg.setText(lang.msg(language, 29, "DatabaseWindow"))
-                return err_msg.exec()
-            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = {"card_number": self.LE_database.text().replace(" ", "")}, {"_id": 0}
-            if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = {"card_number": {"$gte": self.LE_database.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0}
-            if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = {"card_number": {"$lte": self.LE_database.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0}
+            numeric_card_number = True
+            try: float(card_number)
+            except: numeric_card_number = False
+            if numeric_card_number == True:
+                number_expression = re.compile(r"^\d+$")
+                card_number = float(card_number)
+                if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = {"card_number": {"$regex": number_expression}, "$expr":{"$eq": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0}
+                if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = {"card_number": {"$regex": number_expression}, "$expr":{"$gte": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0}
+                if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = {"card_number": {"$regex": number_expression}, "$expr":{"$lte": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0}
+            else:
+                if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = {"card_number": card_number}, {"_id": 0}
+                if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = {"card_number": {"$ne": "-", "$gte": card_number}}, {"_id": 0}
+                if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = {"card_number": {"$ne": "-", "$lte": card_number}}, {"_id": 0}
         
         if self.CB_database_key.currentText() == lang.msg(language, 29, "MainWindow"): # Tramite data tessera
             date = self.LE_database.text().replace(" ", "")
@@ -1501,15 +1509,19 @@ class ExcelWindow(QWidget):
         
         if self.CB_export_key.currentText() == lang.msg(language, 14, "MainWindow"): # Tramite numero tessera
             card_number = self.LE_export.text().replace(" ", "")
-            try: card_number = int(card_number)
-            except:
-                err_msg = QMessageBox(self)
-                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
-                err_msg.setText(lang.msg(language, 29, "DatabaseWindow"))
-                return err_msg.exec()
-            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-"}, "$expr":{"$eq": [{"$toDouble": "$card_number"}, card_number]}}, {"_id": 0})
-            if self.CB_export.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-"}, "$expr":{"$gte": [{"$toDouble": "$card_number"}, card_number]}}, {"_id": 0})
-            if self.CB_export.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-"}, "$expr":{"$lte": [{"$toDouble": "$card_number"}, card_number]}}, {"_id": 0})
+            numeric_card_number = True
+            try: float(card_number)
+            except: numeric_card_number = False
+            if numeric_card_number == True:
+                number_expression = re.compile(r"^\d+$")
+                card_number = float(card_number)
+                if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$regex": number_expression}, "$expr":{"$eq": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
+                if self.CB_export.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$regex": number_expression}, "$expr":{"$gte": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
+                if self.CB_export.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$regex": number_expression}, "$expr":{"$lte": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
+            else:
+                if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"card_number": card_number}, {"_id": 0})
+                if self.CB_export.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-", "$gte": card_number}}, {"_id": 0})
+                if self.CB_export.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-", "$lte": card_number}}, {"_id": 0})
         
         if self.CB_export_key.currentText() == lang.msg(language, 29, "MainWindow"): # Tramite data tessera
             date = self.LE_export.text().replace(" ", "")
