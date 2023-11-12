@@ -765,6 +765,13 @@ class MainWindow(QWidget):
         products = products[:-9]
         col = self.db["receipts"]
         col.insert_one({"receipt_date": date, "receipt_time": time, "receipt_products": products})
+        
+        # Pulizia caselle, tabella e lista
+        
+        self.LE_customer_name.clear()
+        self.SB_table_select.setValue(-1)
+        self.TE_additional_note.clear()
+        self.category_in_receipt.clear()
         for row in reversed(range(self.T_receipt.rowCount())):
             self.T_receipt.removeRow(row)
         self.set_total_price()
