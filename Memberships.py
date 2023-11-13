@@ -8,7 +8,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap,QAction,QCursor,QIcon
 import Memberships_Language as lang
 
-# Versione 1.0.1
+# Versione 1.0.1-r1
 
 # Variabili globali
 
