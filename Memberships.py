@@ -1,4 +1,4 @@
-import pymongo,sys,os,openpyxl
+import pymongo,sys,os,openpyxl,re
 import SoftwareInterfaceStyle as sis
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -6,8 +6,9 @@ from PyQt6.QtWidgets import (QWidget,QApplication,QGridLayout,QVBoxLayout,QLabel
                              QHeaderView,QMessageBox,QTextEdit,QFileDialog,QCheckBox,QSpinBox,QMenu,QInputDialog,QTableWidgetItem)
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap,QAction,QCursor,QIcon
+import Memberships_Language as lang
 
-# Versione 1.0
+# Versione 1.0.1-r1
 
 # Variabili globali
 
@@ -16,6 +17,7 @@ dbclient = ""
 interface = ""
 logo_path = ""
 icon_path = ""
+language = ""
 first_start_application = 0
 
 class MainWindow(QWidget):
@@ -56,105 +58,105 @@ class MainWindow(QWidget):
         
         # Checkbox per ricerca automatica (Parte superiore centrale)
         
-        self.CHB_auto_search = QCheckBox(self, text="Ricerca automatica")
+        self.CHB_auto_search = QCheckBox(self, text=lang.msg(language, 0, "MainWindow"))
         self.lay.addWidget(self.CHB_auto_search, 0, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignCenter)
         
         # Pulsante Database
         
-        self.B_database_management = QPushButton(self, text="Apri database")
+        self.B_database_management = QPushButton(self, text=lang.msg(language, 1, "MainWindow"))
         self.B_database_management.clicked.connect(self.database_management_open)
         self.lay.addWidget(self.B_database_management, 0, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)
         
         # Pulsante Opzioni (Parte superiore destra)
         
-        self.B_options_menu = QPushButton(self, text="Opzioni")
+        self.B_options_menu = QPushButton(self, text=lang.msg(language, 2, "MainWindow"))
         self.B_options_menu.clicked.connect(self.options_menu_open)
         self.lay.addWidget(self.B_options_menu, 0, 4, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)
         
         # Casella codice fiscale (Parte centrale sinistra)
         
         self.LE_tax_id_code = QLineEdit(self)
-        self.LE_tax_id_code.setPlaceholderText("Codice Fiscale")
+        self.LE_tax_id_code.setPlaceholderText(lang.msg(language, 3, "MainWindow"))
         self.LE_tax_id_code.textChanged.connect(self.auto_search)
         self.lay.addWidget(self.LE_tax_id_code, 1, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Casella nome (Parte centrale sinistra)
         
         self.LE_name = QLineEdit(self)
-        self.LE_name.setPlaceholderText("Nome")
+        self.LE_name.setPlaceholderText(lang.msg(language, 4, "MainWindow"))
         self.LE_name.textChanged.connect(self.auto_search)
         self.lay.addWidget(self.LE_name, 2, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Casella cognome (Parte centrale sinistra)
         
         self.LE_surname = QLineEdit(self)
-        self.LE_surname.setPlaceholderText("Cognome")
+        self.LE_surname.setPlaceholderText(lang.msg(language, 5, "MainWindow"))
         self.LE_surname.textChanged.connect(self.auto_search)
         self.lay.addWidget(self.LE_surname, 3, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Casella data di nascita (Parte centrale sinistra)
         
         self.LE_date_of_birth = QLineEdit(self)
-        self.LE_date_of_birth.setPlaceholderText("Data di nascita")
+        self.LE_date_of_birth.setPlaceholderText(lang.msg(language, 6, "MainWindow"))
         self.lay.addWidget(self.LE_date_of_birth, 4, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Casella luogo di nascita (Parte centrale sinistra)
         
         self.LE_birth_place = QLineEdit(self)
-        self.LE_birth_place.setPlaceholderText("Luogo di nascita")
+        self.LE_birth_place.setPlaceholderText(lang.msg(language, 7, "MainWindow"))
         self.lay.addWidget(self.LE_birth_place, 5, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Box sesso (Parte centrale sinistra)
         
         self.CB_sex = QComboBox(self)
-        self.CB_sex.addItems(["MASCHIO", "FEMMINA"])
+        self.CB_sex.addItems([lang.msg(language, 8, "MainWindow"), lang.msg(language, 9, "MainWindow")])
         self.lay.addWidget(self.CB_sex, 6, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Casella comune di residenza (Parte centrale sinistra)
         
         self.LE_city_of_residence = QLineEdit(self)
-        self.LE_city_of_residence.setPlaceholderText("Comune di residenza")
+        self.LE_city_of_residence.setPlaceholderText(lang.msg(language, 10, "MainWindow"))
         self.lay.addWidget(self.LE_city_of_residence, 7, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Casella indirizzo di residenza (Parte centrale sinistra)
         
         self.LE_residential_address = QLineEdit(self)
-        self.LE_residential_address.setPlaceholderText("Indirizzo di residenza")
+        self.LE_residential_address.setPlaceholderText(lang.msg(language, 11, "MainWindow"))
         self.lay.addWidget(self.LE_residential_address, 8, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Casella CAP (Parte centrale sinistra)
         
         self.LE_postal_code = QLineEdit(self)
-        self.LE_postal_code.setPlaceholderText("CAP - Codice di Avviamento Postale")
+        self.LE_postal_code.setPlaceholderText(lang.msg(language, 12, "MainWindow"))
         self.lay.addWidget(self.LE_postal_code, 9, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Casella e-mail (Parte centrale sinistra)
         
         self.LE_email = QLineEdit(self)
-        self.LE_email.setPlaceholderText("e-mail")
+        self.LE_email.setPlaceholderText(lang.msg(language, 13, "MainWindow"))
         self.lay.addWidget(self.LE_email, 10, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Casella numero tessera (Parte centrale sinistra)
         
         self.LE_card_number = QLineEdit(self)
-        self.LE_card_number.setPlaceholderText("Numero tessera")
+        self.LE_card_number.setPlaceholderText(lang.msg(language, 14, "MainWindow"))
         self.lay.addWidget(self.LE_card_number, 11, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Pulsante inserisci (Parte bassa sinistra)
         
-        self.B_insert = QPushButton(self, text="Inserisci >>")
+        self.B_insert = QPushButton(self, text=f"{lang.msg(language, 15, 'MainWindow')} >>")
         self.B_insert.clicked.connect(self.insert_into_db)
         self.lay.addWidget(self.B_insert, 12, 0, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Pulsante cerca (Parte bassa sinistra)
         
-        self.B_search = QPushButton(self, text="Cerca")
+        self.B_search = QPushButton(self, text=lang.msg(language, 16, "MainWindow"))
         self.B_search.clicked.connect(self.search_db)
         self.lay.addWidget(self.B_search, 12, 1, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Pulsante esporta in Excel
         
-        self.B_excel_export = QPushButton(self, text="Esporta excel")
+        self.B_excel_export = QPushButton(self, text=lang.msg(language, 17, "MainWindow"))
         self.B_excel_export.clicked.connect(self.excel_export)
         self.lay.addWidget(self.B_excel_export, 12, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
@@ -162,9 +164,7 @@ class MainWindow(QWidget):
         
         self.TE_db_response = QTextEdit(self)
         self.TE_db_response.setReadOnly(True)
-        self.TE_db_response.setPlainText(f"""Gestione tesseramenti {heading}\n\n
-** Funzioni rapide **
-Pulsante F5: Pulisce tutti i campi a sinistra""")
+        self.TE_db_response.setPlainText(f"{lang.msg(language, 18, 'MainWindow')} {heading}\n\n{lang.msg(language, 19, 'MainWindow')}")
         self.lay.addWidget(self.TE_db_response, 1, 3, 12, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)
     
     # *-*-* Funzioni per il ridimensionamento della finestra *-*-*
@@ -213,49 +213,49 @@ Pulsante F5: Pulisce tutti i campi a sinistra""")
         
         if self.tax_id_code == "" or self.name == "" or self.surname == "":
             err_msg = QMessageBox(self)
-            err_msg.setWindowTitle("Errore")
-            err_msg.setText("I dati che devono obbligatoriamente essere inseriti sono:\n- Codice fiscale\n- Nome\n- Cognome")
+            err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+            err_msg.setText(lang.msg(language, 21, "MainWindow"))
             return err_msg.exec()
         
         # Controllo codice fiscale
         
         if len(self.tax_id_code) != 16:
             err_msg = QMessageBox(self)
-            err_msg.setWindowTitle("Errore")
-            err_msg.setText("Lunghezza codice fiscale non corretta!")
+            err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+            err_msg.setText(lang.msg(language, 22, "MainWindow"))
             return err_msg.exec()
         if self.has_numbers(self.tax_id_code[0:6]) == True or self.has_numbers(self.tax_id_code[8]) == True or self.has_numbers(self.tax_id_code[11]) == True or self.has_numbers(self.tax_id_code[15]) == True:
             err_msg = QMessageBox(self)
-            err_msg.setWindowTitle("Errore")
-            err_msg.setText("Codice fiscale non corretto!")
+            err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+            err_msg.setText(lang.msg(language, 22, "MainWindow"))
             return err_msg.exec()
         if self.tax_id_code[6:8].isdigit() == False or self.tax_id_code[9:11].isdigit() == False or self.tax_id_code[12:15].isdigit() == False:
             err_msg = QMessageBox(self)
-            err_msg.setWindowTitle("Errore")
-            err_msg.setText("Codice fiscale non corretto!")
+            err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+            err_msg.setText(lang.msg(language, 22, "MainWindow"))
             return err_msg.exec()
         tax_id_code_char_list = ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","0","1","2","3","4","5","6","7","8","9"]
         for char in self.tax_id_code:
             if char not in tax_id_code_char_list:
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Codice fiscale non corretto!")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 22, "MainWindow"))
                 return err_msg.exec()
         
         # Controllo nome
         
         if self.has_numbers(self.name) == True:
             err_msg = QMessageBox(self)
-            err_msg.setWindowTitle("Errore")
-            err_msg.setText("Nome non corretto!")
+            err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+            err_msg.setText(lang.msg(language, 23, "MainWindow"))
             return err_msg.exec()
         
         # Controllo cognome
         
         if self.has_numbers(self.surname) == True:
             err_msg = QMessageBox(self)
-            err_msg.setWindowTitle("Errore")
-            err_msg.setText("Cognome non corretto!")
+            err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+            err_msg.setText(lang.msg(language, 24, "MainWindow"))
             return err_msg.exec()
         
         # Trasformazione caselle vuote e data tesseramento
@@ -275,8 +275,8 @@ Pulsante F5: Pulisce tutti i campi a sinistra""")
         col = self.db["cards"]
         if col.find_one({"tax_id_code": self.tax_id_code, "name": self.name, "surname": self.surname}, {"_id": 0}) != None:
             msg = QMessageBox(self)
-            msg.setWindowTitle("Attenzione")
-            msg.setText("Persona già presente nel database!\nVuoi modificare i dati con quelli inseriti?")
+            msg.setWindowTitle(lang.msg(language, 25, "MainWindow"))
+            msg.setText(lang.msg(language, 26, "MainWindow"))
             msg.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.No)
             msg.buttonClicked.connect(self.modify_db)
             return msg.exec()
@@ -301,19 +301,19 @@ Pulsante F5: Pulisce tutti i campi a sinistra""")
         self.TE_db_response.clear()
         date_of_membership = self.date_of_membership # Trasformazione data in formato leggibile
         if date_of_membership != "-": date_of_membership = f"{date_of_membership[6:]}/{date_of_membership[4:6]}/{date_of_membership[:4]}"
-        self.TE_db_response.insertPlainText(f"""-*-* Inserimento effettuato *-*-
-\nCodice fiscale: {self.tax_id_code}
-Nome: {self.name}
-Cognome: {self.surname}
-Data di nascita: {self.date_of_birth}
-Luogo di nascita: {self.birth_place}
-Sesso: {self.sex}
-Comune di residenza: {self.city_of_residence}
-Indirizzo di residenza: {self.residential_address}
-CAP: {self.postal_code}
-email: {self.email}
-Numero tessera: {self.card_number}
-Data tesseramento: {date_of_membership}""")
+        self.TE_db_response.insertPlainText(f"""-*-* {lang.msg(language, 27, 'MainWindow')} *-*-
+\n{lang.msg(language, 3, 'MainWindow')}: {self.tax_id_code}
+{lang.msg(language, 4, 'MainWindow')}: {self.name}
+{lang.msg(language, 5, 'MainWindow')}: {self.surname}
+{lang.msg(language, 6, 'MainWindow')}: {self.date_of_birth}
+{lang.msg(language, 7, 'MainWindow')}: {self.birth_place}
+{lang.msg(language, 28, 'MainWindow')}: {self.sex}
+{lang.msg(language, 10, 'MainWindow')}: {self.city_of_residence}
+{lang.msg(language, 11, 'MainWindow')}: {self.residential_address}
+{lang.msg(language, 12, 'MainWindow')}: {self.postal_code}
+{lang.msg(language, 13, 'MainWindow')}: {self.email}
+{lang.msg(language, 14, 'MainWindow')}: {self.card_number}
+{lang.msg(language, 29, 'MainWindow')}: {date_of_membership}""")
         self.clear_box()
     
     # *-*-* Funzione modifica database *-*-*
@@ -352,20 +352,20 @@ Data tesseramento: {date_of_membership}""")
             self.TE_db_response.clear()
             date_of_membership = self.date_of_membership # Trasformazione data in formato leggibile
             if date_of_membership != "-": date_of_membership = f"{date_of_membership[6:]}/{date_of_membership[4:6]}/{date_of_membership[:4]}"
-            self.TE_db_response.insertPlainText(f"""-*-* Modifica effettuata *-*-
-\nCodice fiscale: {self.tax_id_code}
-Nome: {self.name}
-Cognome: {self.surname}
-Data di nascita: {self.date_of_birth}
-Luogo di nascita: {self.birth_place}
-Sesso: {self.sex}
-Comune di residenza: {self.city_of_residence}
-Indirizzo di residenza: {self.residential_address}
-CAP: {self.postal_code}
-email: {self.email}
-Numero tessera: {self.card_number}
-Data tesseramento: {date_of_membership}""")
-        self.clear_box()
+            self.TE_db_response.insertPlainText(f"""-*-* {lang.msg(language, 30, 'MainWindow')} *-*-
+\n{lang.msg(language, 3, 'MainWindow')}: {self.tax_id_code}
+{lang.msg(language, 4, 'MainWindow')}: {self.name}
+{lang.msg(language, 5, 'MainWindow')}: {self.surname}
+{lang.msg(language, 6, 'MainWindow')}: {self.date_of_birth}
+{lang.msg(language, 7, 'MainWindow')}: {self.birth_place}
+{lang.msg(language, 28, 'MainWindow')}: {self.sex}
+{lang.msg(language, 10, 'MainWindow')}: {self.city_of_residence}
+{lang.msg(language, 11, 'MainWindow')}: {self.residential_address}
+{lang.msg(language, 12, 'MainWindow')}: {self.postal_code}
+{lang.msg(language, 13, 'MainWindow')}: {self.email}
+{lang.msg(language, 14, 'MainWindow')}: {self.card_number}
+{lang.msg(language, 29, 'MainWindow')}: {date_of_membership}""")
+            self.clear_box()
     
     # *-*-* Funzione ricerca automatica nel database *-*-*
     
@@ -432,22 +432,22 @@ Data tesseramento: {date_of_membership}""")
         
         if len(people_founded) != 0:
             self.TE_db_response.clear()
-            self.TE_db_response.insertPlainText("-*-* Persone trovate *-*-\n\n")
+            self.TE_db_response.insertPlainText(f"-*-* {lang.msg(language, 31, 'MainWindow')} *-*-\n\n")
             for person in people_founded:
                 date_of_membership = person["date_of_membership"] # Trasformazione data in formato leggibile
                 if date_of_membership != "-": date_of_membership = f"{date_of_membership[6:]}/{date_of_membership[4:6]}/{date_of_membership[:4]}"
-                self.TE_db_response.append(f"""Codice fiscale: {person['tax_id_code']}
-Nome: {person['name']}
-Cognome: {person['surname']}
-Data di nascita: {person['date_of_birth']}
-Luogo di nascita: {person['birth_place']}
-Sesso: {person['sex']}
-Comune di residenza: {person['city_of_residence']}
-Indirizzo di residenza: {person['residential_address']}
-CAP: {person['postal_code']}
-email: {person['email']}
-Numero tessera: {person['card_number']}
-Data tesseramento: {date_of_membership}\n\n------------------------------\n\n""")
+                self.TE_db_response.append(f"""{lang.msg(language, 3, 'MainWindow')}: {person['tax_id_code']}
+{lang.msg(language, 4, 'MainWindow')}: {person['name']}
+{lang.msg(language, 5, 'MainWindow')}: {person['surname']}
+{lang.msg(language, 6, 'MainWindow')}: {person['date_of_birth']}
+{lang.msg(language, 7, 'MainWindow')}: {person['birth_place']}
+{lang.msg(language, 28, 'MainWindow')}: {person['sex']}
+{lang.msg(language, 10, 'MainWindow')}: {person['city_of_residence']}
+{lang.msg(language, 11, 'MainWindow')}: {person['residential_address']}
+{lang.msg(language, 12, 'MainWindow')}: {person['postal_code']}
+{lang.msg(language, 13, 'MainWindow')}: {person['email']}
+{lang.msg(language, 14, 'MainWindow')}: {person['card_number']}
+{lang.msg(language, 29, 'MainWindow')}: {date_of_membership}\n\n------------------------------\n\n""")
     
     # *-*-* Funzione ricerca manuale nel database *-*-*
     
@@ -456,8 +456,8 @@ Data tesseramento: {date_of_membership}\n\n------------------------------\n\n"""
         
         if self.CHB_auto_search.isChecked() == True:
             err_msg = QMessageBox(self)
-            err_msg.setWindowTitle("Errore")
-            err_msg.setText("Il pulsante non può essere usato con la ricerca automatica attiva!\nPrima disattiva la ricerca automatica.")
+            err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+            err_msg.setText(lang.msg(language, 32, "MainWindow"))
             return err_msg.exec()
         
         # Variabili
@@ -492,12 +492,8 @@ Data tesseramento: {date_of_membership}\n\n------------------------------\n\n"""
         
         if tax_id_code == "-" and name == "-" and surname == "-":
             err_msg = QMessageBox(self)
-            err_msg.setWindowTitle("Errore")
-            err_msg.setText("""I campi non contengono nulla!\n
-Controlla di aver compilato almeno uno dei seguenti campi in questo modo:
-- Codice fiscale: completo
-- Nome: 3 o più lettere
-- Cognome: 3 o più lettere""")
+            err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+            err_msg.setText(lang.msg(language, 33, "MainWindow"))
             return err_msg.exec()
         
         # Ricerca dati nel database
@@ -526,27 +522,27 @@ Controlla di aver compilato almeno uno dei seguenti campi in questo modo:
         
         if len(people_founded) == 0:
             err_msg = QMessageBox(self)
-            err_msg.setWindowTitle("Attenzione")
-            err_msg.setText("Nessun dato trovato nel database!")
+            err_msg.setWindowTitle(lang.msg(language, 25, "MainWindow"))
+            err_msg.setText(lang.msg(language, 34, "MainWindow"))
             return err_msg.exec()
         else:
             self.TE_db_response.clear()
-            self.TE_db_response.insertPlainText("-*-* Persone trovate *-*-\n\n")
+            self.TE_db_response.insertPlainText(f"-*-* {lang.msg(language, 31, 'MainWindow')} *-*-\n\n")
             for person in people_founded:
                 date_of_membership = person["date_of_membership"] # Trasformazione data in formato leggibile
                 if date_of_membership != "-": date_of_membership = f"{date_of_membership[6:]}/{date_of_membership[4:6]}/{date_of_membership[:4]}"
-                self.TE_db_response.append(f"""Codice fiscale: {person['tax_id_code']}
-Nome: {person['name']}
-Cognome: {person['surname']}
-Data di nascita: {person['date_of_birth']}
-Luogo di nascita: {person['birth_place']}
-Sesso: {person['sex']}
-Comune di residenza: {person['city_of_residence']}
-Indirizzo di residenza: {person['residential_address']}
-CAP: {person['postal_code']}
-email: {person['email']}
-Numero tessera: {person['card_number']}
-Data tesseramento: {date_of_membership}\n\n------------------------------\n\n""")       
+                self.TE_db_response.append(f"""{lang.msg(language, 3, 'MainWindow')}: {person['tax_id_code']}
+{lang.msg(language, 4, 'MainWindow')}: {person['name']}
+{lang.msg(language, 5, 'MainWindow')}: {person['surname']}
+{lang.msg(language, 6, 'MainWindow')}: {person['date_of_birth']}
+{lang.msg(language, 7, 'MainWindow')}: {person['birth_place']}
+{lang.msg(language, 28, 'MainWindow')}: {person['sex']}
+{lang.msg(language, 10, 'MainWindow')}: {person['city_of_residence']}
+{lang.msg(language, 11, 'MainWindow')}: {person['residential_address']}
+{lang.msg(language, 12, 'MainWindow')}: {person['postal_code']}
+{lang.msg(language, 13, 'MainWindow')}: {person['email']}
+{lang.msg(language, 14, 'MainWindow')}: {person['card_number']}
+{lang.msg(language, 29, 'MainWindow')}: {date_of_membership}\n\n------------------------------\n\n""")       
 
     # *-*-* Funzione pulizia campi *-*-*
     
@@ -630,8 +626,11 @@ class DatabaseWindow(QWidget):
         # Combobox chiave esportazione
         
         self.CB_database_key = QComboBox(self)
-        self.CB_database_key.addItems(["Codice fiscale", "Nome", "Cognome", "Data di nascita", "Luogo di nascita", "Sesso", "Città di residenza",
-                                     "Indirizzo di residenza", "CAP", "e-mail", "Numero tessera", "Data tessera", "Non tesserati"])
+        self.CB_database_key.addItems([lang.msg(language, 3, "MainWindow"), lang.msg(language, 4, "MainWindow"), lang.msg(language, 5, "MainWindow"),
+                                        lang.msg(language, 6, "MainWindow"), lang.msg(language, 7, "MainWindow"), lang.msg(language, 28, "MainWindow"),
+                                        lang.msg(language, 10, "MainWindow"), lang.msg(language, 11, "MainWindow"), lang.msg(language, 12, "MainWindow"),
+                                        lang.msg(language, 13, "MainWindow"), lang.msg(language, 14, "MainWindow"), lang.msg(language, 29, "MainWindow"),
+                                        lang.msg(language, 0, "DatabaseWindow")])
         self.CB_database_key.currentTextChanged.connect(self.database_key_change)
         self.lay.addWidget(self.CB_database_key, 0, 0, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         
@@ -648,13 +647,13 @@ class DatabaseWindow(QWidget):
         
         # Pulsante cerca
         
-        self.B_search = QPushButton(self, text="Cerca")
+        self.B_search = QPushButton(self, text=lang.msg(language, 16, "MainWindow"))
         self.B_search.clicked.connect(self.search_database)
         self.lay.addWidget(self.B_search, 1, 0, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         
         # Pulsante elimina
         
-        self.B_delete = QPushButton(self, text="Elimina")
+        self.B_delete = QPushButton(self, text=lang.msg(language, 1, "DatabaseWindow"))
         self.B_delete.clicked.connect(self.delete_database)
         self.lay.addWidget(self.B_delete, 1, 1, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         
@@ -662,7 +661,8 @@ class DatabaseWindow(QWidget):
         
         self.T_results = QTableWidget(self)
         self.T_results.setColumnCount(5)
-        self.T_results.setHorizontalHeaderLabels(["Codice Fiscale", "Nome", "Cognome", "Numero tessera", "Data tesseramento"])
+        self.T_results.setHorizontalHeaderLabels([lang.msg(language, 3, "MainWindow"), lang.msg(language, 4, "MainWindow"), lang.msg(language, 5, "MainWindow"),
+                                                  lang.msg(language, 14, "MainWindow"), lang.msg(language, 29, "MainWindow")])
         self.T_results.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.T_results.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.T_results.customContextMenuRequested.connect(self.T_results_CM)
@@ -675,101 +675,101 @@ class DatabaseWindow(QWidget):
     
     def database_key_change(self):
         self.LE_database.clear()
-        if self.CB_database_key.currentText() == "Codice fiscale" or self.CB_database_key.currentText() == "Nome" or self.CB_database_key.currentText() == "Cognome"\
-            or self.CB_database_key.currentText() == "Luogo di nascita" or self.CB_database_key.currentText() == "Città di residenza" or self.CB_database_key.currentText() == "Indirizzo di residenza"\
-            or self.CB_database_key.currentText() == "CAP" or self.CB_database_key.currentText() == "e-mail":
+        if self.CB_database_key.currentText() == lang.msg(language, 3, "MainWindow") or self.CB_database_key.currentText() == lang.msg(language, 4, "MainWindow") or self.CB_database_key.currentText() == lang.msg(language, 5, "MainWindow")\
+            or self.CB_database_key.currentText() == lang.msg(language, 7, "MainWindow") or self.CB_database_key.currentText() == lang.msg(language, 10, "MainWindow") or self.CB_database_key.currentText() == lang.msg(language, 11, "MainWindow")\
+            or self.CB_database_key.currentText() == lang.msg(language, 12, "MainWindow") or self.CB_database_key.currentText() == lang.msg(language, 13, "MainWindow"):
             self.CB_database.clear()
-            self.CB_database.addItems(["Uguale a", "Contiene"])
-        if self.CB_database_key.currentText() == "Data tessera" or self.CB_database_key.currentText() == "Data di nascita" or self.CB_database_key.currentText() == "Numero tessera":
+            self.CB_database.addItems([lang.msg(language, 2, "DatabaseWindow"), lang.msg(language, 3, "DatabaseWindow")])
+        if self.CB_database_key.currentText() == lang.msg(language, 29, "MainWindow") or self.CB_database_key.currentText() == lang.msg(language, 6, "MainWindow") or self.CB_database_key.currentText() == lang.msg(language, 14, "MainWindow"):
             self.CB_database.clear()
-            self.CB_database.addItems(["Uguale a", "Maggiore di", "Minore di"])
-        if self.CB_database_key.currentText() == "Sesso":
+            self.CB_database.addItems([lang.msg(language, 2, "DatabaseWindow"), lang.msg(language, 4, "DatabaseWindow"), lang.msg(language, 5, "DatabaseWindow")])
+        if self.CB_database_key.currentText() == lang.msg(language, 28, "MainWindow"):
             self.CB_database.clear()
-            self.CB_database.addItems(["MASCHIO", "FEMMINA"])
-        if self.CB_database_key.currentText() == "Non tesserati":
+            self.CB_database.addItems([lang.msg(language, 8, "MainWindow"), lang.msg(language, 9, "MainWindow")])
+        if self.CB_database_key.currentText() == lang.msg(language, 0, "DatabaseWindow"):
             self.CB_database.clear()
     
     # -*-* Funzione cambio Combobox database
     
     def database_change(self):
         self.LE_database.clear()
-        if self.CB_database_key.currentText() == "Codice fiscale":
-            if self.CB_database.currentText() == "Uguale a":
-                self.LE_database.setPlaceholderText("Codice fiscale completo")
-            if self.CB_database.currentText() == "Contiene":
-                self.LE_database.setPlaceholderText("Parte di codice fiscale")
+        if self.CB_database_key.currentText() == lang.msg(language, 3, "MainWindow"):
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 6, "DatabaseWindow"))
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 7, "DatabaseWindow"))
         
-        if self.CB_database_key.currentText() == "Nome":
-            if self.CB_database.currentText() == "Uguale a":
-                self.LE_database.setPlaceholderText("Nome completo")
-            if self.CB_database.currentText() == "Contiene":
-                self.LE_database.setPlaceholderText("Parte del nome")
+        if self.CB_database_key.currentText() == lang.msg(language, 4, "MainWindow"):
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 8, "DatabaseWindow"))
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 9, "DatabaseWindow"))
         
-        if self.CB_database_key.currentText() == "Cognome":
-            if self.CB_database.currentText() == "Uguale a":
-                self.LE_database.setPlaceholderText("Cognome completo")
-            if self.CB_database.currentText() == "Contiene":
-                self.LE_database.setPlaceholderText("Parte del cognome")
+        if self.CB_database_key.currentText() == lang.msg(language, 5, "MainWindow"):
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 10, "DatabaseWindow"))
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 11, "DatabaseWindow"))
         
-        if self.CB_database_key.currentText() == "Data di nascita":
-            self.LE_database.setPlaceholderText("Esempio: 18/09/1980")
+        if self.CB_database_key.currentText() == lang.msg(language, 6, "MainWindow"):
+            self.LE_database.setPlaceholderText(lang.msg(language, 12, "DatabaseWindow"))
         
-        if self.CB_database_key.currentText() == "Luogo di nascita":
-            if self.CB_database.currentText() == "Uguale a":
-                self.LE_database.setPlaceholderText("Luogo di nascita completo")
-            if self.CB_database.currentText() == "Contiene":
-                self.LE_database.setPlaceholderText("Parte del luogo di nascita")
+        if self.CB_database_key.currentText() == lang.msg(language, 7, "MainWindow"):
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 13, "DatabaseWindow"))
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 14, "DatabaseWindow"))
         
-        if self.CB_database_key.currentText() == "Sesso":
-            self.LE_database.setPlaceholderText("Casella non necessaria")
+        if self.CB_database_key.currentText() == lang.msg(language, 28, "MainWindow"):
+            self.LE_database.setPlaceholderText(lang.msg(language, 15, "DatabaseWindow"))
         
-        if self.CB_database_key.currentText() == "Città di residenza":
-            if self.CB_database.currentText() == "Uguale a":
-                self.LE_database.setPlaceholderText("Città di residenza completa")
-            if self.CB_database.currentText() == "Contiene":
-                self.LE_database.setPlaceholderText("Parte della città di residenza")
+        if self.CB_database_key.currentText() == lang.msg(language, 10, "MainWindow"):
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 16, "DatabaseWindow"))
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 17, "DatabaseWindow"))
         
-        if self.CB_database_key.currentText() == "Indirizzo di residenza":
-            if self.CB_database.currentText() == "Uguale a":
-                self.LE_database.setPlaceholderText("Indirizzo di residenza completo")
-            if self.CB_database.currentText() == "Contiene":
-                self.LE_database.setPlaceholderText("Parte dell'indirizzo di residenza")
+        if self.CB_database_key.currentText() == lang.msg(language, 11, "MainWindow"):
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 18, "DatabaseWindow"))
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 19, "DatabaseWindow"))
         
-        if self.CB_database_key.currentText() == "CAP":
-            if self.CB_database.currentText() == "Uguale a":
-                self.LE_database.setPlaceholderText("CAP completo")
-            if self.CB_database.currentText() == "Contiene":
-                self.LE_database.setPlaceholderText("Parte del CAP")
+        if self.CB_database_key.currentText() == lang.msg(language, 12, "MainWindow"):
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 20, "DatabaseWindow"))
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 21, "DatabaseWindow"))
         
-        if self.CB_database_key.currentText() == "e-mail":
-            if self.CB_database.currentText() == "Uguale a":
-                self.LE_database.setPlaceholderText("e-mail completa")
-            if self.CB_database.currentText() == "Contiene":
-                self.LE_database.setPlaceholderText("Parte della e-mail")
+        if self.CB_database_key.currentText() == lang.msg(language, 13, "MainWindow"):
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 22, "DatabaseWindow"))
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 23, "DatabaseWindow"))
         
-        if self.CB_database_key.currentText() == "Numero tessera":
-            if self.CB_database.currentText() == "Uguale a":
-                self.LE_database.setPlaceholderText("Numero tessera specifico")
-            if self.CB_database.currentText() == "Maggiore di":
-                self.LE_database.setPlaceholderText("Maggiore del numero inserito")
-            if self.CB_database.currentText() == "Minore di":
-                self.LE_database.setPlaceholderText("Minore del numero inserito")
+        if self.CB_database_key.currentText() == lang.msg(language, 14, "MainWindow"):
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 24, "DatabaseWindow"))
+            if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 25, "DatabaseWindow"))
+            if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"):
+                self.LE_database.setPlaceholderText(lang.msg(language, 26, "DatabaseWindow"))
             
-        if self.CB_database_key.currentText() == "Data tessera":
+        if self.CB_database_key.currentText() == lang.msg(language, 29, "MainWindow"):
             date = datetime.now()
-            if self.CB_database.currentText() == "Uguale a":
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"):
                 date = date.strftime("%d/%m/%Y")
                 self.LE_database.setText(date)
-            if self.CB_database.currentText() == "Maggiore di":
+            if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"):
                 date -= timedelta(days=365)
                 date = date.strftime("%d/%m/%Y")
                 self.LE_database.setText(date)
-            if self.CB_database.currentText() == "Minore di":
+            if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"):
                 date = date.strftime("%d/%m/%Y")
                 self.LE_database.setText(date)
         
-        if self.CB_database_key.currentText() == "Non tesserati":
-            self.LE_database.setPlaceholderText("Casella non necessaria")
+        if self.CB_database_key.currentText() == lang.msg(language, 0, "DatabaseWindow"):
+            self.LE_database.setPlaceholderText(lang.msg(language, 15, "DatabaseWindow"))
     
     # -*-* Funzione di ricerca nel database *-*-
     
@@ -783,101 +783,112 @@ class DatabaseWindow(QWidget):
         # Interrogazione database
         col = self.db["cards"]
         
-        if self.CB_database_key.currentText() == "Codice fiscale": # Tramite codice fiscale
-            if self.CB_database.currentText() == "Uguale a" and len(self.LE_database.text()) != 16:
+        if self.CB_database_key.currentText() == lang.msg(language, 3, "MainWindow"): # Tramite codice fiscale
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow") and len(self.LE_database.text()) != 16:
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Codice fiscale non corretto")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 22, "MainWindow"))
                 return err_msg.exec()
-            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"tax_id_code": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0})
-            if self.CB_database.currentText() == "Contiene": self.query_db = col.find({"tax_id_code": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"tax_id_code": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"tax_id_code": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0})
         
-        if self.CB_database_key.currentText() == "Nome": # Tramite nome
+        if self.CB_database_key.currentText() == lang.msg(language, 4, "MainWindow"): # Tramite nome
             if self.has_numbers(self.LE_database.text().upper().strip()) == True:
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Inserimento non corretto")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 23, "MainWindow"))
                 return err_msg.exec()
-            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"name": self.LE_database.text().upper().strip()}, {"_id": 0})
-            if self.CB_database.currentText() == "Contiene": self.query_db = col.find({"name": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"name": self.LE_database.text().upper().strip()}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"name": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0})
         
-        if self.CB_database_key.currentText() == "Cognome": # Tramite cognome
+        if self.CB_database_key.currentText() == lang.msg(language, 5, "MainWindow"): # Tramite cognome
             if self.has_numbers(self.LE_database.text().upper().strip()) == True:
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Inserimento non corretto")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 24, "MainWindow"))
                 return err_msg.exec()
-            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"surname": self.LE_database.text().upper().strip()}, {"_id": 0})
-            if self.CB_database.currentText() == "Contiene": self.query_db = col.find({"surname": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"surname": self.LE_database.text().upper().strip()}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"surname": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0})
         
-        if self.CB_database_key.currentText() == "Data di nascita": # Tramite data di nascita
+        if self.CB_database_key.currentText() == lang.msg(language, 6, "MainWindow"): # Tramite data di nascita
             date = self.LE_database.text().replace(" ", "")
             if date.count("/") != 2 or len(date) != 10: # Controllo data inserita
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Data non corretta")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 27, "DatabaseWindow"))
                 return err_msg.exec()
             
-            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"date_of_birth": date}, {"_id": 0})
-            if self.CB_database.currentText() == "Maggiore di": self.query_db = col.find({"date_of_birth": {"$gte": date}}, {"_id": 0})
-            if self.CB_database.currentText() == "Minore di": self.query_db = col.find({"date_of_birth": {"$lte": date}}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"date_of_birth": date}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"date_of_birth": {"$gte": date}}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"date_of_birth": {"$lte": date}}, {"_id": 0})
         
-        if self.CB_database_key.currentText() == "Luogo di nascita": # Tramite luogo di nascita
-            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"birth_place": self.LE_database.text().upper().strip()}, {"_id": 0})
-            if self.CB_database.currentText() == "Contiene": self.query_db = col.find({"birth_place": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0})
+        if self.CB_database_key.currentText() == lang.msg(language, 7, "MainWindow"): # Tramite luogo di nascita
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"birth_place": self.LE_database.text().upper().strip()}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"birth_place": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0})
         
-        if self.CB_database_key.currentText() == "Sesso": # Tramite sesso
-            if self.CB_database.currentText() == "MASCHIO": self.query_db = col.find({"sex": "MASCHIO"}, {"_id": 0})
-            if self.CB_database.currentText() == "FEMMINA": self.query_db = col.find({"sex": "FEMMINA"}, {"_id": 0})
+        if self.CB_database_key.currentText() == lang.msg(language, 28, "MainWindow"): # Tramite sesso
+            if self.CB_database.currentText() == lang.msg(language, 8, "MainWindow"): self.query_db = col.find({"sex": lang.msg(language, 8, "MainWindow")}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 9, "MainWindow"): self.query_db = col.find({"sex": lang.msg(language, 9, "MainWindow")}, {"_id": 0})
         
-        if self.CB_database_key.currentText() == "Città di residenza": # Tramite città di residenza
-            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"city_of_residence": self.LE_database.text().upper().strip()}, {"_id": 0})
-            if self.CB_database.currentText() == "Contiene": self.query_db = col.find({"city_of_residence": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0})
+        if self.CB_database_key.currentText() == lang.msg(language, 10, "MainWindow"): # Tramite città di residenza
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"city_of_residence": self.LE_database.text().upper().strip()}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"city_of_residence": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0})
         
-        if self.CB_database_key.currentText() == "Indirizzo di residenza": # Tramite indirizzo di residenza
-            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"residential_address": self.LE_database.text().upper().strip()}, {"_id": 0})
-            if self.CB_database.currentText() == "Contiene": self.query_db = col.find({"residential_address": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0})
+        if self.CB_database_key.currentText() == lang.msg(language, 11, "MainWindow"): # Tramite indirizzo di residenza
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"residential_address": self.LE_database.text().upper().strip()}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"residential_address": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0})
         
-        if self.CB_database_key.currentText() == "CAP": # Tramite CAP
+        if self.CB_database_key.currentText() == lang.msg(language, 12, "MainWindow"): # Tramite CAP
             try: int(self.LE_database.text().replace(" ", ""))
             except:
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Inserimento non corretto")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 28, "DatabaseWindow"))
                 return err_msg.exec()
-            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"postal_code": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0})
-            if self.CB_database.currentText() == "Contiene": self.query_db = col.find({"postal_code": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"postal_code": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"postal_code": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0})
         
-        if self.CB_database_key.currentText() == "e-mail": # Tramite e-mail
-            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"email": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0})
-            if self.CB_database.currentText() == "Contiene": self.query_db = col.find({"email": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0})
+        if self.CB_database_key.currentText() == lang.msg(language, 13, "MainWindow"): # Tramite e-mail
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"email": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"email": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0})
         
-        if self.CB_database_key.currentText() == "Numero tessera": # Tramite numero tessera
-            try: int(self.LE_database.text().replace(" ", ""))
-            except:
-                err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Inserimento non corretto")
-                return err_msg.exec()
-            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"card_number": self.LE_database.text().replace(" ", "")}, {"_id": 0})
-            if self.CB_database.currentText() == "Maggiore di": self.query_db = col.find({"card_number": {"$gte": self.LE_database.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0})
-            if self.CB_database.currentText() == "Minore di": self.query_db = col.find({"card_number": {"$lte": self.LE_database.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0})
+        if self.CB_database_key.currentText() == lang.msg(language, 14, "MainWindow"): # Tramite numero tessera
+            card_number = self.LE_database.text().replace(" ", "")
+            numeric_card_number = True
+            try: float(card_number)
+            except: numeric_card_number = False
+            if numeric_card_number == True:
+                number_expression = re.compile(r"^\d+$")
+                card_number = float(card_number)
+                if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$regex": number_expression}, "$expr":{"$eq": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
+                if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$regex": number_expression}, "$expr":{"$gte": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
+                if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$regex": number_expression}, "$expr":{"$lte": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
+            else:
+                if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"card_number": card_number}, {"_id": 0})
+                if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-", "$gte": card_number}}, {"_id": 0})
+                if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-", "$lte": card_number}}, {"_id": 0})
         
-        if self.CB_database_key.currentText() == "Data tessera": # Tramite data tessera
+        if self.CB_database_key.currentText() == lang.msg(language, 29, "MainWindow"): # Tramite data tessera
             date = self.LE_database.text().replace(" ", "")
             if date.count("/") != 2 or len(date) != 10: # Controllo data inserita
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Data non corretta")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 27, "DatabaseWindow"))
                 return err_msg.exec()
             date = date.split("/")
             date = f"{date[2]}{date[1]}{date[0]}"
+            try: date = int(date)
+            except:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 27, "DatabaseWindow"))
+                return err_msg.exec()
             
-            if self.CB_database.currentText() == "Uguale a": self.query_db = col.find({"date_of_membership": date}, {"_id": 0})
-            if self.CB_database.currentText() == "Maggiore di": self.query_db = col.find({"date_of_membership": {"$gte": date, "$ne": "-"}}, {"_id": 0})
-            if self.CB_database.currentText() == "Minore di": self.query_db = col.find({"date_of_membership": {"$lte": date, "$ne": "-"}}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": {"$ne": "-"}, "$expr":{"$eq": [{"$toDouble": "$date_of_membership"}, date]}}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": {"$ne": "-"}, "$expr":{"$gte": [{"$toDouble": "$date_of_membership"}, date]}}, {"_id": 0})
+            if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": {"$ne": "-"}, "$expr":{"$lte": [{"$toDouble": "$date_of_membership"}, date]}}, {"_id": 0})
         
-        if self.CB_database_key.currentText() == "Non tesserati": # Tutti i non tesserati
+        if self.CB_database_key.currentText() == lang.msg(language, 0, "DatabaseWindow"): # Tutti i non tesserati
             self.query_db = col.find({"date_of_membership": "-"}, {"_id": 0})
             
         # Inserimento nella tabella
@@ -899,108 +910,112 @@ class DatabaseWindow(QWidget):
         
         # Preparazione query per il database
         
-        if self.CB_database_key.currentText() == "Codice fiscale": # Tramite codice fiscale
-            if self.CB_database.currentText() == "Uguale a" and len(self.LE_database.text()) != 16:
+        if self.CB_database_key.currentText() == lang.msg(language, 3, "MainWindow"): # Tramite codice fiscale
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow") and len(self.LE_database.text()) != 16:
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Codice fiscale non corretto")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 22, "MainWindow"))
                 return err_msg.exec()
-            if self.CB_database.currentText() == "Uguale a": self.query_db = {"tax_id_code": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0}
-            if self.CB_database.currentText() == "Contiene": self.query_db = {"tax_id_code": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = {"tax_id_code": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = {"tax_id_code": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0}
         
-        if self.CB_database_key.currentText() == "Nome": # Tramite nome
+        if self.CB_database_key.currentText() == lang.msg(language, 4, "MainWindow"): # Tramite nome
             if self.has_numbers(self.LE_database.text().upper().strip()) == True:
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Inserimento non corretto")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 23, "MainWindow"))
                 return err_msg.exec()
-            if self.CB_database.currentText() == "Uguale a": self.query_db = {"name": self.LE_database.text().upper().strip()}, {"_id": 0}
-            if self.CB_database.currentText() == "Contiene": self.query_db = {"name": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = {"name": self.LE_database.text().upper().strip()}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = {"name": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0}
         
-        if self.CB_database_key.currentText() == "Cognome": # Tramite cognome
+        if self.CB_database_key.currentText() == lang.msg(language, 5, "MainWindow"): # Tramite cognome
             if self.has_numbers(self.LE_database.text().upper().strip()) == True:
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Inserimento non corretto")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 24, "MainWindow"))
                 return err_msg.exec()
-            if self.CB_database.currentText() == "Uguale a": self.query_db = {"surname": self.LE_database.text().upper().strip()}, {"_id": 0}
-            if self.CB_database.currentText() == "Contiene": self.query_db = {"surname": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = {"surname": self.LE_database.text().upper().strip()}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = {"surname": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0}
         
-        if self.CB_database_key.currentText() == "Data di nascita": # Tramite data di nascita
+        if self.CB_database_key.currentText() == lang.msg(language, 6, "MainWindow"): # Tramite data di nascita
             date = self.LE_database.text().replace(" ", "")
             if date.count("/") != 2 or len(date) != 10: # Controllo data inserita
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Data non corretta")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 27, "DatabaseWindow"))
                 return err_msg.exec()
             
-            if self.CB_database.currentText() == "Uguale a": self.query_db = {"date_of_birth": date}, {"_id": 0}
-            if self.CB_database.currentText() == "Maggiore di": self.query_db = {"date_of_birth": {"$gte": date}}, {"_id": 0}
-            if self.CB_database.currentText() == "Minore di": self.query_db = {"date_of_birth": {"$lte": date}}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = {"date_of_birth": date}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = {"date_of_birth": {"$gte": date}}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = {"date_of_birth": {"$lte": date}}, {"_id": 0}
         
-        if self.CB_database_key.currentText() == "Luogo di nascita": # Tramite luogo di nascita
-            if self.CB_database.currentText() == "Uguale a": self.query_db = {"birth_place": self.LE_database.text().upper().strip()}, {"_id": 0}
-            if self.CB_database.currentText() == "Contiene": self.query_db = {"birth_place": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0}
+        if self.CB_database_key.currentText() == lang.msg(language, 7, "MainWindow"): # Tramite luogo di nascita
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = {"birth_place": self.LE_database.text().upper().strip()}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = {"birth_place": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0}
         
-        if self.CB_database_key.currentText() == "Sesso": # Tramite sesso
-            if self.CB_database.currentText() == "MASCHIO": self.query_db = {"sex": "MASCHIO"}, {"_id": 0}
-            if self.CB_database.currentText() == "FEMMINA": self.query_db = {"sex": "FEMMINA"}, {"_id": 0}
+        if self.CB_database_key.currentText() == lang.msg(language, 28, "MainWindow"): # Tramite sesso
+            if self.CB_database.currentText() == lang.msg(language, 8, "MainWindow"): self.query_db = {"sex": lang.msg(language, 8, "MainWindow")}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 9, "MainWindow"): self.query_db = {"sex": lang.msg(language, 9, "MainWindow")}, {"_id": 0}
         
-        if self.CB_database_key.currentText() == "Città di residenza": # Tramite città di residenza
-            if self.CB_database.currentText() == "Uguale a": self.query_db = {"city_of_residence": self.LE_database.text().upper().strip()}, {"_id": 0}
-            if self.CB_database.currentText() == "Contiene": self.query_db = {"city_of_residence": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0}
+        if self.CB_database_key.currentText() == lang.msg(language, 10, "MainWindow"): # Tramite città di residenza
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = {"city_of_residence": self.LE_database.text().upper().strip()}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = {"city_of_residence": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0}
         
-        if self.CB_database_key.currentText() == "Indirizzo di residenza": # Tramite indirizzo di residenza
-            if self.CB_database.currentText() == "Uguale a": self.query_db = {"residential_address": self.LE_database.text().upper().strip()}, {"_id": 0}
-            if self.CB_database.currentText() == "Contiene": self.query_db = {"residential_address": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0}
+        if self.CB_database_key.currentText() == lang.msg(language, 11, "MainWindow"): # Tramite indirizzo di residenza
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = {"residential_address": self.LE_database.text().upper().strip()}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = {"residential_address": {"$regex": self.LE_database.text().upper().strip()}}, {"_id": 0}
         
-        if self.CB_database_key.currentText() == "CAP": # Tramite CAP
+        if self.CB_database_key.currentText() == lang.msg(language, 12, "MainWindow"): # Tramite CAP
             try: int(self.LE_database.text().replace(" ", ""))
             except:
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Inserimento non corretto")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 28, "DatabaseWindow"))
                 return err_msg.exec()
-            if self.CB_database.currentText() == "Uguale a": self.query_db = {"postal_code": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0}
-            if self.CB_database.currentText() == "Contiene": self.query_db = {"postal_code": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = {"postal_code": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = {"postal_code": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0}
         
-        if self.CB_database_key.currentText() == "e-mail": # Tramite e-mail
-            if self.CB_database.currentText() == "Uguale a": self.query_db = {"email": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0}
-            if self.CB_database.currentText() == "Contiene": self.query_db = {"email": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0}
+        if self.CB_database_key.currentText() == lang.msg(language, 13, "MainWindow"): # Tramite e-mail
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = {"email": self.LE_database.text().upper().replace(" ", "")}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = {"email": {"$regex": self.LE_database.text().upper().replace(" ", "")}}, {"_id": 0}
         
-        if self.CB_database_key.currentText() == "Numero tessera": # Tramite numero tessera
-            try: int(self.LE_database.text().replace(" ", ""))
-            except:
-                err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Inserimento non corretto")
-                return err_msg.exec()
-            if self.CB_database.currentText() == "Uguale a": self.query_db = {"card_number": self.LE_database.text().replace(" ", "")}, {"_id": 0}
-            if self.CB_database.currentText() == "Maggiore di": self.query_db = {"card_number": {"$gte": self.LE_database.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0}
-            if self.CB_database.currentText() == "Minore di": self.query_db = {"card_number": {"$lte": self.LE_database.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0}
+        if self.CB_database_key.currentText() == lang.msg(language, 14, "MainWindow"): # Tramite numero tessera
+            numeric_card_number = True
+            try: float(card_number)
+            except: numeric_card_number = False
+            if numeric_card_number == True:
+                number_expression = re.compile(r"^\d+$")
+                card_number = float(card_number)
+                if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = {"card_number": {"$regex": number_expression}, "$expr":{"$eq": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0}
+                if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = {"card_number": {"$regex": number_expression}, "$expr":{"$gte": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0}
+                if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = {"card_number": {"$regex": number_expression}, "$expr":{"$lte": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0}
+            else:
+                if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = {"card_number": card_number}, {"_id": 0}
+                if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = {"card_number": {"$ne": "-", "$gte": card_number}}, {"_id": 0}
+                if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = {"card_number": {"$ne": "-", "$lte": card_number}}, {"_id": 0}
         
-        if self.CB_database_key.currentText() == "Data tessera": # Tramite data tessera
+        if self.CB_database_key.currentText() == lang.msg(language, 29, "MainWindow"): # Tramite data tessera
             date = self.LE_database.text().replace(" ", "")
             if date.count("/") != 2 or len(date) != 10: # Controllo data inserita
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Data non corretta")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 27, "DatabaseWindow"))
                 return err_msg.exec()
             date = date.split("/")
             date = f"{date[2]}{date[1]}{date[0]}"
             
-            if self.CB_database.currentText() == "Uguale a": self.query_db = {"date_of_membership": date}, {"_id": 0}
-            if self.CB_database.currentText() == "Maggiore di": self.query_db = {"date_of_membership": {"$gte": date, "$ne": "-"}}, {"_id": 0}
-            if self.CB_database.currentText() == "Minore di": self.query_db = {"date_of_membership": {"$lte": date, "$ne": "-"}}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = {"date_of_membership": date}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = {"date_of_membership": {"$gte": date, "$ne": "-"}}, {"_id": 0}
+            if self.CB_database.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = {"date_of_membership": {"$lte": date, "$ne": "-"}}, {"_id": 0}
             
-        if self.CB_database_key.currentText() == "Non tesserati": # Tutti i non tesserati
+        if self.CB_database_key.currentText() == lang.msg(language, 0, "DatabaseWindow"): # Tutti i non tesserati
             self.query_db = {"date_of_membership": "-"}, {"_id": 0}
         
         # Messagebox per eliminazione definitiva
         
         msg = QMessageBox(self)
-        msg.setWindowTitle("Attenzione")
-        msg.setText("Stai per eliminare i dati richiesti dal database!\nL'operazione non è reversibile.\nSei sicuro?")
+        msg.setWindowTitle(lang.msg(language, 25, "MainWindow"))
+        msg.setText(lang.msg(language, 30, "DatabaseWindow"))
         msg.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.No)
         msg.buttonClicked.connect(self.delete_database_confirm)
         return msg.exec()
@@ -1022,7 +1037,7 @@ class DatabaseWindow(QWidget):
     def T_results_CM(self):
         if self.T_results.currentRow() == -1: return
         menu = QMenu(self)
-        delete_action = QAction("Elimina", self)
+        delete_action = QAction(lang.msg(language, 1, "DatabaseWindow"), self)
         delete_action.triggered.connect(self.delete_person)
         menu.addAction(delete_action)
         menu.popup(QCursor.pos())
@@ -1077,7 +1092,7 @@ class ExcelWindow(QWidget):
         # *-*-* Impostazioni iniziali *-*-*
         
         self.setWindowIcon(QIcon(icon_path))
-        self.setWindowTitle(f"Esportazione excel {heading}")
+        self.setWindowTitle(f"{lang.msg(language, 0, 'ExcelWindow')} {heading}")
         self.setMinimumSize(640, 540) # Risoluzione minima per schermi piccoli
         self.lay = QGridLayout(self)
         self.setLayout(self.lay)
@@ -1092,7 +1107,7 @@ class ExcelWindow(QWidget):
         
         # Label numero colonne
         
-        L_columns = QLabel(self, text="Colonne:")
+        L_columns = QLabel(self, text=lang.msg(language, 1, "ExcelWindow"))
         self.lay.addWidget(L_columns, 0, 0, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         
         # Spinbox numero colonne
@@ -1105,24 +1120,24 @@ class ExcelWindow(QWidget):
         # Combobox template
         
         self.CB_template = QComboBox(self)
-        self.CB_template.addItems(["Formato ASI"])
+        self.CB_template.addItems([lang.msg(language, 2, "ExcelWindow")])
         self.lay.addWidget(self.CB_template, 0, 2, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
         
         # Pulsante scelta template
         
-        self.B_template = QPushButton(self, text="Imposta")
+        self.B_template = QPushButton(self, text=lang.msg(language, 3, "ExcelWindow"))
         self.B_template.clicked.connect(self.set_template)
         self.lay.addWidget(self.B_template, 0, 3, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
         
         # Pulsante aggiungi riga
         
-        self.B_add_row = QPushButton(self, text="Aggiungi riga")
+        self.B_add_row = QPushButton(self, text=lang.msg(language, 4, "ExcelWindow"))
         self.B_add_row.clicked.connect(self.add_row)
         self.lay.addWidget(self.B_add_row, 1, 0, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         
         # Pulsante rimuovi riga
         
-        self.B_remove_row = QPushButton(self, text="Rimuovi riga")
+        self.B_remove_row = QPushButton(self, text=lang.msg(language, 5, "ExcelWindow"))
         self.B_remove_row.clicked.connect(self.remove_row)
         self.lay.addWidget(self.B_remove_row, 1, 1, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         
@@ -1139,8 +1154,10 @@ class ExcelWindow(QWidget):
         # Combobox chiave esportazione
         
         self.CB_export_key = QComboBox(self)
-        self.CB_export_key.addItems(["Codice fiscale", "Nome", "Cognome", "Data di nascita", "Luogo di nascita", "Sesso", "Città di residenza",
-                                     "Indirizzo di residenza", "CAP", "e-mail", "Numero tessera", "Data tessera"])
+        self.CB_export_key.addItems([lang.msg(language, 3, "MainWindow"), lang.msg(language, 4, "MainWindow"), lang.msg(language, 5, "MainWindow"),
+                                     lang.msg(language, 6, "MainWindow"), lang.msg(language, 7, "MainWindow"), lang.msg(language, 28, "MainWindow"),
+                                     lang.msg(language, 10, "MainWindow"), lang.msg(language, 11, "MainWindow"), lang.msg(language, 12, "MainWindow"),
+                                     lang.msg(language, 13, "MainWindow"), lang.msg(language, 14, "MainWindow"), lang.msg(language, 29, "MainWindow")])
         self.CB_export_key.currentTextChanged.connect(self.export_key_change)
         self.lay.addWidget(self.CB_export_key, 3, 0, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
         
@@ -1157,7 +1174,7 @@ class ExcelWindow(QWidget):
         
         # Pulsante esportazione
         
-        self.B_export = QPushButton(self, text="Esporta in excel")
+        self.B_export = QPushButton(self, text=lang.msg(language, 6, "ExcelWindow"))
         self.B_export.clicked.connect(self.export_button)
         self.lay.addWidget(self.B_export, 3, 3, Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop)
         
@@ -1178,8 +1195,8 @@ class ExcelWindow(QWidget):
     def add_row(self):
         if self.SB_colums.value() == 0:
             err_msg = QMessageBox(self)
-            err_msg.setWindowTitle("Errore")
-            err_msg.setText("Prima di aggiungere una riga deve esserci almeno una colonna!")
+            err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+            err_msg.setText(lang.msg(language, 7, "ExcelWindow"))
             return err_msg.exec()
         self.T_preview.insertRow(self.T_preview.rowCount())
     
@@ -1189,8 +1206,8 @@ class ExcelWindow(QWidget):
         if self.T_preview.rowCount() == 0: return # Blocco della funzione se le righe sono 0
         if self.T_preview.currentRow() == -1: # Blocco della funzione se non è stata selezionata un riga
             err_msg = QMessageBox(self)
-            err_msg.setWindowTitle("Errore")
-            err_msg.setText("Seleziona una riga cliccandoci sopra!")
+            err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+            err_msg.setText(lang.msg(language, 8, "ExcelWindow"))
             return err_msg.exec()
         if self.T_preview.currentRow() == self.T_preview.rowCount() -1: self.B_add_row.setDisabled(False)
         self.T_preview.removeRow(self.T_preview.currentRow())
@@ -1201,33 +1218,33 @@ class ExcelWindow(QWidget):
     def T_preview_CM(self):
          if self.T_preview.currentRow() == -1: return # Blocco della funzione se non è stata selezionata un riga
          menu = QMenu(self)
-         personal_insert = QAction("Personalizza", self)
-         tax_id_code_insert = QAction("Codice fiscale", self)
-         name_insert = QAction("Nome", self)
-         surname_insert = QAction("Cognome", self)
-         date_of_birth_insert = QAction("Data di nascita", self)
-         birth_place_insert = QAction("Luogo di nascita", self)
-         sex_insert = QAction("Sesso", self)
-         city_of_residence_insert = QAction("Città di residenza", self)
-         residential_address_insert = QAction("Indirizzo di residenza", self)
-         postal_code_insert = QAction("CAP", self)
-         email_insert = QAction("e-mail", self)
-         card_number_insert = QAction("Numero tessera", self)
-         date_of_membership_insert = QAction("Data tesseramento", self)
+         personal_insert = QAction(lang.msg(language, 9, "ExcelWindow"), self)
+         tax_id_code_insert = QAction(lang.msg(language, 3, "MainWindow"), self)
+         name_insert = QAction(lang.msg(language, 4, "MainWindow"), self)
+         surname_insert = QAction(lang.msg(language, 5, "MainWindow"), self)
+         date_of_birth_insert = QAction(lang.msg(language, 6, "MainWindow"), self)
+         birth_place_insert = QAction(lang.msg(language, 7, "MainWindow"), self)
+         sex_insert = QAction(lang.msg(language, 28, "MainWindow"), self)
+         city_of_residence_insert = QAction(lang.msg(language, 10, "MainWindow"), self)
+         residential_address_insert = QAction(lang.msg(language, 11, "MainWindow"), self)
+         postal_code_insert = QAction(lang.msg(language, 12, "MainWindow"), self)
+         email_insert = QAction(lang.msg(language, 13, "MainWindow"), self)
+         card_number_insert = QAction(lang.msg(language, 14, "MainWindow"), self)
+         date_of_membership_insert = QAction(lang.msg(language, 29, "MainWindow"), self)
          
          personal_insert.triggered.connect(self.personal_insert)
-         tax_id_code_insert.triggered.connect(lambda: self.database_line_insert("Codice fiscale"))
-         name_insert.triggered.connect(lambda: self.database_line_insert("Nome"))
-         surname_insert.triggered.connect(lambda: self.database_line_insert("Cognome"))
-         date_of_birth_insert.triggered.connect(lambda: self.database_line_insert("Data di nascita"))
-         birth_place_insert.triggered.connect(lambda: self.database_line_insert("Luogo di nascita"))
-         sex_insert.triggered.connect(lambda: self.database_line_insert("Sesso"))
-         city_of_residence_insert.triggered.connect(lambda: self.database_line_insert("Città di residenza"))
-         residential_address_insert.triggered.connect(lambda: self.database_line_insert("Indirizzo di residenza"))
-         postal_code_insert.triggered.connect(lambda: self.database_line_insert("CAP"))
-         email_insert.triggered.connect(lambda: self.database_line_insert("e-mail"))
-         card_number_insert.triggered.connect(lambda: self.database_line_insert("Numero tessera"))
-         date_of_membership_insert.triggered.connect(lambda: self.database_line_insert("Data di tesseramento"))
+         tax_id_code_insert.triggered.connect(lambda: self.database_line_insert(lang.msg(language, 3, "MainWindow")))
+         name_insert.triggered.connect(lambda: self.database_line_insert(lang.msg(language, 4, "MainWindow")))
+         surname_insert.triggered.connect(lambda: self.database_line_insert(lang.msg(language, 5, "MainWindow")))
+         date_of_birth_insert.triggered.connect(lambda: self.database_line_insert(lang.msg(language, 6, "MainWindow")))
+         birth_place_insert.triggered.connect(lambda: self.database_line_insert(lang.msg(language, 7, "MainWindow")))
+         sex_insert.triggered.connect(lambda: self.database_line_insert(lang.msg(language, 28, "MainWindow")))
+         city_of_residence_insert.triggered.connect(lambda: self.database_line_insert(lang.msg(language, 10, "MainWindow")))
+         residential_address_insert.triggered.connect(lambda: self.database_line_insert(lang.msg(language, 11, "MainWindow")))
+         postal_code_insert.triggered.connect(lambda: self.database_line_insert(lang.msg(language, 12, "MainWindow")))
+         email_insert.triggered.connect(lambda: self.database_line_insert(lang.msg(language, 13, "MainWindow")))
+         card_number_insert.triggered.connect(lambda: self.database_line_insert(lang.msg(language, 14, "MainWindow")))
+         date_of_membership_insert.triggered.connect(lambda: self.database_line_insert(lang.msg(language, 29, "MainWindow")))
          
          menu.addActions([personal_insert, tax_id_code_insert, name_insert, surname_insert, date_of_birth_insert, birth_place_insert,sex_insert,
                           city_of_residence_insert, residential_address_insert,postal_code_insert, email_insert, card_number_insert, date_of_membership_insert])
@@ -1237,16 +1254,16 @@ class ExcelWindow(QWidget):
     
     def personal_insert(self):
         msg = QInputDialog(self)
-        msg.setWindowTitle("Inserimento personalizzato")
-        msg.setLabelText("L'inserimento personalizzato ti permette di\ninserire un valore extra alla cella.\nQuesto valore verrà solamente copiato durante l'esportazione.")
-        msg.setOkButtonText("Inserisci")
-        msg.setCancelButtonText("Annulla")
+        msg.setWindowTitle(lang.msg(language, 10, "ExcelWindow"))
+        msg.setLabelText(lang.msg(language, 11, "ExcelWindow"))
+        msg.setOkButtonText(lang.msg(language, 15, "MainWindow"))
+        msg.setCancelButtonText(lang.msg(language, 12, "ExcelWindow"))
         if msg.exec() == 1:
             text = msg.textValue()
             if "DB:" in text:
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("La dicitura 'DB:' non può essere inserita manualmente!")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 13, "ExcelWindow"))
                 return err_msg.exec()
             self.T_preview.setItem(self.T_preview.currentRow(), self.T_preview.currentColumn(), QTableWidgetItem(text))
     
@@ -1255,8 +1272,8 @@ class ExcelWindow(QWidget):
     def database_line_insert(self, line:str):
         if self.T_preview.rowCount() -1 != self.T_preview.currentRow(): # Errore se non è l'ultima riga
             err_msg = QMessageBox(self)
-            err_msg.setWindowTitle("Errore")
-            err_msg.setText("Queste righe a differenza di quella personalizzata iniziano la ricerca nel database!\nDevono necessariamente essere inserite sull'ultima riga")
+            err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+            err_msg.setText(lang.msg(language, 14, "ExcelWindow"))
             return err_msg.exec()
         self.T_preview.setItem(self.T_preview.currentRow(), self.T_preview.currentColumn(), QTableWidgetItem(f"DB:{line}"))
         self.B_add_row.setDisabled(True)
@@ -1267,7 +1284,7 @@ class ExcelWindow(QWidget):
         if self.T_preview.rowCount() != 0: # Rimozione vecchie righe
             for row in reversed(range(self.T_preview.rowCount())):
                 self.T_preview.removeRow(row)
-        if self.CB_template.currentText() == "Formato ASI":
+        if self.CB_template.currentText() == lang.msg(language, 2, "ExcelWindow"):
             self.SB_colums.setValue(13) # Impostazione colonne per template ASI
             self.B_add_row.setDisabled(True) # Disattivazione tasto aggiunta riga
             
@@ -1275,120 +1292,120 @@ class ExcelWindow(QWidget):
             self.T_preview.insertRow(0)
             self.T_preview.insertRow(1)
             
-            self.T_preview.setItem(0, 0, QTableWidgetItem("STAGIONE"))
-            self.T_preview.setItem(0, 1, QTableWidgetItem("DISCIPLINA"))
-            self.T_preview.setItem(0, 2, QTableWidgetItem("QUALIFICA"))
-            self.T_preview.setItem(0, 3, QTableWidgetItem("TIPO TESSERA"))
-            self.T_preview.setItem(0, 4, QTableWidgetItem("NOME"))
-            self.T_preview.setItem(1, 4, QTableWidgetItem("DB:Nome"))
-            self.T_preview.setItem(0, 5, QTableWidgetItem("COGNOME"))
-            self.T_preview.setItem(1, 5, QTableWidgetItem("DB:Cognome"))
-            self.T_preview.setItem(0, 6, QTableWidgetItem("CODICE FISCALE"))
-            self.T_preview.setItem(1, 6, QTableWidgetItem("DB:Codice fiscale"))
-            self.T_preview.setItem(0, 7, QTableWidgetItem("COMUNE RESIDENZA"))
-            self.T_preview.setItem(1, 7, QTableWidgetItem("DB:Città di residenza"))
-            self.T_preview.setItem(0, 8, QTableWidgetItem("INDIRIZZO RESIDENZA"))
-            self.T_preview.setItem(1, 8, QTableWidgetItem("DB:Indirizzo di residenza"))
-            self.T_preview.setItem(0, 9, QTableWidgetItem("CAP"))
-            self.T_preview.setItem(1, 9, QTableWidgetItem("DB:CAP"))
-            self.T_preview.setItem(0, 10, QTableWidgetItem("EMAIL"))
-            self.T_preview.setItem(1, 10, QTableWidgetItem("DB:email"))
-            self.T_preview.setItem(0, 11, QTableWidgetItem("CODICE TESSERA"))
-            self.T_preview.setItem(1, 11, QTableWidgetItem("DB:Numero tessera"))
-            self.T_preview.setItem(0, 12, QTableWidgetItem("CODICE AFFILIAZIONE"))
+            self.T_preview.setItem(0, 0, QTableWidgetItem(lang.msg(language, 15, "ExcelWindow")))
+            self.T_preview.setItem(0, 1, QTableWidgetItem(lang.msg(language, 16, "ExcelWindow")))
+            self.T_preview.setItem(0, 2, QTableWidgetItem(lang.msg(language, 17, "ExcelWindow")))
+            self.T_preview.setItem(0, 3, QTableWidgetItem(lang.msg(language, 18, "ExcelWindow")))
+            self.T_preview.setItem(0, 4, QTableWidgetItem(lang.msg(language, 4, "MainWindow").upper()))
+            self.T_preview.setItem(1, 4, QTableWidgetItem(lang.msg(language, 19, "ExcelWindow")))
+            self.T_preview.setItem(0, 5, QTableWidgetItem(lang.msg(language, 5, "MainWindow").upper()))
+            self.T_preview.setItem(1, 5, QTableWidgetItem(lang.msg(language, 20, "ExcelWindow")))
+            self.T_preview.setItem(0, 6, QTableWidgetItem(lang.msg(language, 3, "MainWindow").upper()))
+            self.T_preview.setItem(1, 6, QTableWidgetItem(lang.msg(language, 21, "ExcelWindow")))
+            self.T_preview.setItem(0, 7, QTableWidgetItem(lang.msg(language, 10, "MainWindow").upper()))
+            self.T_preview.setItem(1, 7, QTableWidgetItem(lang.msg(language, 22, "ExcelWindow")))
+            self.T_preview.setItem(0, 8, QTableWidgetItem(lang.msg(language, 11, "MainWindow").upper()))
+            self.T_preview.setItem(1, 8, QTableWidgetItem(lang.msg(language, 23, "ExcelWindow")))
+            self.T_preview.setItem(0, 9, QTableWidgetItem(lang.msg(language, 12, "MainWindow").upper()))
+            self.T_preview.setItem(1, 9, QTableWidgetItem(lang.msg(language, 24, "ExcelWindow")))
+            self.T_preview.setItem(0, 10, QTableWidgetItem(lang.msg(language, 13, "MainWindow").upper()))
+            self.T_preview.setItem(1, 10, QTableWidgetItem(lang.msg(language, 25, "ExcelWindow")))
+            self.T_preview.setItem(0, 11, QTableWidgetItem(lang.msg(language, 14, "MainWindow").upper()))
+            self.T_preview.setItem(1, 11, QTableWidgetItem(lang.msg(language, 26, "ExcelWindow")))
+            self.T_preview.setItem(0, 12, QTableWidgetItem(lang.msg(language, 27, "ExcelWindow")))
     
     # -*-* Funzione cambio Combobox chiave per export
     
     def export_key_change(self):
         self.LE_export.clear()
-        if self.CB_export_key.currentText() == "Codice fiscale" or self.CB_export_key.currentText() == "Nome" or self.CB_export_key.currentText() == "Cognome"\
-            or self.CB_export_key.currentText() == "Luogo di nascita" or self.CB_export_key.currentText() == "Città di residenza" or self.CB_export_key.currentText() == "Indirizzo di residenza"\
-            or self.CB_export_key.currentText() == "CAP" or self.CB_export_key.currentText() == "e-mail":
+        if self.CB_export_key.currentText() == lang.msg(language, 3, "MainWindow") or self.CB_export_key.currentText() == lang.msg(language, 4, "MainWindow") or self.CB_export_key.currentText() == lang.msg(language, 5, "MainWindow")\
+            or self.CB_export_key.currentText() == lang.msg(language, 7, "MainWindow") or self.CB_export_key.currentText() == lang.msg(language, 10, "MainWindow") or self.CB_export_key.currentText() == lang.msg(language, 11, "MainWindow")\
+            or self.CB_export_key.currentText() == lang.msg(language, 12, "MainWindow") or self.CB_export_key.currentText() == lang.msg(language, 13, "MainWindow"):
             self.CB_export.clear()
-            self.CB_export.addItems(["Uguale a", "Contiene"])
-        if self.CB_export_key.currentText() == "Data tessera" or self.CB_export_key.currentText() == "Data di nascita" or self.CB_export_key.currentText() == "Numero tessera":
+            self.CB_export.addItems([lang.msg(language, 2, "DatabaseWindow"), lang.msg(language, 3, "DatabaseWindow")])
+        if self.CB_export_key.currentText() == lang.msg(language, 29, "MainWindow") or self.CB_export_key.currentText() == lang.msg(language, 6, "MainWindow") or self.CB_export_key.currentText() == lang.msg(language, 14, "MainWindow"):
             self.CB_export.clear()
-            self.CB_export.addItems(["Uguale a", "Maggiore di", "Minore di"])
-        if self.CB_export_key.currentText() == "Sesso":
+            self.CB_export.addItems([lang.msg(language, 2, "DatabaseWindow"), lang.msg(language, 4, "DatabaseWindow"), lang.msg(language, 5, "DatabaseWindow")])
+        if self.CB_export_key.currentText() == lang.msg(language, 28, "MainWindow"):
             self.CB_export.clear()
-            self.CB_export.addItems(["MASCHIO", "FEMMINA"])
+            self.CB_export.addItems([lang.msg(language, 8, "MainWindow"), lang.msg(language, 9, "MainWindow")])
     
     # -*-* Funzione cambio Combobox export
     
     def export_change(self):
         self.LE_export.clear()
-        if self.CB_export_key.currentText() == "Codice fiscale":
-            if self.CB_export.currentText() == "Uguale a":
-                self.LE_export.setPlaceholderText("Codice fiscale completo")
-            if self.CB_export.currentText() == "Contiene":
-                self.LE_export.setPlaceholderText("Parte di codice fiscale")
+        if self.CB_export_key.currentText() == lang.msg(language, 3, "MainWindow"):
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 6, "DatabaseWindow"))
+            if self.CB_export.currentText() == lang.msg(language, 3, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 7, "DatabaseWindow"))
         
-        if self.CB_export_key.currentText() == "Nome":
-            if self.CB_export.currentText() == "Uguale a":
-                self.LE_export.setPlaceholderText("Nome completo")
-            if self.CB_export.currentText() == "Contiene":
-                self.LE_export.setPlaceholderText("Parte del nome")
+        if self.CB_export_key.currentText() == lang.msg(language, 4, "MainWindow"):
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 8, "DatabaseWindow"))
+            if self.CB_export.currentText() == lang.msg(language, 3, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 9, "DatabaseWindow"))
         
-        if self.CB_export_key.currentText() == "Cognome":
-            if self.CB_export.currentText() == "Uguale a":
-                self.LE_export.setPlaceholderText("Cognome completo")
-            if self.CB_export.currentText() == "Contiene":
-                self.LE_export.setPlaceholderText("Parte del cognome")
+        if self.CB_export_key.currentText() == lang.msg(language, 5, "MainWindow"):
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 10, "DatabaseWindow"))
+            if self.CB_export.currentText() == lang.msg(language, 3, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 11, "DatabaseWindow"))
         
-        if self.CB_export_key.currentText() == "Data di nascita":
-            self.LE_export.setPlaceholderText("Esempio: 18/09/1980")
+        if self.CB_export_key.currentText() == lang.msg(language, 6, "MainWindow"):
+            self.LE_export.setPlaceholderText(lang.msg(language, 12, "DatabaseWindow"))
         
-        if self.CB_export_key.currentText() == "Luogo di nascita":
-            if self.CB_export.currentText() == "Uguale a":
-                self.LE_export.setPlaceholderText("Luogo di nascita completo")
-            if self.CB_export.currentText() == "Contiene":
-                self.LE_export.setPlaceholderText("Parte del luogo di nascita")
+        if self.CB_export_key.currentText() == lang.msg(language, 7, "MainWindow"):
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 13, "DatabaseWindow"))
+            if self.CB_export.currentText() == lang.msg(language, 3, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 14, "DatabaseWindow"))
         
-        if self.CB_export_key.currentText() == "Sesso":
-            self.LE_export.setPlaceholderText("Casella non necessaria")
+        if self.CB_export_key.currentText() == lang.msg(language, 28, "MainWindow"):
+            self.LE_export.setPlaceholderText(lang.msg(language, 15, "DatabaseWindow"))
         
-        if self.CB_export_key.currentText() == "Città di residenza":
-            if self.CB_export.currentText() == "Uguale a":
-                self.LE_export.setPlaceholderText("Città di residenza completa")
-            if self.CB_export.currentText() == "Contiene":
-                self.LE_export.setPlaceholderText("Parte della città di residenza")
+        if self.CB_export_key.currentText() == lang.msg(language, 10, "MainWindow"):
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 16, "DatabaseWindow"))
+            if self.CB_export.currentText() == lang.msg(language, 3, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 17, "DatabaseWindow"))
         
-        if self.CB_export_key.currentText() == "Indirizzo di residenza":
-            if self.CB_export.currentText() == "Uguale a":
-                self.LE_export.setPlaceholderText("Indirizzo di residenza completo")
-            if self.CB_export.currentText() == "Contiene":
-                self.LE_export.setPlaceholderText("Parte dell'indirizzo di residenza")
+        if self.CB_export_key.currentText() == lang.msg(language, 11, "MainWindow"):
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 18, "DatabaseWindow"))
+            if self.CB_export.currentText() == lang.msg(language, 3, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 19, "DatabaseWindow"))
         
-        if self.CB_export_key.currentText() == "CAP":
-            if self.CB_export.currentText() == "Uguale a":
-                self.LE_export.setPlaceholderText("CAP completo")
-            if self.CB_export.currentText() == "Contiene":
-                self.LE_export.setPlaceholderText("Parte del CAP")
+        if self.CB_export_key.currentText() == lang.msg(language, 12, "MainWindow"):
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 20, "DatabaseWindow"))
+            if self.CB_export.currentText() == lang.msg(language, 3, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 21, "DatabaseWindow"))
         
-        if self.CB_export_key.currentText() == "e-mail":
-            if self.CB_export.currentText() == "Uguale a":
-                self.LE_export.setPlaceholderText("e-mail completa")
-            if self.CB_export.currentText() == "Contiene":
-                self.LE_export.setPlaceholderText("Parte della e-mail")
+        if self.CB_export_key.currentText() == lang.msg(language, 13, "MainWindow"):
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 22, "DatabaseWindow"))
+            if self.CB_export.currentText() == lang.msg(language, 3, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 23, "DatabaseWindow"))
         
-        if self.CB_export_key.currentText() == "Numero tessera":
-            if self.CB_export.currentText() == "Uguale a":
-                self.LE_export.setPlaceholderText("Numero tessera specifico")
-            if self.CB_export.currentText() == "Maggiore di":
-                self.LE_export.setPlaceholderText("Maggiore del numero inserito")
-            if self.CB_export.currentText() == "Minore di":
-                self.LE_export.setPlaceholderText("Minore del numero inserito")
+        if self.CB_export_key.currentText() == lang.msg(language, 14, "MainWindow"):
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 24, "DatabaseWindow"))
+            if self.CB_export.currentText() == lang.msg(language, 4, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 25, "DatabaseWindow"))
+            if self.CB_export.currentText() == lang.msg(language, 5, "DatabaseWindow"):
+                self.LE_export.setPlaceholderText(lang.msg(language, 26, "DatabaseWindow"))
             
-        if self.CB_export_key.currentText() == "Data tessera":
+        if self.CB_export_key.currentText() == lang.msg(language, 29, "MainWindow"):
             date = datetime.now()
-            if self.CB_export.currentText() == "Uguale a":
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"):
                 date = date.strftime("%d/%m/%Y")
                 self.LE_export.setText(date)
-            if self.CB_export.currentText() == "Maggiore di":
+            if self.CB_export.currentText() == lang.msg(language, 4, "DatabaseWindow"):
                 date -= timedelta(days=365)
                 date = date.strftime("%d/%m/%Y")
                 self.LE_export.setText(date)
-            if self.CB_export.currentText() == "Minore di":
+            if self.CB_export.currentText() == lang.msg(language, 5, "DatabaseWindow"):
                 date = date.strftime("%d/%m/%Y")
                 self.LE_export.setText(date)
     
@@ -1400,8 +1417,8 @@ class ExcelWindow(QWidget):
         
         if self.T_preview.rowCount() == 0:
             err_msg = QMessageBox(self)
-            err_msg.setWindowTitle("Errore")
-            err_msg.setText("La tabella non può essere vuota!")
+            err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+            err_msg.setText(lang.msg(language, 28, "ExcelWindow"))
             return err_msg.exec()
         
         db_check = 0
@@ -1414,106 +1431,117 @@ class ExcelWindow(QWidget):
             if db_check == 1: break            
         else:
             err_msg = QMessageBox(self)
-            err_msg.setWindowTitle("Errore")
-            err_msg.setText("Nella tabella ci deve essere almeno un valore da controllare nel database!")
+            err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+            err_msg.setText(lang.msg(language, 29, "ExcelWindow"))
             return err_msg.exec()
         
         # Interrogazione database
         col = self.db["cards"]
         
-        if self.CB_export_key.currentText() == "Codice fiscale": # Tramite codice fiscale
-            if self.CB_export.currentText() == "Uguale a" and len(self.LE_export.text()) != 16:
+        if self.CB_export_key.currentText() == lang.msg(language, 3, "MainWindow"): # Tramite codice fiscale
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow") and len(self.LE_export.text()) != 16:
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Codice fiscale non corretto")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 22, "MainWindow"))
                 return err_msg.exec()
-            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"tax_id_code": self.LE_export.text().upper().replace(" ", "")}, {"_id": 0})
-            if self.CB_export.currentText() == "Contiene": self.query_db = col.find({"tax_id_code": {"$regex": self.LE_export.text().upper().replace(" ", "")}}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"tax_id_code": self.LE_export.text().upper().replace(" ", "")}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"tax_id_code": {"$regex": self.LE_export.text().upper().replace(" ", "")}}, {"_id": 0})
         
-        if self.CB_export_key.currentText() == "Nome": # Tramite nome
+        if self.CB_export_key.currentText() == lang.msg(language, 4, "MainWindow"): # Tramite nome
             if self.has_numbers(self.LE_export.text().upper().strip()) == True:
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Inserimento non corretto")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 23, "MainWindow"))
                 return err_msg.exec()
-            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"name": self.LE_export.text().upper().strip()}, {"_id": 0})
-            if self.CB_export.currentText() == "Contiene": self.query_db = col.find({"name": {"$regex": self.LE_export.text().upper().strip()}}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"name": self.LE_export.text().upper().strip()}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"name": {"$regex": self.LE_export.text().upper().strip()}}, {"_id": 0})
         
-        if self.CB_export_key.currentText() == "Cognome": # Tramite cognome
+        if self.CB_export_key.currentText() == lang.msg(language, 5, "MainWindow"): # Tramite cognome
             if self.has_numbers(self.LE_export.text().upper().strip()) == True:
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Inserimento non corretto")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 24, "MainWindow"))
                 return err_msg.exec()
-            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"surname": self.LE_export.text().upper().strip()}, {"_id": 0})
-            if self.CB_export.currentText() == "Contiene": self.query_db = col.find({"surname": {"$regex": self.LE_export.text().upper().strip()}}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"surname": self.LE_export.text().upper().strip()}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"surname": {"$regex": self.LE_export.text().upper().strip()}}, {"_id": 0})
         
-        if self.CB_export_key.currentText() == "Data di nascita": # Tramite data di nascita
+        if self.CB_export_key.currentText() == lang.msg(language, 6, "MainWindow"): # Tramite data di nascita
             date = self.LE_export.text().replace(" ", "")
             if date.count("/") != 2 or len(date) != 10: # Controllo data inserita
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Data non corretta")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 27, "DatabaseWindow"))
                 return err_msg.exec()
             
-            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"date_of_birth": date}, {"_id": 0})
-            if self.CB_export.currentText() == "Maggiore di": self.query_db = col.find({"date_of_birth": {"$gte": date}}, {"_id": 0})
-            if self.CB_export.currentText() == "Minore di": self.query_db = col.find({"date_of_birth": {"$lte": date}}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"date_of_birth": date}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"date_of_birth": {"$gte": date}}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"date_of_birth": {"$lte": date}}, {"_id": 0})
         
-        if self.CB_export_key.currentText() == "Luogo di nascita": # Tramite luogo di nascita
-            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"birth_place": self.LE_export.text().upper().strip()}, {"_id": 0})
-            if self.CB_export.currentText() == "Contiene": self.query_db = col.find({"birth_place": {"$regex": self.LE_export.text().upper().strip()}}, {"_id": 0})
+        if self.CB_export_key.currentText() == lang.msg(language, 7, "MainWindow"): # Tramite luogo di nascita
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"birth_place": self.LE_export.text().upper().strip()}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"birth_place": {"$regex": self.LE_export.text().upper().strip()}}, {"_id": 0})
         
-        if self.CB_export_key.currentText() == "Sesso": # Tramite sesso
-            if self.CB_export.currentText() == "MASCHIO": self.query_db = col.find({"sex": "MASCHIO"}, {"_id": 0})
-            if self.CB_export.currentText() == "FEMMINA": self.query_db = col.find({"sex": "FEMMINA"}, {"_id": 0})
+        if self.CB_export_key.currentText() == lang.msg(language, 28, "MainWindow"): # Tramite sesso
+            if self.CB_export.currentText() == lang.msg(language, 8, "MainWindow"): self.query_db = col.find({"sex": lang.msg(language, 8, "MainWindow")}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 9, "MainWindow"): self.query_db = col.find({"sex": lang.msg(language, 9, "MainWindow")}, {"_id": 0})
         
-        if self.CB_export_key.currentText() == "Città di residenza": # Tramite città di residenza
-            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"city_of_residence": self.LE_export.text().upper().strip()}, {"_id": 0})
-            if self.CB_export.currentText() == "Contiene": self.query_db = col.find({"city_of_residence": {"$regex": self.LE_export.text().upper().strip()}}, {"_id": 0})
+        if self.CB_export_key.currentText() == lang.msg(language, 10, "MainWindow"): # Tramite città di residenza
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"city_of_residence": self.LE_export.text().upper().strip()}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"city_of_residence": {"$regex": self.LE_export.text().upper().strip()}}, {"_id": 0})
         
-        if self.CB_export_key.currentText() == "Indirizzo di residenza": # Tramite indirizzo di residenza
-            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"residential_address": self.LE_export.text().upper().strip()}, {"_id": 0})
-            if self.CB_export.currentText() == "Contiene": self.query_db = col.find({"residential_address": {"$regex": self.LE_export.text().upper().strip()}}, {"_id": 0})
+        if self.CB_export_key.currentText() == lang.msg(language, 11, "MainWindow"): # Tramite indirizzo di residenza
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"residential_address": self.LE_export.text().upper().strip()}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"residential_address": {"$regex": self.LE_export.text().upper().strip()}}, {"_id": 0})
         
-        if self.CB_export_key.currentText() == "CAP": # Tramite CAP
+        if self.CB_export_key.currentText() == lang.msg(language, 12, "MainWindow"): # Tramite CAP
             try: int(self.LE_export.text().replace(" ", ""))
             except:
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Inserimento non corretto")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 28, "DatabaseWindow"))
                 return err_msg.exec()
-            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"postal_code": self.LE_export.text().upper().replace(" ", "")}, {"_id": 0})
-            if self.CB_export.currentText() == "Contiene": self.query_db = col.find({"postal_code": {"$regex": self.LE_export.text().upper().replace(" ", "")}}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"postal_code": self.LE_export.text().upper().replace(" ", "")}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"postal_code": {"$regex": self.LE_export.text().upper().replace(" ", "")}}, {"_id": 0})
         
-        if self.CB_export_key.currentText() == "e-mail": # Tramite e-mail
-            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"email": self.LE_export.text().upper().replace(" ", "")}, {"_id": 0})
-            if self.CB_export.currentText() == "Contiene": self.query_db = col.find({"email": {"$regex": self.LE_export.text().upper().replace(" ", "")}}, {"_id": 0})
+        if self.CB_export_key.currentText() == lang.msg(language, 13, "MainWindow"): # Tramite e-mail
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"email": self.LE_export.text().upper().replace(" ", "")}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 3, "DatabaseWindow"): self.query_db = col.find({"email": {"$regex": self.LE_export.text().upper().replace(" ", "")}}, {"_id": 0})
         
-        if self.CB_export_key.currentText() == "Numero tessera": # Tramite numero tessera
-            try: int(self.LE_export.text().replace(" ", ""))
-            except:
-                err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Inserimento non corretto")
-                return err_msg.exec()
-            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"card_number": self.LE_export.text().replace(" ", "")}, {"_id": 0})
-            if self.CB_export.currentText() == "Maggiore di": self.query_db = col.find({"card_number": {"$gte": self.LE_export.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0})
-            if self.CB_export.currentText() == "Minore di": self.query_db = col.find({"card_number": {"$lte": self.LE_export.text().replace(" ", ""), "$ne": "-"}}, {"_id": 0})
+        if self.CB_export_key.currentText() == lang.msg(language, 14, "MainWindow"): # Tramite numero tessera
+            card_number = self.LE_export.text().replace(" ", "")
+            numeric_card_number = True
+            try: float(card_number)
+            except: numeric_card_number = False
+            if numeric_card_number == True:
+                number_expression = re.compile(r"^\d+$")
+                card_number = float(card_number)
+                if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$regex": number_expression}, "$expr":{"$eq": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
+                if self.CB_export.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$regex": number_expression}, "$expr":{"$gte": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
+                if self.CB_export.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$regex": number_expression}, "$expr":{"$lte": [{"$toDouble":"$card_number"}, card_number]}}, {"_id": 0})
+            else:
+                if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"card_number": card_number}, {"_id": 0})
+                if self.CB_export.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-", "$gte": card_number}}, {"_id": 0})
+                if self.CB_export.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"card_number": {"$ne": "-", "$lte": card_number}}, {"_id": 0})
         
-        if self.CB_export_key.currentText() == "Data tessera": # Tramite data tessera
+        if self.CB_export_key.currentText() == lang.msg(language, 29, "MainWindow"): # Tramite data tessera
             date = self.LE_export.text().replace(" ", "")
             if date.count("/") != 2 or len(date) != 10: # Controllo data inserita
                 err_msg = QMessageBox(self)
-                err_msg.setWindowTitle("Errore")
-                err_msg.setText("Data non corretta")
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 27, "DatabaseWindow"))
                 return err_msg.exec()
             date = date.split("/")
             date = f"{date[2]}{date[1]}{date[0]}"
-            
-            if self.CB_export.currentText() == "Uguale a": self.query_db = col.find({"date_of_membership": date}, {"_id": 0})
-            if self.CB_export.currentText() == "Maggiore di": self.query_db = col.find({"date_of_membership": {"$gte": date, "$ne": "-"}}, {"_id": 0})
-            if self.CB_export.currentText() == "Minore di": self.query_db = col.find({"date_of_membership": {"$lte": date, "$ne": "-"}}, {"_id": 0})
+            try: date = int(date)
+            except:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle(lang.msg(language, 20, "MainWindow"))
+                err_msg.setText(lang.msg(language, 27, "DatabaseWindow"))
+                return err_msg.exec()
+                        
+            if self.CB_export.currentText() == lang.msg(language, 2, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": {"$ne": "-"}, "$expr":{"$eq": [{"$toDouble": "$date_of_membership"}, date]}}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 4, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": {"$ne": "-"}, "$expr":{"$gte": [{"$toDouble": "$date_of_membership"}, date]}}, {"_id": 0})
+            if self.CB_export.currentText() == lang.msg(language, 5, "DatabaseWindow"): self.query_db = col.find({"date_of_membership": {"$ne": "-"}, "$expr":{"$lte": [{"$toDouble": "$date_of_membership"}, date]}}, {"_id": 0})
             
         # Esportazione in excel                
         
@@ -1533,29 +1561,29 @@ class ExcelWindow(QWidget):
                 if "DB:" not in self.T_preview.item(row, column).text():
                     ws[f"{excel_column_list[column]}{excel_row}"] = self.T_preview.item(row, column).text()
                 else:
-                    if self.T_preview.item(row, column).text() == "DB:Codice fiscale":
+                    if self.T_preview.item(row, column).text() == lang.msg(language, 21, "ExcelWindow"):
                         ws[f"{excel_column_list[column]}{excel_row}"] = person["tax_id_code"]
-                    if self.T_preview.item(row, column).text() == "DB:Nome":
+                    if self.T_preview.item(row, column).text() == lang.msg(language, 19, "ExcelWindow"):
                         ws[f"{excel_column_list[column]}{excel_row}"] = person["name"]
-                    if self.T_preview.item(row, column).text() == "DB:Cognome":
+                    if self.T_preview.item(row, column).text() == lang.msg(language, 20, "ExcelWindow"):
                         ws[f"{excel_column_list[column]}{excel_row}"] = person["surname"]
-                    if self.T_preview.item(row, column).text() == "DB:Data di nascita":
+                    if self.T_preview.item(row, column).text() == lang.msg(language, 30, "ExcelWindow"):
                         ws[f"{excel_column_list[column]}{excel_row}"] = person["date_of_birth"]
-                    if self.T_preview.item(row, column).text() == "DB:Luogo di nascita":
+                    if self.T_preview.item(row, column).text() == lang.msg(language, 31, "ExcelWindow"):
                         ws[f"{excel_column_list[column]}{excel_row}"] = person["birth_place"]
-                    if self.T_preview.item(row, column).text() == "DB:Sesso":
+                    if self.T_preview.item(row, column).text() == lang.msg(language, 32, "ExcelWindow"):
                         ws[f"{excel_column_list[column]}{excel_row}"] = person["sex"]
-                    if self.T_preview.item(row, column).text() == "DB:Città di residenza":
+                    if self.T_preview.item(row, column).text() == lang.msg(language, 22, "ExcelWindow"):
                         ws[f"{excel_column_list[column]}{excel_row}"] = person["city_of_residence"]
-                    if self.T_preview.item(row, column).text() == "DB:Indirizzo di residenza":
+                    if self.T_preview.item(row, column).text() == lang.msg(language, 23, "ExcelWindow"):
                         ws[f"{excel_column_list[column]}{excel_row}"] = person["residential_address"]
-                    if self.T_preview.item(row, column).text() == "DB:CAP":
+                    if self.T_preview.item(row, column).text() == lang.msg(language, 24, "ExcelWindow"):
                         ws[f"{excel_column_list[column]}{excel_row}"] = person["postal_code"]
-                    if self.T_preview.item(row, column).text() == "DB:e-mail":
+                    if self.T_preview.item(row, column).text() == lang.msg(language, 25, "ExcelWindow"):
                         ws[f"{excel_column_list[column]}{excel_row}"] = person["email"]
-                    if self.T_preview.item(row, column).text() == "DB:Numero tessera":
+                    if self.T_preview.item(row, column).text() == lang.msg(language, 26, "ExcelWindow"):
                         ws[f"{excel_column_list[column]}{excel_row}"] = person["card_number"]
-                    if self.T_preview.item(row, column).text() == "DB:Data di tesseramento":
+                    if self.T_preview.item(row, column).text() == lang.msg(language, 33, "ExcelWindow"):
                         date = person["date_of_membership"]
                         date = f"{date[6:]}/{date[4:6]}/{date[:4]}"
                         ws[f"{excel_column_list[column]}{excel_row}"] = date
@@ -1567,8 +1595,8 @@ class ExcelWindow(QWidget):
         wb.save(f"{os.environ['HOME']}/Memberships/template_{date}.xlsx")
         
         msg = QMessageBox(self)
-        msg.setWindowTitle("File salvato")
-        msg.setText(f"File salvato correttamente:\n{os.environ['HOME']}/Memberships/template_{date}.xlsx")
+        msg.setWindowTitle(lang.msg(language, 34, "ExcelWindow"))
+        msg.setText(f"{lang.msg(language, 35, 'ExcelWindow')}:\n{os.environ['HOME']}/Memberships/template_{date}.xlsx")
         return msg.exec()
     
     # *-*-* Funzione controllo numeri *-*-*
@@ -1597,6 +1625,7 @@ class OptionsMenu(QWidget):
         self.interface_style = ""
         self.logo_path = ""
         self.icon_path = ""
+        self.language = "ENGLISH"
         
         # Lettura file e impostazione variabili
     
@@ -1607,92 +1636,91 @@ class OptionsMenu(QWidget):
             self.interface_style = options_file.readline().replace("interface=", "").replace("\n", "")
             self.logo_path = options_file.readline().replace("logo=", "").replace("\n", "")
             self.icon_path = options_file.readline().replace("icon=", "").replace("\n", "")
+            self.language = options_file.readline().replace("language=", "").replace("\n", "")
             options_file.close()
         
         self.setWindowIcon(QIcon(self.icon_path))
-        self.setWindowTitle(f"{heading} - opzioni")
+        self.setWindowTitle(f"{heading} - {lang.msg(self.language, 0, 'OptionsMenuWindow')}")
         self.lay = QVBoxLayout(self)
         self.setStyleSheet(sis.interface_style(self.interface_style))
         
-        L_title = QLabel(self, text="Menu Opzioni")
-        L_title.setAccessibleName("an_title")
-        self.lay.addWidget(L_title)
+        self.L_title = QLabel(self, text=lang.msg(self.language, 0, "OptionsMenuWindow"))
+        self.L_title.setAccessibleName("an_title")
+        self.lay.addWidget(self.L_title)
         
-        L_database_connection = QLabel(self, text="Connessione al database")
-        L_database_connection.setAccessibleName("an_section_title")
-        self.lay.addWidget(L_database_connection)
+        self.L_language = QLabel(self, text=lang.msg(self.language, 1, "OptionsMenuWindow"))
+        self.L_language.setAccessibleName("an_section_title")
+        self.lay.addWidget(self.L_language)
         
-        L_database_connection_instructions = QLabel(self)
-        L_database_connection_instructions.setText("""Il programma usa MongoDB come database
-Inserisci il link nella casella qui sotto.
-Se hai un database locale il link sarà: mongodb://localhost:27017/""")
-        self.lay.addWidget(L_database_connection_instructions)
+        self.CB_language = QComboBox(self)
+        self.CB_language.addItems(["ENGLISH", "ITALIANO"])
+        self.CB_language.setCurrentText(self.language)
+        self.CB_language.currentTextChanged.connect(self.language_change)
+        self.lay.addWidget(self.CB_language)
+        
+        self.L_database_connection = QLabel(self, text=lang.msg(self.language, 2, "OptionsMenuWindow"))
+        self.L_database_connection.setAccessibleName("an_section_title")
+        self.lay.addWidget(self.L_database_connection)
+        
+        self.L_database_connection_instructions = QLabel(self)
+        self.L_database_connection_instructions.setText(lang.msg(self.language, 3, "OptionsMenuWindow"))
+        self.lay.addWidget(self.L_database_connection_instructions)
         
         self.LE_database_connection = QLineEdit(self)
-        self.LE_database_connection.setPlaceholderText("Link al database")
+        self.LE_database_connection.setPlaceholderText(lang.msg(self.language, 4, "OptionsMenuWindow"))
         self.LE_database_connection.setText(self.mongodb_connection)
         self.lay.addWidget(self.LE_database_connection)
         
-        L_heading = QLabel(self, text="Intestazione")
-        L_heading.setAccessibleName("an_section_title")
-        self.lay.addWidget(L_heading)
+        self.L_heading = QLabel(self, text=lang.msg(self.language, 5, "OptionsMenuWindow"))
+        self.L_heading.setAccessibleName("an_section_title")
+        self.lay.addWidget(self.L_heading)
         
-        L_heading_instructions = QLabel(self)
-        L_heading_instructions.setText("""Inserisci un intestazione, verrà usata sia sulla testa
-del programma che ad ogni inizio scontrino""")
-        self.lay.addWidget(L_heading_instructions)
+        self.L_heading_instructions = QLabel(self)
+        self.L_heading_instructions.setText(lang.msg(self.language, 6, "OptionsMenuWindow"))
+        self.lay.addWidget(self.L_heading_instructions)
         
         self.LE_heading = QLineEdit(self)
-        self.LE_heading.setPlaceholderText("Intestazione")
+        self.LE_heading.setPlaceholderText(lang.msg(self.language, 5, "OptionsMenuWindow"))
         self.LE_heading.setText(self.heading)
         self.lay.addWidget(self.LE_heading)
         
-        L_interface_style = QLabel(self, text="Intefaccia grafica")
-        L_interface_style.setAccessibleName("an_section_title")
-        self.lay.addWidget(L_interface_style)
+        self.L_interface_style = QLabel(self, text=lang.msg(self.language, 7, "OptionsMenuWindow"))
+        self.L_interface_style.setAccessibleName("an_section_title")
+        self.lay.addWidget(self.L_interface_style)
         
-        L_interface_style_instructions = QLabel(self)
-        L_interface_style_instructions.setText("""Stile interfaccia grafica
-Seleziona uno stile grafico per il programma""")
-        self.lay.addWidget(L_interface_style_instructions)
+        self.L_interface_style_instructions = QLabel(self)
+        self.L_interface_style_instructions.setText(lang.msg(self.language, 8, "OptionsMenuWindow"))
+        self.lay.addWidget(self.L_interface_style_instructions)
         
         self.CB_interface_style = QComboBox(self)
-        self.CB_interface_style.addItems(["Stile 98", "Stile Tech", "Stile Elegante Chiaro", "Stile Elegante Scuro"])
+        self.CB_interface_style.addItems(["98 Style", "Tech Style", "Clear Elegant Style", "Dark Elegant Style"])
         self.CB_interface_style.setCurrentText(self.interface_style)
         self.CB_interface_style.currentIndexChanged.connect(self.interface_change)
         self.lay.addWidget(self.CB_interface_style)
         
-        L_logo = QLabel(self, text="Logo")
-        L_logo.setAccessibleName("an_section_title")
-        self.lay.addWidget(L_logo)
+        self.L_logo = QLabel(self, text=lang.msg(self.language, 9, "OptionsMenuWindow"))
+        self.L_logo.setAccessibleName("an_section_title")
+        self.lay.addWidget(self.L_logo)
         
-        self.L_logo_instructions = QLabel(self)
-        self.L_logo_instructions.setText(f"""Seleziona un immagine png per il logo
-Il logo verrà posizionato in alto a sinistra nell'interfaccia
-Le dimensioni ideali sono: 190 x 85 pixel
-Attualmente stai usando il file: {self.logo_path}""")
+        self.L_logo_instructions = QLabel(self, text=f"{lang.msg(self.language, 10, 'OptionsMenuWindow')}: {self.logo_path}")
         self.lay.addWidget(self.L_logo_instructions)
         
-        self.B_logo = QPushButton(self, text="Seleziona")
+        self.B_logo = QPushButton(self, text=lang.msg(self.language, 11, "OptionsMenuWindow"))
         self.B_logo.clicked.connect(self.logo_selection)
         self.lay.addWidget(self.B_logo)
         
-        L_icon = QLabel(self, text="Icona")
-        L_icon.setAccessibleName("an_section_title")
-        self.lay.addWidget(L_icon)
+        self.L_icon = QLabel(self, text=lang.msg(self.language, 12, "OptionsMenuWindow"))
+        self.L_icon.setAccessibleName("an_section_title")
+        self.lay.addWidget(self.L_icon)
         
-        self.L_icon_instructions = QLabel(self)
-        self.L_icon_instructions.setText(f"""Seleziona un immagine png per l'icona
-L'icona la troverai su ogni finestra
-Le dimensioni ideali sono: 51 x 21 pixel
-Attualmente stai usando il file: {self.icon_path}""")
+        self.L_icon_instructions = QLabel(self, text=f"{lang.msg(self.language, 13, 'OptionsMenuWindow')}: {self.icon_path}")
         self.lay.addWidget(self.L_icon_instructions)
         
-        self.B_icon = QPushButton(self, text="Seleziona")
+        self.B_icon = QPushButton(self, text=lang.msg(self.language, 11, "OptionsMenuWindow"))
         self.B_icon.clicked.connect(self.icon_selection)
         self.lay.addWidget(self.B_icon)
         
-        self.B_close_and_save = QPushButton(self, text="Chiudi e salva")
+        self.B_close_and_save = QPushButton(self, text=lang.msg(self.language, 14, "OptionsMenuWindow"))
         self.B_close_and_save.clicked.connect(self.close_and_save)
         self.lay.addWidget(self.B_close_and_save)
         
@@ -1711,47 +1739,63 @@ Attualmente stai usando il file: {self.icon_path}""")
     def logo_selection(self):
         logo = QFileDialog()
         logo.setFileMode(QFileDialog.FileMode.AnyFile)
-        logo.setNameFilter("Immagini (*.png)")
+        logo.setNameFilter(f"{lang.msg(self.language, 15, 'OptionsMenuWindow')} (*.png)")
         logo.setViewMode(QFileDialog.ViewMode.List)
         logo_path = QFileDialog.getOpenFileName(logo)
         logo_path = Path(logo_path[0])
         self.logo_path = logo_path
-        self.L_logo_instructions.setText(f"""Seleziona un immagine png per il logo
-Il logo verrà posizionato in alto a sinistra nell'interfaccia
-Le dimensioni ideali sono: 190 x 85 pixel
-Attualmente stai usando il file: {self.logo_path}""")
+        self.L_logo_instructions.setText(f"{lang.msg(self.language, 10, 'OptionsMenuWindow')}: {self.logo_path}")
     
     def icon_selection(self):
         icon = QFileDialog()
         icon.setFileMode(QFileDialog.FileMode.AnyFile)
-        icon.setNameFilter("Immagini (*.png)")
+        icon.setNameFilter(f"{lang.msg(self.language, 15, 'OptionsMenuWindow')} (*.png)")
         icon.setViewMode(QFileDialog.ViewMode.List)
         icon_path = QFileDialog.getOpenFileName(icon)
         icon_path = Path(icon_path[0])
         self.icon_path = icon_path
-        self.L_icon_instructions.setText(f"""Seleziona un immagine png per l'icona
-L'icona la troverai su ogni finestra
-Le dimensioni ideali sono: 51 x 21 pixel
-Attualmente stai usando il file: {self.icon_path}""")
+        self.L_icon_instructions.setText(f"{lang.msg(self.language, 13, 'OptionsMenuWindow')}: {self.icon_path}")
+    
+    def language_change(self):
+        self.language = self.CB_language.currentText()
+        self.setWindowTitle(f"{heading} - {lang.msg(self.language, 0, 'OptionsMenuWindow')}")
+        self.L_title.setText(lang.msg(self.language, 0, "OptionsMenuWindow"))
+        self.L_language.setText(lang.msg(self.language, 1, "OptionsMenuWindow"))
+        self.L_database_connection.setText(lang.msg(self.language, 2, "OptionsMenuWindow"))
+        self.L_database_connection_instructions.setText(lang.msg(self.language, 3, "OptionsMenuWindow"))
+        self.LE_database_connection.setPlaceholderText(lang.msg(self.language, 4, "OptionsMenuWindow"))
+        self.L_heading.setText(lang.msg(self.language, 5, "OptionsMenuWindow"))
+        self.L_heading_instructions.setText(lang.msg(self.language, 6, "OptionsMenuWindow"))
+        self.LE_heading.setPlaceholderText(lang.msg(self.language, 5, "OptionsMenuWindow"))
+        self.L_interface_style.setText(lang.msg(self.language, 7, "OptionsMenuWindow"))
+        self.L_interface_style_instructions.setText(lang.msg(self.language, 8, "OptionsMenuWindow"))
+        self.L_logo.setText(lang.msg(self.language, 9, "OptionsMenuWindow"))
+        self.L_logo_instructions.setText(f"{lang.msg(self.language, 10, 'OptionsMenuWindow')}: {self.logo_path}")
+        self.B_logo.setText(lang.msg(self.language, 11, "OptionsMenuWindow"))
+        self.L_icon.setText(lang.msg(self.language, 12, "OptionsMenuWindow"))
+        self.L_icon_instructions.setText(f"{lang.msg(self.language, 13, 'OptionsMenuWindow')}: {self.icon_path}")
+        self.B_icon.setText(lang.msg(self.language, 11, "OptionsMenuWindow"))
+        self.B_close_and_save.setText(lang.msg(self.language, 14, "OptionsMenuWindow"))
     
     def close_and_save(self):
+        global language
         if self.LE_database_connection.text() == "":
             err_msg = QMessageBox(self)
-            err_msg.setWindowTitle("Errore")
-            err_msg.setText("La casella per la connessione al database non può essere vuota")
+            err_msg.setWindowTitle(lang.msg(self.language, 19, "MainWindow"))
+            err_msg.setText(lang.msg(self.language, 16, "OptionsMenuWindow"))
             return err_msg.exec()
         
         # Impostazione del messaggio di connessione
         
         self.L_database_connection_st.setStyleSheet("color: #FF7800; font: 18px bold Arial;")
-        self.L_database_connection_st.setText("Connessione al database in corso....")
+        self.L_database_connection_st.setText(lang.msg(self.language, 17, "OptionsMenuWindow"))
         self.L_database_connection_st.show()
         self.L_database_connection_st.repaint()
         
         # Salvataggio file
         
         options_file = open(f"{os.environ['HOME']}/Memberships/options.txt", "w")
-        options_file.write(f"db_connection={self.LE_database_connection.text()}\nheading={self.LE_heading.text()}\ninterface={self.CB_interface_style.currentText()}\nlogo={self.logo_path}\nicon={self.icon_path}")
+        options_file.write(f"db_connection={self.LE_database_connection.text()}\nheading={self.LE_heading.text()}\ninterface={self.CB_interface_style.currentText()}\nlogo={self.logo_path}\nicon={self.icon_path}\nlanguage={self.CB_language.currentText()}")
         options_file.close()
         
         # -*-* Riavvio applicazione *-*-
@@ -1765,7 +1809,7 @@ Attualmente stai usando il file: {self.icon_path}""")
         except:
             options_file.close()
             self.L_database_connection_st.setStyleSheet("color: #8B0B0B; font: 18px bold Arial;")
-            self.L_database_connection_st.setText("Connessione al database fallita!")
+            self.L_database_connection_st.setText(lang.msg(self.language, 18, "OptionsMenuWindow"))
             self.L_database_connection_st.show()
             return
         global heading
@@ -1776,6 +1820,7 @@ Attualmente stai usando il file: {self.icon_path}""")
         logo_path = options_file.readline().replace("logo=", "").replace("\n", "")
         global icon_path
         icon_path = options_file.readline().replace("icon=", "").replace("\n", "")
+        language = options_file.readline().replace("language=", "").replace("\n", "")
         options_file.close()
         
         # Test di connessione
@@ -1783,12 +1828,25 @@ Attualmente stai usando il file: {self.icon_path}""")
         try:
             dbclient.server_info()
             # Avvio se la connessione al database avviene
+            
+            # Inserimento prodotti nel dizionario
+
+            db = dbclient["Bar"]
+            col = db["maincategory"]
+            global menu_dict
+            for product in col.find():
+                try:
+                    st_menu = str(product["menu"])
+                    dic_product = str(product["description"]) + str(product["category"])
+                    menu_dict.update({dic_product: st_menu})
+                except: pass
+            
             self.window = MainWindow()
             self.window.show()
             self.close()
         except:
             self.L_database_connection_st.setStyleSheet("color: #8B0B0B; font: 18px bold Arial;")
-            self.L_database_connection_st.setText("Connessione al database fallita!")
+            self.L_database_connection_st.setText(lang.msg(self.language, 18, "OptionsMenuWindow"))
             self.L_database_connection_st.show()
 
 # -*-* Avvio applicazione *-*-

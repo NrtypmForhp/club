@@ -1,7 +1,9 @@
+# Versione 1.0.1-r1
+
 def interface_style(name_of_style:str):
     style_string = ""
-    if name_of_style == "": name_of_style = "Stile 98" # Impostazione allo stile di default
-    if name_of_style == "Stile 98":
+    if name_of_style == "": name_of_style = "98 Style" # Impostazione allo stile di default
+    if name_of_style == "98 Style":
         style_string = """
                     QWidget{
                         background-color: #404040;
@@ -51,6 +53,14 @@ def interface_style(name_of_style:str):
                     QComboBox:selected{
                         background-color: #075206;
                     }
+                    QComboBox QAbstractItemView{
+                        border: 1px solid black;
+                        background-color: black;
+                        color: #A6AB13;
+                        selection-background-color: #0C3B0B;
+                        selection-color: #A6AB13;
+                        font: 10pt Arial;
+                    }
                     QTableWidget{
                         color: #A6AB13;
                         border: 2px solid black;
@@ -76,7 +86,7 @@ def interface_style(name_of_style:str):
                         border: 2px solid black;
                     }
                     QMenu{
-                        border: 1px solid black;
+                        border: 1px solid #A6AB13;
                     }
                     QMenu::item{
                         background-color: black;
@@ -128,7 +138,7 @@ def interface_style(name_of_style:str):
                         background-color: none;
                     }
                     """
-    if name_of_style == "Stile Tech":
+    if name_of_style == "Tech Style":
         style_string = """
                     QWidget{
                         background-color: black;
@@ -173,6 +183,14 @@ def interface_style(name_of_style:str):
                     QComboBox:selected{
                         background-color: #075206;
                         color: #D59B0C;
+                    }
+                    QComboBox QAbstractItemView{
+                        border: 1px solid black;
+                        background-color: #292424;
+                        color: #1CB414;
+                        selection-background-color: #0C3B0B;
+                        selection-color: #D59B0C;
+                        font: 10pt SourceCodeVF;
                     }
                     QTableWidget{
                         color: #1CB414;
@@ -253,7 +271,7 @@ def interface_style(name_of_style:str):
                         background-color: none;
                     }
                     """
-    if name_of_style == "Stile Elegante Chiaro":
+    if name_of_style == "Clear Elegant Style":
         style_string = """
                     QWidget{
                         background-color: #EEEAEA;
@@ -296,8 +314,16 @@ def interface_style(name_of_style:str):
                         color: white;
                     }
                     QComboBox:selected{
+                        background-color: #092B06;
+                        color: white;
+                    }
+                    QComboBox QAbstractItemView{
+                        border: 1px solid white;
                         background-color: #444342;
                         color: black;
+                        selection-background-color: #092B06;
+                        selection-color: white;
+                        font: 10pt Adobe New Century Schoolbook;
                     }
                     QTableWidget{
                         color: black;
@@ -377,7 +403,7 @@ def interface_style(name_of_style:str):
                         background-color: none;
                     }
                     """
-    if name_of_style == "Stile Elegante Scuro":
+    if name_of_style == "Dark Elegant Style":
         style_string = """
                     QWidget{
                         background-color: #444342;
@@ -419,6 +445,15 @@ def interface_style(name_of_style:str):
                     }
                     QComboBox:selected{
                         background-color: black;
+                        background-color: #092B06;
+                    }
+                    QComboBox QAbstractItemView{
+                        border: 1px solid #444342;
+                        background-color: black;
+                        color: white;
+                        selection-background-color: #092B06;
+                        selection-color: white;
+                        font: 10pt Adobe New Century Schoolbook;
                     }
                     QTableWidget{
                         color: black;
