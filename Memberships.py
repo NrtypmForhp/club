@@ -7,8 +7,9 @@ from PyQt6.QtWidgets import (QWidget,QApplication,QGridLayout,QVBoxLayout,QLabel
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap,QAction,QCursor,QIcon
 import Memberships_Language as lang
+import Names
 
-# Versione 1.0.1-r1
+# Versione 1.0.2-r1
 
 # Variabili globali
 
@@ -370,6 +371,16 @@ class MainWindow(QWidget):
     # *-*-* Funzione ricerca automatica nel database *-*-*
     
     def auto_search(self):
+        # Controllo del nome per cambio casella sesso
+        
+        sex = Names.NameCheck(self.LE_name.text().upper().strip())
+        if sex == "Male":
+            if language == "ITALIANO": self.CB_sex.setCurrentText("MASCHIO")
+            if language == "ENGLISH": self.CB_sex.setCurrentText("MALE")
+        if sex == "Female":
+            if language == "ITALIANO": self.CB_sex.setCurrentText("FEMMINA")
+            if language == "ENGLISH": self.CB_sex.setCurrentText("FEMALE")
+        
         # Controllo se la ricerca automatica è attiva
         
         if self.CHB_auto_search.isChecked() == False: return
