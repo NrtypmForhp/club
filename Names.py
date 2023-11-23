@@ -1,4 +1,6 @@
-# Versione 1.0.2-r2
+import os
+
+# Versione 1.0.2-r3
 
 female_name_list = ['ADA', 'ADELAIDE', 'ADELE', 'ADRIANA', 'AGAPE', 'AGATA', 'AGATHA', 'AGNESE', 'AGOSTINA', 'AIDA', 'ALBA', 'ALBAROSA', 'ALBERTA', 'ALESSANDRA',
                     'ALESSIA', 'ALICE', 'ALICIA', 'ALISSA', 'ALLEGRA', 'AMALIA', 'AMANDA', 'AMBRA', 'AMELIA', 'AMELIE', 'AMERICA', 'ANASTASIA', 'ANGELA', 'ANGELICA',
@@ -53,8 +55,8 @@ female_name_list = ['ADA', 'ADELAIDE', 'ADELE', 'ADRIANA', 'AGAPE', 'AGATA', 'AG
                     'LOLITA', 'LAIDE', 'LALLA', 'LELA', 'LELLA', 'LEONDINA', 'LEONILDA', 'LIANA', 'LIALA', 'LIDA', 'LIGEIA', 'LIVIANA', 'LJUBA', 'LORA', 'LORELAYNE',
                     'LORELEY', 'LORIANA', 'LORITA', 'LORITY', 'LORYAN', 'LUCETTA', 'LUCINA', 'LUIGINA', 'LUISELLA', 'MADDALENA', 'MADELEINE', 'MAFALDA', 'MAIA',
                     'MALALA', 'MANUELA', 'MARA', 'MARCELLA', 'MARGHERITA', 'MARIA', 'MARIANGELA', 'MARIANNA', 'MARICA', 'MARIE', 'MARILENA', 'MARINA', 'MARINELLA',
-                    'MARISA', 'MARLENE', 'MARTA', 'MARTHA-LOUISE', 'MARTINA', 'MARZIA', 'MASHA', 'MATILDE', 'MAURA', 'MAYA', 'MEDEA', 'MELANIA', 'MELISSA', 'MELITA',
-                    'MIA', 'MICHELA / MICAELA', 'MICOL', 'MILENA', 'MILLY', 'MINA', 'MINERVA', 'MIRANDA', 'MIRELLA', 'MIRIAM', 'MIRIANA', 'MIRTA', 'MOIRA', 'MONICA',
+                    'MARISA', 'MARLENE', 'MARTA', 'MARTHA', 'LOUISE', 'MARTINA', 'MARZIA', 'MASHA', 'MATILDE', 'MAURA', 'MAYA', 'MEDEA', 'MELANIA', 'MELISSA', 'MELITA',
+                    'MIA', 'MICHELA', 'MICAELA', 'MICOL', 'MILENA', 'MILLY', 'MINA', 'MINERVA', 'MIRANDA', 'MIRELLA', 'MIRIAM', 'MIRIANA', 'MIRTA', 'MOIRA', 'MONICA',
                     'MORENA', 'MORGANA', 'MICHELA', 'MICHELLE', 'MARIKA', 'MATILDA', 'MARIASOLE', 'MARISOL', 'MARIACHIARA', 'MYRIAM', 'MICAELA', 'MIRYAM', 'MARIESA',
                     'MARIAFRANCESCA', 'MARIAGRAZIA', 'MARIAROSARIA', 'MAIRA', 'MARIAVITTORIA', 'MARIAPIA', 'MEGAN', 'MARIATERESA', 'MARIARITA', 'MALIKA', 'MILA',
                     'MARISTELLA', 'MARIASTELLA', 'MAELA', 'MAGDA', 'MAIKA', 'MAILA', 'MALVINA', 'MANILA', 'MAREA', 'MARELLA', 'MARETA', 'MARGARET', 'MARIA ADELE',
@@ -63,7 +65,7 @@ female_name_list = ['ADA', 'ADELAIDE', 'ADELE', 'ADRIANA', 'AGAPE', 'AGATA', 'AG
                     'MARIANITA', 'MARIANELLA', 'MARIA MADDALENA', 'MARIA PAOLA', 'MARIA RITA', 'MARIAROSA', 'MARIA SARA', 'MARIA VITTORIA', 'MARIELE', 'MARIELLA',
                     'MARIEVA', 'MARILINA', 'MARILISA', "MARILU'", 'MARIOLINA', 'MARISEL', 'MARISSA', 'MARY', 'MARY KATE', 'MARYLIN', 'MARUSKA', 'MASCHA',
                     'MASSIMILIANA', 'MATTEA', 'MAUDIA', 'MAURICA', 'MECREN', 'MELITTA', 'MERCEDES', 'MIKOL', 'MIETTA', 'MILVA', 'MILVIA', 'MIRKA', 'MIREA', 'MIRNA',
-                    'MIRZIA', 'MOANA', 'MONIA', 'MONIC', 'MOREA', 'MURIELLE', 'NADA', 'NADIA', 'NAOMI', 'NATALIA', 'NATASHA', 'NERINA', 'NERINA/NERISSA', 'NICOLE',
+                    'MIRZIA', 'MOANA', 'MONIA', 'MONIC', 'MOREA', 'MURIELLE', 'NADA', 'NADIA', 'NAOMI', 'NATALIA', 'NATASHA', 'NERINA', 'NERISSA', 'NICOLE',
                     'NICOLETTA', 'NILDE', 'NIMUE', 'NINA', 'NIVES', 'NOA', 'NOEMI', 'NORA', 'NORMA', 'NOVELLA', 'NUNZIA', 'NICOL', 'NATALIE', 'NOEMY', 'NANCY',
                     'NOELIA', 'NICLA', 'NATHALIE', 'NIKITA', 'NATASCIA', 'NICOLINA', 'NAUSICA', 'NICHOLE', 'NEVE', 'NEVA', 'NATASCHA', 'NELLA', 'NUNZIATA', 'NOEL',
                     'NABILA', 'NAIKE', 'NARA', 'NATALINA', 'NAYADE', 'NEIDE', 'NELIDA', 'NEREIDE', 'NICHE', 'NILLA', 'NINFA', 'NIVA', 'NIVEA', 'NOELA', 'NORIKO',
@@ -84,12 +86,32 @@ female_name_list = ['ADA', 'ADELAIDE', 'ADELE', 'ADRIANA', 'AGAPE', 'AGATA', 'AG
                     'TEA', 'TERESA', 'TESS', 'TINA', 'TIZIANA', 'TOSCA', 'TULLIA', 'TYRA', 'TESSA', 'TECLA', 'TEODORA', 'THEA', 'TONIA', 'TABATA', 'TATIANA', 'TANYA',
                     'TABITHA', 'TONYA', 'TALITA', 'TAIDE', 'TARA', 'TERENZIA', 'TERSILLA', 'TILDE', 'TISBE', 'TOMMASINA', 'TRISTANA', 'UBALDA', 'URANIA', 'URSULA',
                     'ULDERICA', 'ULRICA', 'UMA', 'UMBERTA', 'VALENCIA', 'VALENTINA', 'VALERIA', 'VANESSA', 'VANNA', 'VENERE', 'VERA', 'VERBENA', 'VERDIANA',
-                    'VERONICA', 'VICTORIA', 'VINCENZA', 'VIOLA', 'VIOLA/VIOLET/VIOLETTA', 'VIOLANTE', 'VIRGINIA', 'VIRNA', 'VITTORIA', 'VIVIANA', 'VIVIENNE',
+                    'VERONICA', 'VICTORIA', 'VINCENZA', 'VIOLA', 'VIOLET', 'VIOLETTA', 'VIOLANTE', 'VIRGINIA', 'VIRNA', 'VITTORIA', 'VIVIANA', 'VIVIENNE',
                     'VIOLETTA', 'VALERY', 'VITA', 'VERENA', 'VANIA', 'VELIA', 'VENERA', 'VIORICA', 'VALENIA', 'VANDA', 'VENERITA', 'VERIDIANA', 'VERUSKA', 'VESNA',
                     'VIENNA', 'VILIA', 'VILMA', 'VIOLAINE', 'VIOLANTINA', 'VITALBA', 'VITALIA', 'WANDA', 'WENDY', 'WILLOW', 'WILMA', 'WINONA', 'YARA', 'YRMA',
                     'YVONNE', 'YASMINE', 'YLENIA', 'YOYCE', 'XENIA', 'XENA', 'ZAIRA', 'ZARA', 'ZELMIRA', 'ZINAIDA', 'ZOE', 'ZELIA', 'ZABRY', 'ZELDA', 'ZELIDA',
                     'ZELINDA', 'ZEUDI', 'ZITA', 'ZOIA', 'ZULEJKA']
 
-def NameCheck(name:str):
-    if name in female_name_list: return "Female"
-    else: return "Male"
+def StartNameList():
+    if os.path.exists(f"{os.environ['HOME']}/Memberships/names.txt") == False:
+        file = open(f"{os.environ['HOME']}/Memberships/names.txt", "a")
+        for name in female_name_list:
+            file.write(f"{name}\n")
+        file.close()
+    file = open(f"{os.environ['HOME']}/Memberships/names.txt", "r")
+    names_list = []
+    for name in file:
+        names_list.append(name[:-1])
+    file.close()
+    return names_list
+
+def UpdateNameList(name:str):
+    file = open(f"{os.environ['HOME']}/Memberships/names.txt", "a")
+    file.write(f"{name}\n")
+    file.close()
+    file = open(f"{os.environ['HOME']}/Memberships/names.txt", "r")
+    names_list = []
+    for name in file:
+        names_list.append(name[:-1])
+    file.close()
+    return names_list

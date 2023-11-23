@@ -9,7 +9,7 @@ from PyQt6.QtGui import QPixmap,QAction,QCursor,QIcon
 import Memberships_Language as lang
 import Names
 
-# Versione 1.0.2-r1
+# Versione 1.0.2-r2
 
 # Variabili globali
 
@@ -19,6 +19,7 @@ interface = ""
 logo_path = ""
 icon_path = ""
 language = ""
+female_names_list = []
 first_start_application = 0
 
 class MainWindow(QWidget):
@@ -86,6 +87,7 @@ class MainWindow(QWidget):
         self.LE_name = QLineEdit(self)
         self.LE_name.setPlaceholderText(lang.msg(language, 4, "MainWindow"))
         self.LE_name.textChanged.connect(self.auto_search)
+        self.LE_name.textChanged.connect(self.auto_sex_change)
         self.lay.addWidget(self.LE_name, 2, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Casella cognome (Parte centrale sinistra)
@@ -299,6 +301,12 @@ class MainWindow(QWidget):
             "date_of_membership": self.date_of_membership
         })
         
+        # Aggiunta nome femminile nel caso non sia presente in lista
+        
+        global female_names_list
+        if self.CB_sex.currentText() == lang.msg(language, 9, 'MainWindow') and self.name not in female_names_list:
+            female_names_list = Names.UpdateNameList(self.name)
+        
         self.TE_db_response.clear()
         date_of_membership = self.date_of_membership # Trasformazione data in formato leggibile
         if date_of_membership != "-": date_of_membership = f"{date_of_membership[6:]}/{date_of_membership[4:6]}/{date_of_membership[:4]}"
@@ -350,6 +358,12 @@ class MainWindow(QWidget):
                 "date_of_membership": self.date_of_membership
             }})
             
+            # Aggiunta nome femminile nel caso non sia presente in lista
+        
+            global female_names_list
+            if self.CB_sex.currentText() == lang.msg(language, 9, 'MainWindow') and self.name not in female_names_list:
+                female_names_list = Names.UpdateNameList(self.name)
+            
             self.TE_db_response.clear()
             date_of_membership = self.date_of_membership # Trasformazione data in formato leggibile
             if date_of_membership != "-": date_of_membership = f"{date_of_membership[6:]}/{date_of_membership[4:6]}/{date_of_membership[:4]}"
@@ -368,19 +382,19 @@ class MainWindow(QWidget):
 {lang.msg(language, 29, 'MainWindow')}: {date_of_membership}""")
             self.clear_box()
     
-    # *-*-* Funzione ricerca automatica nel database *-*-*
+    # -*-* Funzione cambio automatico casella sesso
     
-    def auto_search(self):
-        # Controllo del nome per cambio casella sesso
-        
-        sex = Names.NameCheck(self.LE_name.text().upper().strip())
-        if sex == "Male":
-            if language == "ITALIANO": self.CB_sex.setCurrentText("MASCHIO")
-            if language == "ENGLISH": self.CB_sex.setCurrentText("MALE")
-        if sex == "Female":
+    def auto_sex_change(self):
+        if self.LE_name.text().upper().strip() in female_names_list:
             if language == "ITALIANO": self.CB_sex.setCurrentText("FEMMINA")
             if language == "ENGLISH": self.CB_sex.setCurrentText("FEMALE")
-        
+        else:
+            if language == "ITALIANO": self.CB_sex.setCurrentText("MASCHIO")
+            if language == "ENGLISH": self.CB_sex.setCurrentText("MALE")
+    
+    # -*-* Funzione ricerca automatica nel database *-*-
+    
+    def auto_search(self):
         # Controllo se la ricerca automatica è attiva
         
         if self.CHB_auto_search.isChecked() == False: return
@@ -1839,18 +1853,8 @@ class OptionsMenu(QWidget):
         try:
             dbclient.server_info()
             # Avvio se la connessione al database avviene
-            
-            # Inserimento prodotti nel dizionario
-
-            db = dbclient["Bar"]
-            col = db["maincategory"]
-            global menu_dict
-            for product in col.find():
-                try:
-                    st_menu = str(product["menu"])
-                    dic_product = str(product["description"]) + str(product["category"])
-                    menu_dict.update({dic_product: st_menu})
-                except: pass
+            global female_names_list
+            female_names_list = Names.StartNameList()
             
             self.window = MainWindow()
             self.window.show()
