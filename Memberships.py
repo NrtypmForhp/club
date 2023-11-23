@@ -1829,18 +1829,6 @@ class OptionsMenu(QWidget):
             dbclient.server_info()
             # Avvio se la connessione al database avviene
             
-            # Inserimento prodotti nel dizionario
-
-            db = dbclient["Bar"]
-            col = db["maincategory"]
-            global menu_dict
-            for product in col.find():
-                try:
-                    st_menu = str(product["menu"])
-                    dic_product = str(product["description"]) + str(product["category"])
-                    menu_dict.update({dic_product: st_menu})
-                except: pass
-            
             self.window = MainWindow()
             self.window.show()
             self.close()
