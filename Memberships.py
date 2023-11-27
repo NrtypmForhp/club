@@ -8,7 +8,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap,QAction,QCursor,QIcon
 import Memberships_Language as lang
 
-# Versione 1.0.1-r1
+# Versione 1.0.2-r3
 
 # Variabili globali
 
@@ -78,6 +78,7 @@ class MainWindow(QWidget):
         self.LE_tax_id_code = QLineEdit(self)
         self.LE_tax_id_code.setPlaceholderText(lang.msg(language, 3, "MainWindow"))
         self.LE_tax_id_code.textChanged.connect(self.auto_search)
+        self.LE_tax_id_code.textChanged.connect(self.auto_sex_change)
         self.lay.addWidget(self.LE_tax_id_code, 1, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Casella nome (Parte centrale sinistra)
@@ -367,7 +368,20 @@ class MainWindow(QWidget):
 {lang.msg(language, 29, 'MainWindow')}: {date_of_membership}""")
             self.clear_box()
     
-    # *-*-* Funzione ricerca automatica nel database *-*-*
+    # -*-* Funzione cambio automatico casella sesso
+    
+    def auto_sex_change(self):
+        try:
+            date = int(self.LE_tax_id_code.text()[9:11])
+            if date > 40:
+                if language == "ITALIANO": self.CB_sex.setCurrentText("FEMMINA")
+                if language == "ENGLISH": self.CB_sex.setCurrentText("FEMALE")
+            else:
+                if language == "ITALIANO": self.CB_sex.setCurrentText("MASCHIO")
+                if language == "ENGLISH": self.CB_sex.setCurrentText("MALE")
+        except: pass
+    
+    # -*-* Funzione ricerca automatica nel database *-*-
     
     def auto_search(self):
         # Controllo se la ricerca automatica è attiva
