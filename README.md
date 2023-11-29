@@ -3,7 +3,7 @@ Software for small organisations like clubs. Simplify management of bar, kitchen
 
 # Memberships Version 1.0.2
 
-- Added an automatic name search for change of sex Combobox.
+- Added some automation with the italian Tax ID Code, now automatically change sex, birth date and birth place when a complete Tax ID Code is inserted!
 
 # Version 1.0.1
 
