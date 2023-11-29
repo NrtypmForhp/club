@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import (QWidget,QApplication,QGridLayout,QVBoxLayout,QLabel
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QPixmap,QAction,QCursor,QIcon
 import Memberships_Language as lang
+import ItalyCityCode as ICC
 
 # Versione 1.0.2-r3
 
@@ -78,7 +79,7 @@ class MainWindow(QWidget):
         self.LE_tax_id_code = QLineEdit(self)
         self.LE_tax_id_code.setPlaceholderText(lang.msg(language, 3, "MainWindow"))
         self.LE_tax_id_code.textChanged.connect(self.auto_search)
-        self.LE_tax_id_code.textChanged.connect(self.auto_sex_change)
+        self.LE_tax_id_code.textChanged.connect(self.auto_field_change)
         self.lay.addWidget(self.LE_tax_id_code, 1, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Casella nome (Parte centrale sinistra)
@@ -368,18 +369,42 @@ class MainWindow(QWidget):
 {lang.msg(language, 29, 'MainWindow')}: {date_of_membership}""")
             self.clear_box()
     
-    # -*-* Funzione cambio automatico casella sesso
+    # -*-* Funzione cambio automatico caselle
     
-    def auto_sex_change(self):
-        try:
-            date = int(self.LE_tax_id_code.text()[9:11])
-            if date > 40:
-                if language == "ITALIANO": self.CB_sex.setCurrentText("FEMMINA")
-                if language == "ENGLISH": self.CB_sex.setCurrentText("FEMALE")
-            else:
-                if language == "ITALIANO": self.CB_sex.setCurrentText("MASCHIO")
-                if language == "ENGLISH": self.CB_sex.setCurrentText("MALE")
-        except: pass
+    def auto_field_change(self):
+        tax_id_code = self.LE_tax_id_code.text().upper().replace(" ", "")
+        if len(tax_id_code) == 16:
+            tax_id_code_to_month = {"A":"01","B":"02","C":"03","D":"04","E":"05","H":"06","L":"07","M":"08","P":"09","R":"10","S":"11","T":"12"}
+            # Casella data di nascita
+            try:
+                current_year = datetime.now()
+                current_year = current_year.strftime("%Y")
+                day = int(tax_id_code[9:11])
+                if day > 40: day = day -40
+                if day < 10: day = f"0{day}"
+                month = tax_id_code_to_month[tax_id_code[8]]
+                year = int(f"{current_year[:2]}{tax_id_code[6:8]}")
+                if int(current_year[2:]) < int(tax_id_code[6:8]): year -= 100
+                date_of_birth = f"{day}/{month}/{year}"
+                self.LE_date_of_birth.setText(date_of_birth)
+            except: pass
+            
+            # Casella sesso
+            try:
+                date = int(tax_id_code[9:11])
+                if date > 40:
+                    if language == "ITALIANO": self.CB_sex.setCurrentText("FEMMINA")
+                    if language == "ENGLISH": self.CB_sex.setCurrentText("FEMALE")
+                else:
+                    if language == "ITALIANO": self.CB_sex.setCurrentText("MASCHIO")
+                    if language == "ENGLISH": self.CB_sex.setCurrentText("MALE")
+            except: pass
+            
+            # Casella luogo di nascita
+            
+            try:
+                self.LE_birth_place.setText(ICC.GetCity(tax_id_code[11:15]))
+            except: pass
     
     # -*-* Funzione ricerca automatica nel database *-*-
     
