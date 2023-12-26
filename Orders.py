@@ -10,7 +10,7 @@ from PyQt6.QtGui import QPixmap,QAction,QCursor,QTextCharFormat,QColor,QTextCurs
 import Orders_Language as lang
 if platform == "win32": import win32print # Importazione del modulo stampa per sistemi operativi Windows
 
-# Versione 1.0.1-r1
+# Versione 1.0.2-r1
 
 # Debug mode
 
@@ -133,6 +133,12 @@ class MainWindow(QWidget):
         self.TE_additional_note.setPlaceholderText(lang.msg(language, 11, "MainWindow"))
         self.lay.addWidget(self.TE_additional_note, 9, 0, 1, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
+        # Casella righe da inviare (Parte sinistra bassa)
+        
+        self.LE_send_order = QLineEdit(self)
+        self.LE_send_order.setPlaceholderText(lang.msg(language, 44, "MainWindow"))
+        self.lay.addWidget(self.LE_send_order, 9, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        
         # Funzioni per stampa e salvataggio (Parte sinistra bassa)
         
         L_print_save = QLabel(self, text=lang.msg(language, 12, "MainWindow"))
@@ -234,6 +240,8 @@ class MainWindow(QWidget):
             self.LE_customer_name.setMinimumWidth(int(W_width - 150))
             # Note aggiuntive scontrino
             self.TE_additional_note.setMinimumSize(int(W_width - 150), int(W_height / 5))
+            # Righe da inviare
+            self.LE_send_order.setMinimumWidth(int(W_width - 260))
             # Funzioni di stampa e salvataggio
             self.CB_printer_list.setMinimumWidth(int(W_width / 2))
             # Tabella categorie
@@ -659,6 +667,49 @@ class MainWindow(QWidget):
     
     def print_receipt(self):
         if self.T_receipt.rowCount() == 0: return # Se la tabella scontrino è vuota
+        # Invio Ordine
+        if self.LE_send_order.text() != "":
+            # Controllo inserimento
+            try:
+                lines_list = self.LE_send_order.text().split("-")
+                for line_list in lines_list:
+                    int(line_list)
+                    if int(line_list)-1 >= self.T_receipt.rowCount() or int(line_list) <= 0:
+                        err_msg = QMessageBox(self)
+                        err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+                        err_msg.setText(lang.msg(language, 45, "MainWindow"))
+                        return err_msg.exec()
+            except:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+                err_msg.setText(lang.msg(language, 45, "MainWindow"))
+                return err_msg.exec()
+            # Invio ordine al database
+            date_time = datetime.now()
+            date = date_time.strftime("%d/%m/%Y")
+            time = date_time.strftime("%H:%M:%S")
+            date_time = f"{date} - {time}"
+            customer_and_table = ""
+            if self.LE_customer_name.text() != "": customer_and_table = customer_and_table + f"{lang.msg(language, 40, 'MainWindow')}: {self.LE_customer_name.text()}"
+            if self.SB_table_select.value() != -1:
+                if customer_and_table == "": customer_and_table = customer_and_table + f"{lang.msg(language, 41, 'MainWindow')}: {self.SB_table_select.value()}"
+                else: customer_and_table = customer_and_table + f" - {lang.msg(language, 41, 'MainWindow')}: {self.SB_table_select.value()}"
+            if customer_and_table == "": customer_and_table = "-"
+            order = ""
+            lines_list = self.LE_send_order.text().split("-")
+            for line_list in lines_list:
+                description = self.T_receipt.item(int(line_list)-1, 0).text()
+                quantity = self.T_receipt.item(int(line_list)-1, 1).text()
+                total_price = self.T_receipt.item(int(line_list)-1, 2).text()
+                order = order + f"{description} - {lang.msg(language, 42, 'MainWindow')}: {quantity} - {total_price} {lang.msg(language, 18, 'MainWindow')}\n"
+            order = order[:-1]
+            order_note = ""
+            if len(self.TE_additional_note.toPlainText()) > 0: order_note = self.TE_additional_note.toPlainText()
+            else: order_note = "-"
+            
+            col = self.db["orders"]
+            col.insert_one({"status":"0", "date_time": date_time, "customer_and_table": customer_and_table, "order": order, "order_note": order_note})
+            
         # Salvataggio su DB
         date_time = datetime.now()
         date = date_time.strftime("%Y%m%d")
@@ -672,6 +723,7 @@ class MainWindow(QWidget):
         products = products[:-9]
         col = self.db["receipts"]
         col.insert_one({"receipt_date": date, "receipt_time": time, "receipt_products": products})
+            
         # Stampa scontrino
         printer = self.CB_printer_list.currentText()
         
@@ -721,6 +773,7 @@ class MainWindow(QWidget):
         self.SB_table_select.setValue(-1)
         self.TE_additional_note.clear()
         self.category_in_receipt.clear()
+        self.LE_send_order.clear()
         for row in reversed(range(self.T_receipt.rowCount())):
             self.T_receipt.removeRow(row)
         self.set_total_price()
@@ -753,6 +806,49 @@ class MainWindow(QWidget):
     # Funzione salvataggio su DB
     def save_receipt(self):
         if self.T_receipt.rowCount() == 0: return # Se la tabella scontrino è vuota
+        # Invio Ordine
+        if self.LE_send_order.text() != "":
+            # Controllo inserimento
+            try:
+                lines_list = self.LE_send_order.text().split("-")
+                for line_list in lines_list:
+                    int(line_list)
+                    if int(line_list)-1 >= self.T_receipt.rowCount() or int(line_list) <= 0:
+                        err_msg = QMessageBox(self)
+                        err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+                        err_msg.setText(lang.msg(language, 45, "MainWindow"))
+                        return err_msg.exec()
+            except:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+                err_msg.setText(lang.msg(language, 45, "MainWindow"))
+                return err_msg.exec()
+            # Invio ordine al database
+            date_time = datetime.now()
+            date = date_time.strftime("%d/%m/%Y")
+            time = date_time.strftime("%H:%M:%S")
+            date_time = f"{date} - {time}"
+            customer_and_table = ""
+            if self.LE_customer_name.text() != "": customer_and_table = customer_and_table + f"{lang.msg(language, 40, 'MainWindow')}: {self.LE_customer_name.text()}"
+            if self.SB_table_select.value() != -1:
+                if customer_and_table == "": customer_and_table = customer_and_table + f"{lang.msg(language, 41, 'MainWindow')}: {self.SB_table_select.value()}"
+                else: customer_and_table = customer_and_table + f" - {lang.msg(language, 41, 'MainWindow')}: {self.SB_table_select.value()}"
+            if customer_and_table == "": customer_and_table = "-"
+            order = ""
+            lines_list = self.LE_send_order.text().split("-")
+            for line_list in lines_list:
+                description = self.T_receipt.item(int(line_list)-1, 0).text()
+                quantity = self.T_receipt.item(int(line_list)-1, 1).text()
+                total_price = self.T_receipt.item(int(line_list)-1, 2).text()
+                order = order + f"{description} - {lang.msg(language, 42, 'MainWindow')}: {quantity} - {total_price} {lang.msg(language, 18, 'MainWindow')}\n"
+            order = order[:-1]
+            order_note = ""
+            if len(self.TE_additional_note.toPlainText()) > 0: order_note = self.TE_additional_note.toPlainText()
+            else: order_note = "-"
+            
+            col = self.db["orders"]
+            col.insert_one({"status":"0", "date_time": date_time, "customer_and_table": customer_and_table, "order": order, "order_note": order_note})
+            
         date_time = datetime.now()
         date = date_time.strftime("%Y%m%d")
         time = date_time.strftime("%H%M%S")
@@ -772,6 +868,7 @@ class MainWindow(QWidget):
         self.SB_table_select.setValue(-1)
         self.TE_additional_note.clear()
         self.category_in_receipt.clear()
+        self.LE_send_order.clear()
         for row in reversed(range(self.T_receipt.rowCount())):
             self.T_receipt.removeRow(row)
         self.set_total_price()
@@ -1293,7 +1390,7 @@ class OptionsMenu(QWidget):
     
         if os.path.exists(f"{os.environ['HOME']}/Orders/options.txt"):
             options_file = open(f"{os.environ['HOME']}/Orders/options.txt", "r")
-            self.mongodb_connection =options_file.readline().replace("db_connection=", "").replace("\n", "")
+            self.mongodb_connection = options_file.readline().replace("db_connection=", "").replace("\n", "")
             self.heading = options_file.readline().replace("heading=", "").replace("\n", "")
             self.interface_style = options_file.readline().replace("interface=", "").replace("\n", "")
             self.logo_path = options_file.readline().replace("logo=", "").replace("\n", "")
