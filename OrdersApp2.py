@@ -20,8 +20,8 @@ heading = "98 Ottani The Club" # Stringa di selezione titolo
 # Lingue
 
 def lang(lg:str, index:int):
-    it = ["1@-@Annulla","2@-@Elimina"]
-    en = ["1@-@Undo","2@-@Delete"]
+    it = ["0@-@Annulla","1@-@Elimina","2@-@Connessione al database fallita!"]
+    en = ["0@-@Undo","1@-@Delete","2@-@Connection to database failed!"]
     if lg == "IT": return it[index][it[index].index("@-@")+3:]
     if lg == "EN": return en[index][en[index].index("@-@")+3:]
 
@@ -42,11 +42,15 @@ class MainWindow(MDApp):
                 col.update_one({"_id": obj_instance}, {"$set": {"status": "1"}})
     
     def scheduled_database_connection(self, dt): # Connessione al database e caricamento variabili
-        self.dbclient = pymongo.MongoClient(mongodb_connection)
-        self.dbclient.server_info() # Test per la connessione al database
-        self.title = heading
-        self.db = self.dbclient["Bar"]
-        self.root.current = "orders_table"
+        try:
+            self.dbclient = pymongo.MongoClient(mongodb_connection)
+            self.dbclient.server_info() # Test per la connessione al database
+            self.title = heading
+            self.db = self.dbclient["Bar"]
+            self.root.current = "orders_table"
+        except:
+            self.root.current = "database_connection"
+            return
         
         self.root.ids["TAB_orders"].title = heading
         # Avvio degli ordini in corso
@@ -114,6 +118,17 @@ ScreenManager:
             ScrollView:
                 MDList:
                     id: LS_products
+    Screen:
+        name: "database_connection"
+        BoxLayout:
+            orientation: "vertical"
+            MDLabel:
+                id: L_connection
+                text: "{lang(language, 2)}"
+                font_style: "H6"
+                halign: "center"
+                theme_text_color: "Custom"
+                text_color: "#B0B006"
                     """
         
         return Builder.load_string(self.KV)
