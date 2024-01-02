@@ -11,6 +11,13 @@ from bson.objectid import ObjectId
 
 # Versione 1.0.0 r1
 
+# Avvio permessi
+
+from kivy.utils import platform
+if platform == "android":
+    from android.permissions import request_permissions, Permission
+    request_permissions([Permission.READ_EXTERNAL_STORAGE, Permission.WRITE_EXTERNAL_STORAGE, Permission.INTERNET])
+
 # Variabili Globali
 
 mongodb_connection = "mongodb://localhost:27017/" # Stringa di connessione al database
@@ -20,8 +27,8 @@ heading = "98 Ottani The Club" # Stringa di selezione titolo
 # Lingue
 
 def lang(lg:str, index:int):
-    it = ["0@-@Annulla","1@-@Elimina","2@-@Connessione al database fallita!"]
-    en = ["0@-@Undo","1@-@Delete","2@-@Connection to database failed!"]
+    it = ["0@-@Annulla","1@-@Elimina","2@-@Connessione al database fallita!","3@-@Connessione al database in corso...."]
+    en = ["0@-@Undo","1@-@Delete","2@-@Connection to database failed!","3@-@Connection to database...."]
     if lg == "IT": return it[index][it[index].index("@-@")+3:]
     if lg == "EN": return en[index][en[index].index("@-@")+3:]
 
@@ -41,7 +48,11 @@ class MainWindow(MDApp):
                 obj_instance = ObjectId(line["_id"])
                 col.update_one({"_id": obj_instance}, {"$set": {"status": "1"}})
     
-    def scheduled_database_connection(self, dt): # Connessione al database e caricamento variabili
+    def scheduled_database_connection_1(self, dt): # Impostazione schermata iniziale
+        self.root.current = "database_connection"
+        Clock.schedule_once(self.scheduled_database_connection_2, 1.0) # Avvio della connessione al database
+    
+    def scheduled_database_connection_2(self, dt): # Connessione al database e caricamento variabili
         try:
             self.dbclient = pymongo.MongoClient(mongodb_connection)
             self.dbclient.server_info() # Test per la connessione al database
@@ -50,6 +61,7 @@ class MainWindow(MDApp):
             self.root.current = "orders_table"
         except:
             self.root.current = "database_connection"
+            self.root.ids["L_connection"].text = lang(language, 2)
             return
         
         self.root.ids["TAB_orders"].title = heading
@@ -103,7 +115,7 @@ class MainWindow(MDApp):
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Yellow"
         # Avvio delle funzioni del database
-        Clock.schedule_once(self.scheduled_database_connection, 0.2) # Avvio della connessione al database
+        Clock.schedule_once(self.scheduled_database_connection_1, 0.2) # Avvio della connessione al database
         Clock.schedule_interval(self.scheduled_function, 5.0) # Controllo del database periodico
         
         self.KV = f"""
@@ -124,7 +136,7 @@ ScreenManager:
             orientation: "vertical"
             MDLabel:
                 id: L_connection
-                text: "{lang(language, 2)}"
+                text: "{lang(language, 3)}"
                 font_style: "H6"
                 halign: "center"
                 theme_text_color: "Custom"
