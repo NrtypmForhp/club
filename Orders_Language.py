@@ -9,7 +9,7 @@ ita_mw = ["0@-@Opzioni","1@-@Creazione Categorie","2@-@Descrizione","3@-@Crea >>
           "33@-@Il prodotto selezionato si trova già nella prima casella!","34@-@Il prodotto selezionato si trova già nell'ultima casella","35@-@Quantità specifica",
           "36@-@Inserisci un numero intero che verrà aggiunto alla quantità nella tabella dello scontrino","37@-@Inserisci","38@-@Annulla",
           "39@-@Devi inserire un numero intero!","40@-@Cliente","41@-@Numero tavolo","42@-@qta","43@-@EUR",
-          "44@-@Righe da inviare divise da -","45@-@Nelle righe da inviare c'è qualcosa di sbagliato!\nCompilare come in questo esempio: 1-2-4"]
+          "44@-@Righe da inviare divise da -","45@-@Nelle righe da inviare c'è qualcosa di sbagliato!\nCompilare come in questo esempio: 1-2-4 o 1-2:4-6"]
 eng_mw = ["0@-@Options","1@-@Category Creation","2@-@Description","3@-@Create >>","4@-@Products Insert","5@-@Price","6@-@Insert >>","7@-@Party Settings",
           "8@-@Party name","9@-@Customer and Table Number Selection","10@-@Customer name","11@-@Additional notes that will appear at the end of the receipt",
           "12@-@Print or Save Receipt","13@-@Print","14@-@Save","15@-@Open Database","16@-@Quantity","17@-@Total","18@-@£","19@-@Error",
@@ -18,7 +18,7 @@ eng_mw = ["0@-@Options","1@-@Category Creation","2@-@Description","3@-@Create >>
           "30@-@Add +1 (double left click)","31@-@Remove -1 (right click)","32@-@Create a menu","33@-@Selected product is already in the first slot",
           "34@-@Selected product is already in the last slot","35@-@Specific quantity","36@-@Insert an integer number that will be added to the receipt table",
           "37@-@Insert","38@-@Cancel","39@-@You must insert an integer number!","40@-@Customer","41@-@Table number","42@-@qty","43@-@GBP",
-          "44@-@Lines to send divided by -","45@-@There's something wrong in the lines to send!\nFill in as in this example: 1-2-4"]
+          "44@-@Lines to send divided by -","45@-@There's something wrong in the lines to send!\nFill in as in this example: 1-2-4 or 1-2:4-6"]
 
 # DatabaseWindow
 

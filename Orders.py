@@ -10,7 +10,7 @@ from PyQt6.QtGui import QPixmap,QAction,QCursor,QTextCharFormat,QColor,QTextCurs
 import Orders_Language as lang
 if platform == "win32": import win32print # Importazione del modulo stampa per sistemi operativi Windows
 
-# Versione 1.0.2-r1
+# Versione 1.0.2-r2
 
 # Debug mode
 
@@ -669,21 +669,40 @@ class MainWindow(QWidget):
         if self.T_receipt.rowCount() == 0: return # Se la tabella scontrino è vuota
         # Invio Ordine
         if self.LE_send_order.text() != "":
+            lines_to_send = "" # Linee da inviare
             # Controllo inserimento
             try:
                 lines_list = self.LE_send_order.text().split("-")
                 for line_list in lines_list:
-                    int(line_list)
-                    if int(line_list)-1 >= self.T_receipt.rowCount() or int(line_list) <= 0:
-                        err_msg = QMessageBox(self)
-                        err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
-                        err_msg.setText(lang.msg(language, 45, "MainWindow"))
-                        return err_msg.exec()
+                    line_list = line_list.strip()
+                    if ":" in line_list:
+                        if line_list.count(":") > 1: # Blocco funzione se sono stati inseriti più di 1 divisorio
+                            err_msg = QMessageBox(self)
+                            err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+                            err_msg.setText(lang.msg(language, 45, "MainWindow"))
+                            return err_msg.exec()
+                        list_number_1 = int(line_list[:line_list.index(":")])
+                        list_number_2 = int(line_list[line_list.index(":")+1:])
+                        # Errore se il secondo numero della lista è maggiore del primo, o se il secondo supera il numero di linee nella tabella, o se viene messo uno 0
+                        if list_number_1 >= list_number_2 or list_number_2 - 1 >= self.T_receipt.rowCount() or list_number_1 <= 0 or list_number_2 <= 0:
+                            err_msg = QMessageBox(self)
+                            err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+                            err_msg.setText(lang.msg(language, 45, "MainWindow"))
+                            return err_msg.exec()
+                        for ln in range(list_number_1, list_number_2 + 1): lines_to_send = lines_to_send + f"{ln}-"
+                    else:
+                        if int(line_list)-1 >= self.T_receipt.rowCount() or int(line_list) <= 0:
+                            err_msg = QMessageBox(self)
+                            err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+                            err_msg.setText(lang.msg(language, 45, "MainWindow"))
+                            return err_msg.exec()
+                        lines_to_send = lines_to_send + f"{line_list}-"
             except:
                 err_msg = QMessageBox(self)
                 err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
                 err_msg.setText(lang.msg(language, 45, "MainWindow"))
                 return err_msg.exec()
+            lines_to_send = lines_to_send[:-1]
             # Invio ordine al database
             date_time = datetime.now()
             date = date_time.strftime("%d/%m/%Y")
@@ -696,7 +715,7 @@ class MainWindow(QWidget):
                 else: customer_and_table = customer_and_table + f" - {lang.msg(language, 41, 'MainWindow')}: {self.SB_table_select.value()}"
             if customer_and_table == "": customer_and_table = "-"
             order = ""
-            lines_list = self.LE_send_order.text().split("-")
+            lines_list = lines_to_send.split("-")
             for line_list in lines_list:
                 description = self.T_receipt.item(int(line_list)-1, 0).text()
                 quantity = self.T_receipt.item(int(line_list)-1, 1).text()
@@ -808,21 +827,40 @@ class MainWindow(QWidget):
         if self.T_receipt.rowCount() == 0: return # Se la tabella scontrino è vuota
         # Invio Ordine
         if self.LE_send_order.text() != "":
+            lines_to_send = "" # Linee da inviare
             # Controllo inserimento
             try:
                 lines_list = self.LE_send_order.text().split("-")
                 for line_list in lines_list:
-                    int(line_list)
-                    if int(line_list)-1 >= self.T_receipt.rowCount() or int(line_list) <= 0:
-                        err_msg = QMessageBox(self)
-                        err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
-                        err_msg.setText(lang.msg(language, 45, "MainWindow"))
-                        return err_msg.exec()
+                    line_list = line_list.strip()
+                    if ":" in line_list:
+                        if line_list.count(":") > 1: # Blocco funzione se sono stati inseriti più di 1 divisorio
+                            err_msg = QMessageBox(self)
+                            err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+                            err_msg.setText(lang.msg(language, 45, "MainWindow"))
+                            return err_msg.exec()
+                        list_number_1 = int(line_list[:line_list.index(":")])
+                        list_number_2 = int(line_list[line_list.index(":")+1:])
+                        # Errore se il secondo numero della lista è maggiore del primo, o se il secondo supera il numero di linee nella tabella, o se viene messo uno 0
+                        if list_number_1 >= list_number_2 or list_number_2 - 1 >= self.T_receipt.rowCount() or list_number_1 <= 0 or list_number_2 <= 0:
+                            err_msg = QMessageBox(self)
+                            err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+                            err_msg.setText(lang.msg(language, 45, "MainWindow"))
+                            return err_msg.exec()
+                        for ln in range(list_number_1, list_number_2 + 1): lines_to_send = lines_to_send + f"{ln}-"
+                    else:
+                        if int(line_list)-1 >= self.T_receipt.rowCount() or int(line_list) <= 0:
+                            err_msg = QMessageBox(self)
+                            err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+                            err_msg.setText(lang.msg(language, 45, "MainWindow"))
+                            return err_msg.exec()
+                        lines_to_send = lines_to_send + f"{line_list}-"
             except:
                 err_msg = QMessageBox(self)
                 err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
                 err_msg.setText(lang.msg(language, 45, "MainWindow"))
                 return err_msg.exec()
+            lines_to_send = lines_to_send[:-1]
             # Invio ordine al database
             date_time = datetime.now()
             date = date_time.strftime("%d/%m/%Y")
@@ -835,7 +873,7 @@ class MainWindow(QWidget):
                 else: customer_and_table = customer_and_table + f" - {lang.msg(language, 41, 'MainWindow')}: {self.SB_table_select.value()}"
             if customer_and_table == "": customer_and_table = "-"
             order = ""
-            lines_list = self.LE_send_order.text().split("-")
+            lines_list = lines_to_send.split("-")
             for line_list in lines_list:
                 description = self.T_receipt.item(int(line_list)-1, 0).text()
                 quantity = self.T_receipt.item(int(line_list)-1, 1).text()
