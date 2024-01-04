@@ -683,7 +683,7 @@ class MainWindow(QWidget):
                             return err_msg.exec()
                         list_number_1 = int(line_list[:line_list.index(":")])
                         list_number_2 = int(line_list[line_list.index(":")+1:])
-                        # Errore se il secondo numero della lista è maggiore del primo, o se il secondo supera il numero di linee nella tabella, o se viene messo uno 0
+                        # Errore se il primo numero della lista è maggiore del secondo, o se il secondo supera il numero di linee nella tabella, o se viene messo uno 0
                         if list_number_1 >= list_number_2 or list_number_2 - 1 >= self.T_receipt.rowCount() or list_number_1 <= 0 or list_number_2 <= 0:
                             err_msg = QMessageBox(self)
                             err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
@@ -841,7 +841,7 @@ class MainWindow(QWidget):
                             return err_msg.exec()
                         list_number_1 = int(line_list[:line_list.index(":")])
                         list_number_2 = int(line_list[line_list.index(":")+1:])
-                        # Errore se il secondo numero della lista è maggiore del primo, o se il secondo supera il numero di linee nella tabella, o se viene messo uno 0
+                        # Errore se il primo numero della lista è maggiore del secondo, o se il secondo supera il numero di linee nella tabella, o se viene messo uno 0
                         if list_number_1 >= list_number_2 or list_number_2 - 1 >= self.T_receipt.rowCount() or list_number_1 <= 0 or list_number_2 <= 0:
                             err_msg = QMessageBox(self)
                             err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
