@@ -80,13 +80,13 @@ class MainWindow(MDApp):
         col = self.db["orders"]
         obj_instance = ObjectId(instance.text[4:])
         order = col.find_one({"_id": obj_instance})
-        order_string = f"""ID: {order['_id']}
+        order_string = f"""[color=1F7F06]ID: {order['_id']}
 {order["customer_and_table"]}
-{order["date_time"]}
------------------------------------
-{order["order"]}
------------------------------------
-{order["order_note"]}"""
+{order["date_time"]}[/color]
+[color=DE7A10][b]-----------------------------------[/b][/color]
+[color=B0B006]{order["order"]}[/color]
+[color=DE7A10][b]-----------------------------------[/b][/color]
+[color=B29933]{order["order_note"]}[/color]"""
         self.root.ids["L_order"].text = order_string
         self.instance = instance
         self.list_item = self.root.ids.LS_products
@@ -127,7 +127,7 @@ ScreenManager:
             MDLabel:
                 id: L_connection
                 text: "{lang(language, 3)}"
-                font_style: "H4"
+                font_style: "H3"
                 halign: "center"
                 theme_text_color: "Custom"
                 text_color: "#B0B006"
@@ -141,8 +141,7 @@ ScreenManager:
                     id: L_order
                     font_style: "H6"
                     halign: "left"
-                    theme_text_color: "Custom"
-                    text_color: "#B0B006"
+                    markup: True
                     size_hint: 1, None
                     size: self.texture_size
             MDFillRoundFlatButton:
