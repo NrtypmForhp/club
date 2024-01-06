@@ -1,7 +1,6 @@
 from kivymd.app import MDApp
 from kivy.lang import Builder
 from kivy.clock import Clock
-from kivy.uix.screenmanager import ScreenManager, Screen
 from kivymd.uix.list import ThreeLineListItem
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
@@ -20,8 +19,8 @@ heading = "98 Ottani The Club" # Stringa di selezione titolo
 # Lingue
 
 def lang(lg:str, index:int):
-    it = ["0@-@Annulla","1@-@Elimina","2@-@Connessione al database fallita!","3@-@Connessione al database in corso...."]
-    en = ["0@-@Undo","1@-@Delete","2@-@Connection to database failed!","3@-@Connection to database...."]
+    it = ["0@-@INDIETRO","1@-@ELIMINA ORDINE","2@-@Connessione al database fallita!","3@-@Connessione al database in corso...."]
+    en = ["0@-@BACK","1@-@DELETE ORDER","2@-@Connection to database failed!","3@-@Connection to database...."]
     if lg == "IT": return it[index][it[index].index("@-@")+3:]
     if lg == "EN": return en[index][en[index].index("@-@")+3:]
 
@@ -36,7 +35,7 @@ class MainWindow(MDApp):
                                               theme_text_color="Custom", text_color="#B0B006",
                                               secondary_theme_text_color="Custom", secondary_text_color="#B0B006",
                                               tertiary_theme_text_color="Custom", tertiary_text_color="#B0B006")
-                list_item.bind(on_release = lambda x, item=list_item: self.show_alert(item))
+                list_item.bind(on_release = lambda x, item=list_item: self.show_detailed_order(item))
                 self.root.ids.LS_products.add_widget(list_item)
                 obj_instance = ObjectId(line["_id"])
                 col.update_one({"_id": obj_instance}, {"$set": {"status": "1"}})
@@ -66,33 +65,32 @@ class MainWindow(MDApp):
                                           theme_text_color="Custom", text_color="#B0B006",
                                           secondary_theme_text_color="Custom", secondary_text_color="#B0B006",
                                           tertiary_theme_text_color="Custom", tertiary_text_color="#B0B006")
-            list_item.bind(on_release = lambda x, item=list_item: self.show_alert(item))
+            list_item.bind(on_release = lambda x, item=list_item: self.show_detailed_order(item))
             self.root.ids.LS_products.add_widget(list_item)
         col.update_many({"status": "0"}, {"$set": {"status": "1"}})
     
-    def show_alert(self, instance): # Visualizzazione dettagliata della comanda
+    def order_undo(self):
+        self.root.current = "orders_table"
+    
+    def order_delete(self):
+        self.remove_widget_instance(self.instance, self.list_item)
+        self.root.current = "orders_table"
+    
+    def show_detailed_order(self, instance): # Visualizzazione dettagliata della comanda
         col = self.db["orders"]
         obj_instance = ObjectId(instance.text[4:])
         order = col.find_one({"_id": obj_instance})
-        order_string = f"[color=#B0B006]ID: {order['_id']}\n{order['customer_and_table']}\n{order['date_time']}\n\n{order['order']}\n\n{order['order_note']}[/color]"
-        self.dialog = MDDialog(
-            text=order_string,
-            buttons=[
-                MDFlatButton(
-                    text=lang(language, 0),
-                    theme_text_color="Custom",
-                    text_color=self.theme_cls.primary_color,
-                    on_release = lambda _: self.dialog.dismiss()
-                ),
-                MDFlatButton(
-                    text=lang(language, 1),
-                    theme_text_color="Custom",
-                    text_color=self.theme_cls.primary_color,
-                    on_release = lambda x: self.remove_widget_instance(instance, self.root.ids.LS_products),
-                ),
-            ],
-        )
-        self.dialog.open()
+        order_string = f"""ID: {order['_id']}
+{order["customer_and_table"]}
+{order["date_time"]}
+-----------------------------------
+{order["order"]}
+-----------------------------------
+{order["order_note"]}"""
+        self.root.ids["L_order"].text = order_string
+        self.instance = instance
+        self.list_item = self.root.ids.LS_products
+        self.root.current = "orders_detail"
             
     def remove_widget_instance(self, instance, parent_widget): # Eliminazione comanda alla pressione del tasto
         # Rimozione dal database
@@ -101,7 +99,6 @@ class MainWindow(MDApp):
         col.delete_one({"_id": obj_instance})
         # Rimozione dall'interfaccia
         parent_widget.remove_widget(instance)
-        self.dialog.dismiss()
     
     def build(self):
         # Impostazioni stile
@@ -130,10 +127,34 @@ ScreenManager:
             MDLabel:
                 id: L_connection
                 text: "{lang(language, 3)}"
-                font_style: "H6"
+                font_style: "H4"
                 halign: "center"
                 theme_text_color: "Custom"
                 text_color: "#B0B006"
+    Screen:
+        name: "orders_detail"
+        BoxLayout:
+            spacing: 4
+            orientation: "vertical"
+            ScrollView:
+                MDLabel:
+                    id: L_order
+                    font_style: "H6"
+                    halign: "left"
+                    theme_text_color: "Custom"
+                    text_color: "#B0B006"
+                    size_hint: 1, None
+                    size: self.texture_size
+            MDFillRoundFlatButton:
+                id: B_order_undo
+                text: "{lang(language, 0)}"
+                size_hint_x: 1
+                on_release: app.order_undo()
+            MDFillRoundFlatButton:
+                id: B_order_delete
+                text: "{lang(language, 1)}"
+                size_hint_x: 1
+                on_release: app.order_delete()
                     """
         
         return Builder.load_string(self.KV)

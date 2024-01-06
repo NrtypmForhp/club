@@ -721,6 +721,18 @@ class MainWindow(QWidget):
                 quantity = self.T_receipt.item(int(line_list)-1, 1).text()
                 total_price = self.T_receipt.item(int(line_list)-1, 2).text()
                 order = order + f"{description} - {lang.msg(language, 42, 'MainWindow')}: {quantity} - {total_price} {lang.msg(language, 18, 'MainWindow')}\n"
+                # Se è presente un menu per il prodotto
+                dic_key = description + self.category_in_receipt[int(line_list)-1]
+                if dic_key in menu_dict:
+                    line = menu_dict[dic_key].split("@nl@")
+                    for detailed_product in line:
+                        detail = detailed_product.split("@sp@")
+                        detailed_description = detail[0]
+                        detailed_quantity = detail[1]
+                        detailed_price = detail[2]
+                        if detailed_quantity != "-": detailed_quantity = f"{float(detailed_quantity) * float(quantity):.2f}"
+                        if detailed_price != "-" and detailed_quantity != "-": detailed_price = f"{float(detailed_price) * float(detailed_quantity):.2f}"
+                        order = order + f"*-*-* {detailed_description} - {lang.msg(language, 42, 'MainWindow')} {detailed_quantity} - {lang.msg(language, 43, 'MainWindow')} {detailed_price}\n"
             order = order[:-1]
             order_note = ""
             if len(self.TE_additional_note.toPlainText()) > 0: order_note = self.TE_additional_note.toPlainText()
@@ -879,6 +891,18 @@ class MainWindow(QWidget):
                 quantity = self.T_receipt.item(int(line_list)-1, 1).text()
                 total_price = self.T_receipt.item(int(line_list)-1, 2).text()
                 order = order + f"{description} - {lang.msg(language, 42, 'MainWindow')}: {quantity} - {total_price} {lang.msg(language, 18, 'MainWindow')}\n"
+                # Se è presente un menu per il prodotto
+                dic_key = description + self.category_in_receipt[int(line_list)-1]
+                if dic_key in menu_dict:
+                    line = menu_dict[dic_key].split("@nl@")
+                    for detailed_product in line:
+                        detail = detailed_product.split("@sp@")
+                        detailed_description = detail[0]
+                        detailed_quantity = detail[1]
+                        detailed_price = detail[2]
+                        if detailed_quantity != "-": detailed_quantity = f"{float(detailed_quantity) * float(quantity):.2f}"
+                        if detailed_price != "-" and detailed_quantity != "-": detailed_price = f"{float(detailed_price) * float(detailed_quantity):.2f}"
+                        order = order + f"*-*-* {detailed_description} - {lang.msg(language, 42, 'MainWindow')} {detailed_quantity} - {lang.msg(language, 43, 'MainWindow')} {detailed_price}\n"
             order = order[:-1]
             order_note = ""
             if len(self.TE_additional_note.toPlainText()) > 0: order_note = self.TE_additional_note.toPlainText()
