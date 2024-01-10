@@ -10,7 +10,7 @@ from PyQt6.QtGui import QPixmap,QAction,QCursor,QTextCharFormat,QColor,QTextCurs
 import Orders_Language as lang
 if platform == "win32": import win32print # Importazione del modulo stampa per sistemi operativi Windows
 
-# Versione 1.0.2-r2
+# Versione 1.0.2-r3
 
 # Debug mode
 
@@ -26,7 +26,7 @@ logo_path = ""
 icon_path = ""
 menu_dict = {}
 first_start_application = 0
-total_rows = 11
+total_rows = 13
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -133,17 +133,25 @@ class MainWindow(QWidget):
         self.TE_additional_note.setPlaceholderText(lang.msg(language, 11, "MainWindow"))
         self.lay.addWidget(self.TE_additional_note, 9, 0, 1, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
-        # Casella righe da inviare (Parte sinistra bassa)
+        # Ordini da inviare (Parte sinistra bassa)
+        
+        L_order_to_send = QLabel(self, text=lang.msg(language, 46, "MainWindow"))
+        L_order_to_send.setAccessibleName("an_section_title")
+        self.lay.addWidget(L_order_to_send, 10, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         self.LE_send_order = QLineEdit(self)
         self.LE_send_order.setPlaceholderText(lang.msg(language, 44, "MainWindow"))
-        self.lay.addWidget(self.LE_send_order, 9, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.lay.addWidget(self.LE_send_order, 11, 0, 1, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        
+        self.B_see_orders = QPushButton(self, text=lang.msg(language, 47, "MainWindow"))
+        self.B_see_orders.clicked.connect(self.open_orders_table)
+        self.lay.addWidget(self.B_see_orders, 11, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Funzioni per stampa e salvataggio (Parte sinistra bassa)
         
         L_print_save = QLabel(self, text=lang.msg(language, 12, "MainWindow"))
         L_print_save.setAccessibleName("an_section_title")
-        self.lay.addWidget(L_print_save, 10, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.lay.addWidget(L_print_save, 12, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         self.CB_printer_list = QComboBox(self) # ComboBox lista stampanti
         printers_list = []
@@ -159,15 +167,15 @@ class MainWindow(QWidget):
                 if len(line) > 0 and list_count !=0: printers_list.append(line)
                 list_count += 1
         self.CB_printer_list.addItems(printers_list)
-        self.lay.addWidget(self.CB_printer_list, 11, 0, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.lay.addWidget(self.CB_printer_list, 13, 0, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         self.B_print = QPushButton(self, text=lang.msg(language, 13, "MainWindow")) # Pulsante stampa
         self.B_print.clicked.connect(self.print_receipt)
-        self.lay.addWidget(self.B_print, 11, 1, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.lay.addWidget(self.B_print, 13, 1, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         self.B_save = QPushButton(self, text=lang.msg(language, 14, "MainWindow")) # Pulsante salva
         self.B_save.clicked.connect(self.save_receipt)
-        self.lay.addWidget(self.B_save, 11, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.lay.addWidget(self.B_save, 13, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Selezione Categoria (Parte centrale alta)
         
@@ -240,8 +248,8 @@ class MainWindow(QWidget):
             self.LE_customer_name.setMinimumWidth(int(W_width - 150))
             # Note aggiuntive scontrino
             self.TE_additional_note.setMinimumSize(int(W_width - 150), int(W_height / 5))
-            # Righe da inviare
-            self.LE_send_order.setMinimumWidth(int(W_width - 260))
+            # Ordini da inviare
+            self.LE_send_order.setMinimumWidth(int(W_width - 150))
             # Funzioni di stampa e salvataggio
             self.CB_printer_list.setMinimumWidth(int(W_width / 2))
             # Tabella categorie
@@ -739,7 +747,7 @@ class MainWindow(QWidget):
             else: order_note = "-"
             
             col = self.db["orders"]
-            col.insert_one({"status":"0", "date_time": date_time, "customer_and_table": customer_and_table, "order": order, "order_note": order_note})
+            col.insert_one({"status":"ordered", "date_time": date_time, "customer_and_table": customer_and_table, "order": order, "order_note": order_note})
             
         # Salvataggio su DB
         date_time = datetime.now()
@@ -909,7 +917,7 @@ class MainWindow(QWidget):
             else: order_note = "-"
             
             col = self.db["orders"]
-            col.insert_one({"status":"0", "date_time": date_time, "customer_and_table": customer_and_table, "order": order, "order_note": order_note})
+            col.insert_one({"status":"ordered", "date_time": date_time, "customer_and_table": customer_and_table, "order": order, "order_note": order_note})
             
         date_time = datetime.now()
         date = date_time.strftime("%Y%m%d")
@@ -953,6 +961,77 @@ class MainWindow(QWidget):
         self.options_window = OptionsMenu()
         self.options_window.show()
         self.close()
+    
+    # *-*-* Funzione apertura finestra ordini *-*-*
+    
+    def open_orders_table(self):
+        self.orders_window = OrdersWindow()
+        self.orders_window.show()
+
+# *-*-* Finestra Ordini *-*-*
+
+class OrdersWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+        
+        self.db = dbclient["Bar"] # Apertura database
+        
+        self.setWindowIcon(QIcon(icon_path))
+        self.setWindowTitle(f"{lang.msg(language, 0, 'OrdersWindow')} {heading}")
+        self.setMinimumSize(640, 480)
+        self.lay = QGridLayout(self)
+        self.setLayout(self.lay)
+        self.lay.setContentsMargins(10,10,10,10)
+        self.lay.setSpacing(1)
+        self.setStyleSheet(sis.interface_style(interface))
+        
+        # Tabella ordini
+        
+        self.T_orders = QTableWidget(self)
+        self.T_orders.setColumnCount(4)
+        self.T_orders.setHorizontalHeaderLabels(["ID", lang.msg(language, 10, "MainWindow"), lang.msg(language, 1, 'OrdersWindow'), lang.msg(language, 2, 'OrdersWindow')])
+        self.T_orders.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        #self.T_orders.doubleClicked.connect(self.add_product)
+        self.T_orders.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        #self.T_orders.customContextMenuRequested.connect(self.T_orders_CM)
+        self.T_orders_headers = self.T_orders.horizontalHeader()
+        self.lay.addWidget(self.T_orders, 0, 0, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignCenter)
+        
+        # Avvio ricerca ordini
+        self.search_orders()
+        
+    def resizeEvent(self, event):
+        W_width = self.width()
+        W_height = self.height()
+        
+        try:
+            # Tabella ordini
+            self.T_orders.setMinimumSize(int(W_width - 15), int((W_height - 15)))
+            self.T_orders_headers.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
+            self.T_orders_headers.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+            self.T_orders_headers.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
+            self.T_orders_headers.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)
+        except AttributeError:
+            pass
+    
+    def search_orders(self):
+        # Rimozione righe iniziale
+        if self.T_orders.rowCount() != 0:
+            for row in reversed(range(self.T_orders.rowCount())):
+                self.T_orders.removeRow(row)
+        
+        col = self.db["orders"]
+        for line in col.find():
+            status_st = ""
+            if line["status"] == "ordered" or line["status"] == "seen": status_st = lang.msg(language, 3, "OrdersWindow")
+            if line["status"] == "in_progress": status_st = lang.msg(language, 4, "OrdersWindow")
+            if line["status"] == "done": status_st = lang.msg(language, 5, "OrdersWindow")
+            row = self.T_orders.rowCount()
+            self.T_orders.insertRow(row)
+            self.T_orders.setItem(row, 0, QTableWidgetItem(str(line["_id"])))
+            self.T_orders.setItem(row, 1, QTableWidgetItem(str(line["customer_and_table"])))
+            self.T_orders.setItem(row, 2, QTableWidgetItem(str(line["date_time"])))
+            self.T_orders.setItem(row, 3, QTableWidgetItem(status_st))
 
 # *-*-* Finestra Database *-*-*
 
