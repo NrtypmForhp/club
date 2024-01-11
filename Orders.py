@@ -1,4 +1,5 @@
 import pymongo,sys,subprocess,os,time
+from bson.objectid import ObjectId
 import SoftwareInterfaceStyle as sis
 from sys import platform
 from pathlib import Path
@@ -713,15 +714,14 @@ class MainWindow(QWidget):
             lines_to_send = lines_to_send[:-1]
             # Invio ordine al database
             date_time = datetime.now()
-            date = date_time.strftime("%d/%m/%Y")
-            time = date_time.strftime("%H:%M:%S")
-            date_time = f"{date} - {time}"
-            customer_and_table = ""
-            if self.LE_customer_name.text() != "": customer_and_table = customer_and_table + f"{lang.msg(language, 40, 'MainWindow')}: {self.LE_customer_name.text()}"
-            if self.SB_table_select.value() != -1:
-                if customer_and_table == "": customer_and_table = customer_and_table + f"{lang.msg(language, 41, 'MainWindow')}: {self.SB_table_select.value()}"
-                else: customer_and_table = customer_and_table + f" - {lang.msg(language, 41, 'MainWindow')}: {self.SB_table_select.value()}"
-            if customer_and_table == "": customer_and_table = "-"
+            date = date_time.strftime("%Y%m%d")
+            time = date_time.strftime("%H%M%S")
+            customer = ""
+            table = ""
+            if self.LE_customer_name.text() != "": customer = self.LE_customer_name.text()
+            else: customer = "-"
+            if self.SB_table_select.value() != -1: table = f"{self.SB_table_select.value()}"
+            else: table = "-"
             order = ""
             lines_list = lines_to_send.split("-")
             for line_list in lines_list:
@@ -747,7 +747,7 @@ class MainWindow(QWidget):
             else: order_note = "-"
             
             col = self.db["orders"]
-            col.insert_one({"status":"ordered", "date_time": date_time, "customer_and_table": customer_and_table, "order": order, "order_note": order_note})
+            col.insert_one({"status":"ordered", "date": date, "time": time, "customer": customer, "table": table, "order": order, "order_note": order_note})
             
         # Salvataggio su DB
         date_time = datetime.now()
@@ -883,15 +883,14 @@ class MainWindow(QWidget):
             lines_to_send = lines_to_send[:-1]
             # Invio ordine al database
             date_time = datetime.now()
-            date = date_time.strftime("%d/%m/%Y")
-            time = date_time.strftime("%H:%M:%S")
-            date_time = f"{date} - {time}"
-            customer_and_table = ""
-            if self.LE_customer_name.text() != "": customer_and_table = customer_and_table + f"{lang.msg(language, 40, 'MainWindow')}: {self.LE_customer_name.text()}"
-            if self.SB_table_select.value() != -1:
-                if customer_and_table == "": customer_and_table = customer_and_table + f"{lang.msg(language, 41, 'MainWindow')}: {self.SB_table_select.value()}"
-                else: customer_and_table = customer_and_table + f" - {lang.msg(language, 41, 'MainWindow')}: {self.SB_table_select.value()}"
-            if customer_and_table == "": customer_and_table = "-"
+            date = date_time.strftime("%Y%m%d")
+            time = date_time.strftime("%H%M%S")
+            customer = ""
+            table = ""
+            if self.LE_customer_name.text() != "": customer = self.LE_customer_name.text()
+            else: customer = "-"
+            if self.SB_table_select.value() != -1: table = f"{self.SB_table_select.value()}"
+            else: table = "-"
             order = ""
             lines_list = lines_to_send.split("-")
             for line_list in lines_list:
@@ -917,7 +916,7 @@ class MainWindow(QWidget):
             else: order_note = "-"
             
             col = self.db["orders"]
-            col.insert_one({"status":"ordered", "date_time": date_time, "customer_and_table": customer_and_table, "order": order, "order_note": order_note})
+            col.insert_one({"status":"ordered", "date": date, "time": time, "customer": customer, "table": table, "order": order, "order_note": order_note})
             
         date_time = datetime.now()
         date = date_time.strftime("%Y%m%d")
@@ -989,11 +988,11 @@ class OrdersWindow(QWidget):
         
         self.T_orders = QTableWidget(self)
         self.T_orders.setColumnCount(4)
-        self.T_orders.setHorizontalHeaderLabels(["ID", lang.msg(language, 10, "MainWindow"), lang.msg(language, 1, 'OrdersWindow'), lang.msg(language, 2, 'OrdersWindow')])
+        self.T_orders.setHorizontalHeaderLabels(["ID", lang.msg(language, 10, "MainWindow"), lang.msg(language, 1, "OrdersWindow"), lang.msg(language, 2, "OrdersWindow")])
         self.T_orders.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
-        #self.T_orders.doubleClicked.connect(self.add_product)
+        self.T_orders.doubleClicked.connect(self.show_detailed_order)
         self.T_orders.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-        #self.T_orders.customContextMenuRequested.connect(self.T_orders_CM)
+        self.T_orders.customContextMenuRequested.connect(self.T_orders_CM)
         self.T_orders_headers = self.T_orders.horizontalHeader()
         self.lay.addWidget(self.T_orders, 0, 0, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignCenter)
         
@@ -1014,6 +1013,8 @@ class OrdersWindow(QWidget):
         except AttributeError:
             pass
     
+    # *-*-* Ricerca ordini *-*-*
+    
     def search_orders(self):
         # Rimozione righe iniziale
         if self.T_orders.rowCount() != 0:
@@ -1021,7 +1022,8 @@ class OrdersWindow(QWidget):
                 self.T_orders.removeRow(row)
         
         col = self.db["orders"]
-        for line in col.find():
+        for line in col.find().sort("_id", pymongo.DESCENDING):
+            date_time = f"{line['date'][6:]}/{line['date'][4:6]}/{line['date'][:4]} - {line['time'][:2]}:{line['time'][2:4]}:{line['time'][4:]}"
             status_st = ""
             if line["status"] == "ordered" or line["status"] == "seen": status_st = lang.msg(language, 3, "OrdersWindow")
             if line["status"] == "in_progress": status_st = lang.msg(language, 4, "OrdersWindow")
@@ -1029,9 +1031,41 @@ class OrdersWindow(QWidget):
             row = self.T_orders.rowCount()
             self.T_orders.insertRow(row)
             self.T_orders.setItem(row, 0, QTableWidgetItem(str(line["_id"])))
-            self.T_orders.setItem(row, 1, QTableWidgetItem(str(line["customer_and_table"])))
-            self.T_orders.setItem(row, 2, QTableWidgetItem(str(line["date_time"])))
+            self.T_orders.setItem(row, 1, QTableWidgetItem(f"{lang.msg(language, 10, 'MainWindow')}: {line['customer']}"))
+            self.T_orders.setItem(row, 2, QTableWidgetItem(date_time))
             self.T_orders.setItem(row, 3, QTableWidgetItem(status_st))
+    
+    # *-*-* Visualizzazione dettagliata degli ordini *-*-*
+    
+    def show_detailed_order(self):
+        row = self.T_orders.currentRow()
+        
+        if row == -1: return # Blocco delle funzioni se nulla è selezionato
+        
+        col = self.db["orders"]
+        obj_instance = ObjectId(self.T_orders.item(row, 0).text())
+        order = col.find_one({"_id": obj_instance})
+        order_string = f"""ID: {order['_id']}
+{lang.msg(language, 10, "MainWindow")}: {order["customer"]} - {lang.msg(language, 41, "MainWindow")}: {order["table"]}
+{lang.msg(language, 7, "OrdersWindow")}: {order['date'][6:]}/{order['date'][4:6]}/{order['date'][:4]} - {lang.msg(language, 8, "OrdersWindow")}: {order['time'][:2]}:{order['time'][2:4]}:{order['time'][4:]}
+-----------------------------------
+{order["order"]}
+-----------------------------------
+{order["order_note"]}"""
+        msg = QMessageBox(self)
+        msg.setWindowTitle(lang.msg(language, 6, "OrdersWindow"))
+        msg.setText(order_string)
+        return msg.exec()
+    
+    # *-*-* Custom Menu della tabella *-*-*
+    
+    def T_orders_CM(self):
+        if self.T_orders.currentRow() == -1: return
+        menu = QMenu(self)
+        sdo_action = QAction(lang.msg(language, 9, "OrdersWindow"), self)
+        sdo_action.triggered.connect(self.show_detailed_order)
+        menu.addActions([sdo_action])
+        menu.popup(QCursor.pos())
 
 # *-*-* Finestra Database *-*-*
 

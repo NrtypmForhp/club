@@ -19,8 +19,10 @@ heading = "98 Ottani The Club" # Stringa di selezione titolo
 # Lingue
 
 def lang(lg:str, index:int):
-    it = ["0@-@INDIETRO","1@-@ELIMINA ORDINE","2@-@Connessione al database fallita!","3@-@Connessione al database in corso...."]
-    en = ["0@-@BACK","1@-@DELETE ORDER","2@-@Connection to database failed!","3@-@Connection to database...."]
+    it = ["0@-@INDIETRO","1@-@CAMBIA STATO IN -> ","2@-@Connessione al database fallita!","3@-@Connessione al database in corso....","4@-@ORDINATO","5@-@IN CORSO",
+          "6@-@Stato","7@-@ORDINE FATTO","8@-@ELIMINA ORDINE","9@-@Nome cliente","10@-@Tavolo","11@-@Data ordine","12@-@Orario ordine"]
+    en = ["0@-@BACK","1@-@CHANGE STATUS IN -> ","2@-@Connection to database failed!","3@-@Connection to database....","4@-@ORDERED","5@-@IN PROGRESS",
+          "6@-@Status","7@-@ORDER DONE","8@-@DELETE ORDER","9@-@Customer name","10@-@Table","11@-@Order date","12@-@Order time"]
     if lg == "IT": return it[index][it[index].index("@-@")+3:]
     if lg == "EN": return en[index][en[index].index("@-@")+3:]
 
@@ -29,16 +31,22 @@ def lang(lg:str, index:int):
 class MainWindow(MDApp):
     def scheduled_function(self, dt): # Funzione che controlla il database periodicamente
         if self.root.current == "orders_table":
+            self.root.ids.LS_products.clear_widgets()
             col = self.db["orders"]
-            for line in col.find({"status": "0"}):
-                list_item = ThreeLineListItem(text=f"ID: {line['_id']}",secondary_text=f"{line['customer_and_table']}",tertiary_text=f"{line['date_time']}",
+            for line in col.find().sort("_id", pymongo.DESCENDING):
+                status_st = ""
+                if line["status"] == "ordered": status_st = lang(language, 4)
+                if line["status"] == "in_progress": status_st = lang(language, 5)
+                if line["status"] == "done": status_st = lang(language, 7)
+                customer_and_table = f"{lang(language, 9)}: {line['customer']} - {lang(language, 10)}: {line['table']}"
+                date_and_time = f"{lang(language, 11)}: {line['date'][6:]}/{line['date'][4:6]}/{line['date'][:4]} - {lang(language, 12)}: {line['time'][:2]}:{line['time'][2:4]}:{line['time'][4:]}"
+                list_item = ThreeLineListItem(text=f"ID: {line['_id']}",secondary_text=f"{customer_and_table} - {date_and_time}",tertiary_text=f"{lang(language, 6)}: {status_st}",
                                               theme_text_color="Custom", text_color="#B0B006",
                                               secondary_theme_text_color="Custom", secondary_text_color="#B0B006",
                                               tertiary_theme_text_color="Custom", tertiary_text_color="#B0B006")
                 list_item.bind(on_release = lambda x, item=list_item: self.show_detailed_order(item))
                 self.root.ids.LS_products.add_widget(list_item)
                 obj_instance = ObjectId(line["_id"])
-                col.update_one({"_id": obj_instance}, {"$set": {"status": "1"}})
     
     def scheduled_database_connection_1(self, dt): # Impostazione schermata iniziale
         self.root.current = "database_connection"
@@ -60,20 +68,35 @@ class MainWindow(MDApp):
         # Avvio degli ordini in corso
         col = self.db["orders"]
         self.root.ids.LS_products.clear_widgets()
-        for line in col.find():
-            list_item = ThreeLineListItem(text=f"ID: {line['_id']}",secondary_text=f"{line['customer_and_table']}",tertiary_text=f"{line['date_time']}",
-                                          theme_text_color="Custom", text_color="#B0B006",
-                                          secondary_theme_text_color="Custom", secondary_text_color="#B0B006",
-                                          tertiary_theme_text_color="Custom", tertiary_text_color="#B0B006")
+        for line in col.find().sort("_id", pymongo.DESCENDING):
+            status_st = ""
+            if line["status"] == "ordered": status_st = lang(language, 4)
+            if line["status"] == "in_progress": status_st = lang(language, 5)
+            if line["status"] == "done": status_st = lang(language, 7)
+            customer_and_table = f"{lang(language, 9)}: {line['customer']} - {lang(language, 10)}: {line['table']}"
+            date_and_time = f"{lang(language, 11)}: {line['date'][6:]}/{line['date'][4:6]}/{line['date'][:4]} - {lang(language, 12)}: {line['time'][:2]}:{line['time'][2:4]}:{line['time'][4:]}"
+            list_item = ThreeLineListItem(text=f"ID: {line['_id']}",secondary_text=f"{customer_and_table} - {date_and_time}",tertiary_text=f"{lang(language, 6)}: {status_st}",
+                                            theme_text_color="Custom", text_color="#B0B006",
+                                            secondary_theme_text_color="Custom", secondary_text_color="#B0B006",
+                                            tertiary_theme_text_color="Custom", tertiary_text_color="#B0B006")
             list_item.bind(on_release = lambda x, item=list_item: self.show_detailed_order(item))
             self.root.ids.LS_products.add_widget(list_item)
-        col.update_many({"status": "0"}, {"$set": {"status": "1"}})
     
     def order_undo(self):
         self.root.current = "orders_table"
     
-    def order_delete(self):
-        self.remove_widget_instance(self.instance, self.list_item)
+    def order_change_state(self):
+        col = self.db["orders"]
+        obj_instance = ObjectId(self.instance.text[4:])
+        order = col.find_one({"_id": obj_instance})
+        if order["status"] == "ordered" or order["status"] == "seen":
+            col.update_one({"_id": obj_instance}, {"$set": {"status": "in_progress"}})
+            self.instance.tertiary_text = f"{lang(language, 6)}: {lang(language, 5)}"
+        if order["status"] == "in_progress":
+            col.update_one({"_id": obj_instance}, {"$set": {"status": "done"}})
+            self.instance.tertiary_text = f"{lang(language, 6)}: {lang(language, 7)}"
+        if order["status"] == "done":
+            self.remove_widget_instance(self.instance, self.list_item)
         self.root.current = "orders_table"
     
     def show_detailed_order(self, instance): # Visualizzazione dettagliata della comanda
@@ -81,8 +104,8 @@ class MainWindow(MDApp):
         obj_instance = ObjectId(instance.text[4:])
         order = col.find_one({"_id": obj_instance})
         order_string = f"""[color=1F7F06]ID: {order['_id']}
-{order["customer_and_table"]}
-{order["date_time"]}[/color]
+{lang(language, 9)}: {order["customer"]} - {lang(language, 10)}: {order["table"]}
+{lang(language, 11)}: {order['date'][6:]}/{order['date'][4:6]}/{order['date'][:4]} - {lang(language, 12)}: {order['time'][:2]}:{order['time'][2:4]}:{order['time'][4:]}[/color]
 [color=DE7A10][b]-----------------------------------[/b][/color]
 [color=B0B006]{order["order"]}[/color]
 [color=DE7A10][b]-----------------------------------[/b][/color]
@@ -90,6 +113,9 @@ class MainWindow(MDApp):
         self.root.ids["L_order"].text = order_string
         self.instance = instance
         self.list_item = self.root.ids.LS_products
+        if order["status"] == "ordered" or order["status"] == "seen": self.root.ids["B_order_change_state"].text = lang(language, 1) + lang(language, 5)
+        if order["status"] == "in_progress": self.root.ids["B_order_change_state"].text = lang(language, 1) + lang(language, 7)
+        if order["status"] == "done": self.root.ids["B_order_change_state"].text = lang(language, 8)
         self.root.current = "orders_detail"
             
     def remove_widget_instance(self, instance, parent_widget): # Eliminazione comanda alla pressione del tasto
@@ -150,10 +176,9 @@ ScreenManager:
                 size_hint_x: 1
                 on_release: app.order_undo()
             MDFillRoundFlatButton:
-                id: B_order_delete
-                text: "{lang(language, 1)}"
+                id: B_order_change_state
                 size_hint_x: 1
-                on_release: app.order_delete()
+                on_release: app.order_change_state()
                     """
         
         return Builder.load_string(self.KV)
