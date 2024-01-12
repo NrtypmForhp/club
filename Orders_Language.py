@@ -61,9 +61,9 @@ eng_omw = ["0@-@Options menu","1@-@Language selection","2@-@Database connection"
 # OrdersWindow
 
 ita_ow = ["0@-@Ordini","1@-@Data e Ora","2@-@Stato","3@-@ORDINATO","4@-@IN CORSO","5@-@ORDINE FATTO","6@-@Dettaglio ordine","7@-@Data ordine","8@-@Orario ordine",
-          "9@-@Vedi ordine (doppo click sx)"]
+          "9@-@Vedi ordine (doppo click sx)","10@-@Aggiorna","11@-@Cambia stato in: Ordinato","12@-@Cambia stato in: In Corso","13@-@Cambia stato in: Ordine Fatto"]
 eng_ow = ["0@-@Orders","1@-@Date and Time","2@-@Status","3@-@ORDERED","4@-@IN PROGRESS","5@-@ORDER DONE","6@-@Order detail","7@-@Order date","8@-@Order time",
-          "9@-@Show order (double left click)"]
+          "9@-@Show order (double left click)","10@-@Update","11@-@Change status in: Ordered","12@-@Change status in: In Progress","13@-@Change status in: Order Done"]
 
 def msg(lang:str, msg_index:int, msg_window:str):
     if msg_window == "MainWindow":

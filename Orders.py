@@ -996,6 +996,12 @@ class OrdersWindow(QWidget):
         self.T_orders_headers = self.T_orders.horizontalHeader()
         self.lay.addWidget(self.T_orders, 0, 0, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignCenter)
         
+        # Pulsante aggiornamento tabella
+        
+        self.B_update = QPushButton(self, text=lang.msg(language, 10, "OrdersWindow"))
+        self.B_update.clicked.connect(self.search_orders)
+        self.lay.addWidget(self.B_update, 1, 0, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        
         # Avvio ricerca ordini
         self.search_orders()
         
@@ -1005,7 +1011,7 @@ class OrdersWindow(QWidget):
         
         try:
             # Tabella ordini
-            self.T_orders.setMinimumSize(int(W_width - 15), int((W_height - 15)))
+            self.T_orders.setMinimumSize(int(W_width - 15), int((W_height - 65)))
             self.T_orders_headers.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
             self.T_orders_headers.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
             self.T_orders_headers.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)
@@ -1025,7 +1031,7 @@ class OrdersWindow(QWidget):
         for line in col.find().sort("_id", pymongo.DESCENDING):
             date_time = f"{line['date'][6:]}/{line['date'][4:6]}/{line['date'][:4]} - {line['time'][:2]}:{line['time'][2:4]}:{line['time'][4:]}"
             status_st = ""
-            if line["status"] == "ordered" or line["status"] == "seen": status_st = lang.msg(language, 3, "OrdersWindow")
+            if line["status"] == "ordered": status_st = lang.msg(language, 3, "OrdersWindow")
             if line["status"] == "in_progress": status_st = lang.msg(language, 4, "OrdersWindow")
             if line["status"] == "done": status_st = lang.msg(language, 5, "OrdersWindow")
             row = self.T_orders.rowCount()
@@ -1057,14 +1063,53 @@ class OrdersWindow(QWidget):
         msg.setText(order_string)
         return msg.exec()
     
+    # *-*-* Cambio stato ordine *-*-*
+    
+    def change_status(self, status:str):
+        row = self.T_orders.currentRow()
+        
+        if row == -1: return # Blocco delle funzioni se nulla è selezionato
+        
+        status_st = ""
+        if status == "ordered": status_st = lang.msg(language, 3, "OrdersWindow")
+        if status == "in_progress": status_st = lang.msg(language, 4, "OrdersWindow")
+        if status == "done": status_st = lang.msg(language, 5, "OrdersWindow")
+        
+        col = self.db["orders"]
+        obj_instance = ObjectId(self.T_orders.item(row, 0).text())
+        col.update_one({"_id": obj_instance},{"$set": {"status": status}})
+        self.T_orders.setItem(row, 3, QTableWidgetItem(status_st))
+    
+    # *-*-* Eliminazione ordine *-*-*
+    
+    def delete_order(self):
+        row = self.T_orders.currentRow()
+        
+        if row == -1: return # Blocco delle funzioni se nulla è selezionato
+        
+        col = self.db["orders"]
+        obj_instance = ObjectId(self.T_orders.item(row, 0).text())
+        
+        col.delete_one({"_id": obj_instance})
+        self.T_orders.removeRow(row)
+        self.T_orders.setCurrentCell(-1, -1)
+    
     # *-*-* Custom Menu della tabella *-*-*
     
     def T_orders_CM(self):
         if self.T_orders.currentRow() == -1: return
         menu = QMenu(self)
         sdo_action = QAction(lang.msg(language, 9, "OrdersWindow"), self)
+        cs_ordered_action = QAction(lang.msg(language, 11, "OrdersWindow"), self)
+        cs_inprogress_action = QAction(lang.msg(language, 12, "OrdersWindow"), self)
+        cs_done_action = QAction(lang.msg(language, 13, "OrdersWindow"), self)
+        delete_action = QAction(lang.msg(language, 26, "MainWindow"), self)
         sdo_action.triggered.connect(self.show_detailed_order)
-        menu.addActions([sdo_action])
+        cs_ordered_action.triggered.connect(lambda x: self.change_status("ordered"))
+        cs_inprogress_action.triggered.connect(lambda x: self.change_status("in_progress"))
+        cs_done_action.triggered.connect(lambda x: self.change_status("done"))
+        delete_action.triggered.connect(self.delete_order)
+        menu.addActions([sdo_action,cs_ordered_action,cs_inprogress_action,cs_done_action,delete_action])
         menu.popup(QCursor.pos())
 
 # *-*-* Finestra Database *-*-*
