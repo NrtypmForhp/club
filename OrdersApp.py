@@ -15,6 +15,7 @@ from bson.objectid import ObjectId
 mongodb_connection = "mongodb://localhost:27017/" # Stringa di connessione al database
 language = "IT" # Stringa di selezione lingua
 heading = "98 Ottani The Club" # Stringa di selezione titolo
+update_time = 30.0 # Tempo di update del database
 
 # Lingue
 
@@ -132,7 +133,7 @@ class MainWindow(MDApp):
         self.theme_cls.primary_palette = "Yellow"
         # Avvio delle funzioni del database
         Clock.schedule_once(self.scheduled_database_connection_1, 0.2) # Avvio della connessione al database
-        Clock.schedule_interval(self.scheduled_function, 5.0) # Controllo del database periodico
+        Clock.schedule_interval(self.scheduled_function, update_time) # Controllo del database periodico
         
         self.KV = f"""
 ScreenManager:
