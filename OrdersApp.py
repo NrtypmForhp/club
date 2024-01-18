@@ -5,10 +5,11 @@ from kivymd.uix.list import ThreeLineListItem
 from kivymd.uix.button import MDFlatButton
 from kivymd.uix.dialog import MDDialog
 from kivy.properties import StringProperty
-import pymongo
+import pymongo, certifi
+from kivy.utils import platform
 from bson.objectid import ObjectId
 
-# Versione 1.0.0 r1
+# Versione 1.0.0 r2
 
 # Variabili Globali
 
@@ -36,15 +37,24 @@ class MainWindow(MDApp):
             col = self.db["orders"]
             for line in col.find().sort("_id", pymongo.DESCENDING):
                 status_st = ""
-                if line["status"] == "ordered": status_st = lang(language, 4)
-                if line["status"] == "in_progress": status_st = lang(language, 5)
-                if line["status"] == "done": status_st = lang(language, 7)
+                color_st = ""
+                if line["status"] == "ordered":
+                    status_st = lang(language, 4)
+                    color_st = "#BA681F"
+                if line["status"] == "in_progress":
+                    status_st = lang(language, 5)
+                    color_st = "#08506D"
+                if line["status"] == "done":
+                    status_st = lang(language, 7)
+                    color_st = "#158B09"
                 customer_and_table = f"{lang(language, 9)}: {line['customer']} - {lang(language, 10)}: {line['table']}"
                 date_and_time = f"{lang(language, 11)}: {line['date'][6:]}/{line['date'][4:6]}/{line['date'][:4]} - {lang(language, 12)}: {line['time'][:2]}:{line['time'][2:4]}:{line['time'][4:]}"
-                list_item = ThreeLineListItem(text=f"ID: {line['_id']}",secondary_text=f"{customer_and_table} - {date_and_time}",tertiary_text=f"{lang(language, 6)}: {status_st}",
+                list_item = ThreeLineListItem(text=f"ID: {line['_id']}",
+                                              secondary_text=f"{customer_and_table} - {date_and_time}",
+                                              tertiary_text=f"{lang(language, 6)}: {status_st}",
                                               theme_text_color="Custom", text_color="#B0B006",
                                               secondary_theme_text_color="Custom", secondary_text_color="#B0B006",
-                                              tertiary_theme_text_color="Custom", tertiary_text_color="#B0B006")
+                                              tertiary_theme_text_color="Custom", tertiary_text_color=color_st)
                 list_item.bind(on_release = lambda x, item=list_item: self.show_detailed_order(item))
                 self.root.ids.LS_products.add_widget(list_item)
                 obj_instance = ObjectId(line["_id"])
@@ -55,7 +65,8 @@ class MainWindow(MDApp):
     
     def scheduled_database_connection_2(self, dt): # Connessione al database e caricamento variabili
         try:
-            self.dbclient = pymongo.MongoClient(mongodb_connection)
+            if platform == "android": self.dbclient = pymongo.MongoClient(mongodb_connection, tlsCAFile=certifi.where()) # Solo per Android
+            else: self.dbclient = pymongo.MongoClient(mongodb_connection)
             self.dbclient.server_info() # Test per la connessione al database
             self.title = heading
             self.db = self.dbclient["Bar"]
@@ -71,15 +82,24 @@ class MainWindow(MDApp):
         self.root.ids.LS_products.clear_widgets()
         for line in col.find().sort("_id", pymongo.DESCENDING):
             status_st = ""
-            if line["status"] == "ordered": status_st = lang(language, 4)
-            if line["status"] == "in_progress": status_st = lang(language, 5)
-            if line["status"] == "done": status_st = lang(language, 7)
+            color_st = ""
+            if line["status"] == "ordered":
+                status_st = lang(language, 4)
+                color_st = "#BA681F"
+            if line["status"] == "in_progress":
+                status_st = lang(language, 5)
+                color_st = "#08506D"
+            if line["status"] == "done":
+                status_st = lang(language, 7)
+                color_st = "#158B09"
             customer_and_table = f"{lang(language, 9)}: {line['customer']} - {lang(language, 10)}: {line['table']}"
             date_and_time = f"{lang(language, 11)}: {line['date'][6:]}/{line['date'][4:6]}/{line['date'][:4]} - {lang(language, 12)}: {line['time'][:2]}:{line['time'][2:4]}:{line['time'][4:]}"
-            list_item = ThreeLineListItem(text=f"ID: {line['_id']}",secondary_text=f"{customer_and_table} - {date_and_time}",tertiary_text=f"{lang(language, 6)}: {status_st}",
+            list_item = ThreeLineListItem(text=f"ID: {line['_id']}",
+                                            secondary_text=f"{customer_and_table} - {date_and_time}",
+                                            tertiary_text=f"{lang(language, 6)}: {status_st}",
                                             theme_text_color="Custom", text_color="#B0B006",
                                             secondary_theme_text_color="Custom", secondary_text_color="#B0B006",
-                                            tertiary_theme_text_color="Custom", tertiary_text_color="#B0B006")
+                                            tertiary_theme_text_color="Custom", tertiary_text_color=color_st)
             list_item.bind(on_release = lambda x, item=list_item: self.show_detailed_order(item))
             self.root.ids.LS_products.add_widget(list_item)
     
@@ -90,12 +110,14 @@ class MainWindow(MDApp):
         col = self.db["orders"]
         obj_instance = ObjectId(self.instance.text[4:])
         order = col.find_one({"_id": obj_instance})
-        if order["status"] == "ordered" or order["status"] == "seen":
+        if order["status"] == "ordered":
             col.update_one({"_id": obj_instance}, {"$set": {"status": "in_progress"}})
             self.instance.tertiary_text = f"{lang(language, 6)}: {lang(language, 5)}"
+            self.instance.tertiary_text_color = "#08506D"
         if order["status"] == "in_progress":
             col.update_one({"_id": obj_instance}, {"$set": {"status": "done"}})
             self.instance.tertiary_text = f"{lang(language, 6)}: {lang(language, 7)}"
+            self.instance.tertiary_text_color = "#158B09"
         if order["status"] == "done":
             self.remove_widget_instance(self.instance, self.list_item)
         self.root.current = "orders_table"
@@ -151,13 +173,14 @@ ScreenManager:
         name: "database_connection"
         BoxLayout:
             orientation: "vertical"
-            MDLabel:
-                id: L_connection
-                text: "{lang(language, 3)}"
-                font_style: "H3"
-                halign: "center"
-                theme_text_color: "Custom"
-                text_color: "#B0B006"
+            ScrollView:
+                MDLabel:
+                    id: L_connection
+                    text: "{lang(language, 3)}"
+                    font_style: "H3"
+                    halign: "center"
+                    theme_text_color: "Custom"
+                    text_color: "#B0B006"
     Screen:
         name: "orders_detail"
         BoxLayout:
