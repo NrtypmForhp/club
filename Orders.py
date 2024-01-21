@@ -11,7 +11,7 @@ from PyQt6.QtGui import QPixmap,QAction,QCursor,QTextCharFormat,QColor,QTextCurs
 import Orders_Language as lang
 if platform == "win32": import win32print # Importazione del modulo stampa per sistemi operativi Windows
 
-# Versione 1.0.2-r3
+# Versione 1.0.2-r4
 
 # Debug mode
 
@@ -1145,7 +1145,7 @@ class DatabaseWindow(QWidget):
         
         self.setWindowIcon(QIcon(icon_path))
         self.setWindowTitle(f"Database {heading}")
-        self.setFixedSize(480, 640)
+        self.setFixedSize(540, 640)
         self.lay = QGridLayout(self)
         self.setLayout(self.lay)
         self.lay.setContentsMargins(10,10,10,10)
@@ -1180,14 +1180,14 @@ class DatabaseWindow(QWidget):
         # Label istruzioni orari
         
         L_time_range = QLabel(self, text=lang.msg(language, 0, "DatabaseWindow"))
-        self.lay.addWidget(L_time_range, 0, 1, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.lay.addWidget(L_time_range, 0, 1, 1, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Casella selezione orari
         
         self.LE_time_range = QLineEdit(self)
-        self.LE_time_range.setFixedWidth(150)
+        self.LE_time_range.setFixedWidth(250)
         self.LE_time_range.setPlaceholderText(lang.msg(language, 1, "DatabaseWindow"))
-        self.lay.addWidget(self.LE_time_range, 1, 1, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.lay.addWidget(self.LE_time_range, 1, 1, 1, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Bottone interroga
         
@@ -1195,18 +1195,29 @@ class DatabaseWindow(QWidget):
         self.B_query_database.clicked.connect(self.query_database)
         self.lay.addWidget(self.B_query_database, 2, 1, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
+        # Label ordinamento dizionario
+        
+        L_sort_orders = QLabel(self, text=lang.msg(language, 17, "DatabaseWindow"))
+        self.lay.addWidget(L_sort_orders, 2, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        
         # Bottone elimina dal database
         
         self.B_delete_database = QPushButton(self, text=lang.msg(language, 26, "MainWindow"))
         self.B_delete_database.clicked.connect(self.delete_database)
         self.lay.addWidget(self.B_delete_database, 3, 1, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
+        # Combobox ordinamento dizionario
+        
+        self.CB_sort_orders = QComboBox(self)
+        self.CB_sort_orders.addItems([lang.msg(language, 18, "DatabaseWindow"),lang.msg(language, 19, "DatabaseWindow"),lang.msg(language, 20, "DatabaseWindow")])
+        self.lay.addWidget(self.CB_sort_orders, 3, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        
         # Text Edit per risposta Database
         
         self.TE_database_response = QTextEdit(self)
         self.TE_database_response.setReadOnly(True)
         self.TE_database_response.setFixedHeight(450)
-        self.lay.addWidget(self.TE_database_response, 4, 0, 1, 2, Qt.AlignmentFlag.AlignTop)
+        self.lay.addWidget(self.TE_database_response, 4, 0, 1, 3, Qt.AlignmentFlag.AlignTop)
     
     def date_select(self):
         if self.date_selection == 0: # Selezione della seconda data
@@ -1308,6 +1319,9 @@ class DatabaseWindow(QWidget):
             text_cursor.setPosition(0)
             self.TE_database_response.setTextCursor(text_cursor)
             total_string = f"-*-* {lang.msg(language, 9, 'DatabaseWindow')} {firstdate} *-*-\n"
+            if self.CB_sort_orders.currentIndex() == 0: detail_tot = dict(sorted(detail_tot.items(), key=lambda item: item[1]["total"])) # Ordinato per prezzo
+            if self.CB_sort_orders.currentIndex() == 1: detail_tot = dict(sorted(detail_tot.items(), key=lambda item: item[1]["quantity"])) # Ordinato per quantità
+            if self.CB_sort_orders.currentIndex() == 2: detail_tot = dict(sorted(detail_tot.items())) # Ordinato per descrizione
             for detail in detail_tot: # Loop del dizionario con il totale vendite
                 total_string = total_string + f"\n{detail} - {lang.msg(language, 42, 'MainWindow')} {detail_tot[detail]['quantity']} - {lang.msg(language, 18, 'MainWindow')} {detail_tot[detail]['total']:.2f}"
             total_string = total_string + f"\n\n-*-* {lang.msg(language, 10, 'DatabaseWindow')} {lang.msg(language, 18, 'MainWindow')} {total_receipts:.2f} *-*-\n --------------------------\n\n\n"

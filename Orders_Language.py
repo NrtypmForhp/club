@@ -24,15 +24,17 @@ eng_mw = ["0@-@Options","1@-@Category Creation","2@-@Description","3@-@Create >>
 
 # DatabaseWindow
 
-ita_dw = ["0@-@Selezione orari\nNella casella qui sotto\npuoi selezionare un\nrange di orari.\nEsempio 17:30-20:00","1@-@Orari","2@-@Interroga","3@-@Dettaglio vendite",
+ita_dw = ["0@-@Selezione orari\nNella casella qui sotto puoi selezionare un\nrange di orari. Esempio 17:30-20:00","1@-@Orari","2@-@Interroga","3@-@Dettaglio vendite",
           "4@-@Data scontrino","5@-@Orario scontrino","6@-@Nessun dato per la data selezionata!","7@-@Formato ora inserito non corretto!",
           "8@-@Nessun dato per la data e ora selezionata!","9@-@Totale vendite del","10@-@Totale complessivo","11@-@Nessun dato per le date selezionate!",
           "12@-@Nessun dato per le date e ora selezionate!","13@-@Totale vendite dal","14@-@al",
-          "15@-@Stai per eliminare i dati selezionati dal database\nL'operazione non è annullabile\nVuoi continuare?","16@-@Eliminazione effettuata"]
-eng_dw = ["0@-@Times selection\nIn the bottom field\nyou can select a\nrange of times\nExample 17:30-20:00","1@-@Times","2@-@Query","3@-@Sales detail","4@-@Receipt date",
+          "15@-@Stai per eliminare i dati selezionati dal database\nL'operazione non è annullabile\nVuoi continuare?","16@-@Eliminazione effettuata",
+          "17@-@Ordina risultati","18@-@Per prezzo","19@-@Per quantità","20@-@Per descrizione"]
+eng_dw = ["0@-@Times selection\nIn the bottom field you can select a\nrange of times Example 17:30-20:00","1@-@Times","2@-@Query","3@-@Sales detail","4@-@Receipt date",
           "5@-@Receipt time","6@-@No data for the selected date!","7@-@Inserted time format not correct!","8@-@No data for the selected date and time!",
           "9@-@Total sales of","10@-@Total","11@-@No data for the selected dates!","12@-@No data for the selected dates and time!","13@-@Total sales from","14@-@to",
-          "15@-@You're going to delete the selected data from the database\nThe operation is not reversible\nDo you want to continue?","16@-@Deletion done"]
+          "15@-@You're going to delete the selected data from the database\nThe operation is not reversible\nDo you want to continue?","16@-@Deletion done",
+          "17@-@Sort results","18@-@By price","19@-@By quantity","20@-@By description"]
 
 # CreateMenuWindow
 
