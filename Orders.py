@@ -746,8 +746,14 @@ class MainWindow(QWidget):
             if len(self.TE_additional_note.toPlainText()) > 0: order_note = self.TE_additional_note.toPlainText()
             else: order_note = "-"
             
-            col = self.db["orders"]
-            col.insert_one({"status":"ordered", "date": date, "time": time, "customer": customer, "table": table, "order": order, "order_note": order_note})
+            try: # Controllo della connessione al database
+                col = self.db["orders"]
+                col.insert_one({"status":"ordered", "date": date, "time": time, "customer": customer, "table": table, "order": order, "order_note": order_note})
+            except:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+                err_msg.setText(lang.msg(language, 48, "MainWindow"))
+                return err_msg.exec()
             
         # Salvataggio su DB
         date_time = datetime.now()
@@ -760,8 +766,14 @@ class MainWindow(QWidget):
             total_price = self.T_receipt.item(row, 2).text()
             products = products + f"{description}@space@{quantity}@space@{total_price}@newline@"
         products = products[:-9]
-        col = self.db["receipts"]
-        col.insert_one({"receipt_date": date, "receipt_time": time, "receipt_products": products})
+        try: # Controllo della connessione al database
+            col = self.db["receipts"]
+            col.insert_one({"receipt_date": date, "receipt_time": time, "receipt_products": products})
+        except:
+            err_msg = QMessageBox(self)
+            err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+            err_msg.setText(lang.msg(language, 48, "MainWindow"))
+            return err_msg.exec()
             
         # Stampa scontrino
         printer = self.CB_printer_list.currentText()
@@ -915,8 +927,14 @@ class MainWindow(QWidget):
             if len(self.TE_additional_note.toPlainText()) > 0: order_note = self.TE_additional_note.toPlainText()
             else: order_note = "-"
             
-            col = self.db["orders"]
-            col.insert_one({"status":"ordered", "date": date, "time": time, "customer": customer, "table": table, "order": order, "order_note": order_note})
+            try: # Controllo della connessione al database
+                col = self.db["orders"]
+                col.insert_one({"status":"ordered", "date": date, "time": time, "customer": customer, "table": table, "order": order, "order_note": order_note})
+            except:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+                err_msg.setText(lang.msg(language, 48, "MainWindow"))
+                return err_msg.exec()
             
         date_time = datetime.now()
         date = date_time.strftime("%Y%m%d")
@@ -928,8 +946,14 @@ class MainWindow(QWidget):
             total_price = self.T_receipt.item(row, 2).text()
             products = products + f"{description}@space@{quantity}@space@{total_price}@newline@"
         products = products[:-9]
-        col = self.db["receipts"]
-        col.insert_one({"receipt_date": date, "receipt_time": time, "receipt_products": products})
+        try: # Controllo della connessione al database
+            col = self.db["receipts"]
+            col.insert_one({"receipt_date": date, "receipt_time": time, "receipt_products": products})
+        except:
+            err_msg = QMessageBox(self)
+            err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+            err_msg.setText(lang.msg(language, 48, "MainWindow"))
+            return err_msg.exec()
         
         # Pulizia caselle, tabella e lista
         
