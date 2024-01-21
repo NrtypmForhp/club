@@ -1209,7 +1209,8 @@ class DatabaseWindow(QWidget):
         # Combobox ordinamento dizionario
         
         self.CB_sort_orders = QComboBox(self)
-        self.CB_sort_orders.addItems([lang.msg(language, 18, "DatabaseWindow"),lang.msg(language, 19, "DatabaseWindow"),lang.msg(language, 20, "DatabaseWindow")])
+        self.CB_sort_orders.addItems([lang.msg(language, 18, "DatabaseWindow"),lang.msg(language, 19, "DatabaseWindow"),lang.msg(language, 20, "DatabaseWindow"),
+                                      lang.msg(language, 21, "DatabaseWindow"),lang.msg(language, 22, "DatabaseWindow"),lang.msg(language, 23, "DatabaseWindow")])
         self.lay.addWidget(self.CB_sort_orders, 3, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Text Edit per risposta Database
@@ -1322,6 +1323,9 @@ class DatabaseWindow(QWidget):
             if self.CB_sort_orders.currentIndex() == 0: detail_tot = dict(sorted(detail_tot.items(), key=lambda item: item[1]["total"])) # Ordinato per prezzo
             if self.CB_sort_orders.currentIndex() == 1: detail_tot = dict(sorted(detail_tot.items(), key=lambda item: item[1]["quantity"])) # Ordinato per quantità
             if self.CB_sort_orders.currentIndex() == 2: detail_tot = dict(sorted(detail_tot.items())) # Ordinato per descrizione
+            if self.CB_sort_orders.currentIndex() == 3: detail_tot = dict(sorted(detail_tot.items(), key=lambda item: item[1]["total"], reverse=True)) # Ordinato per prezzo (contrario)
+            if self.CB_sort_orders.currentIndex() == 4: detail_tot = dict(sorted(detail_tot.items(), key=lambda item: item[1]["quantity"], reverse=True)) # Ordinato per quantità (contrario)
+            if self.CB_sort_orders.currentIndex() == 5: detail_tot = dict(sorted(detail_tot.items(), reverse=True)) # Ordinato per descrizione (contrario)
             for detail in detail_tot: # Loop del dizionario con il totale vendite
                 total_string = total_string + f"\n{detail} - {lang.msg(language, 42, 'MainWindow')} {detail_tot[detail]['quantity']} - {lang.msg(language, 18, 'MainWindow')} {detail_tot[detail]['total']:.2f}"
             total_string = total_string + f"\n\n-*-* {lang.msg(language, 10, 'DatabaseWindow')} {lang.msg(language, 18, 'MainWindow')} {total_receipts:.2f} *-*-\n --------------------------\n\n\n"
