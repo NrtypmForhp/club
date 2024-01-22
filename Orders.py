@@ -1396,6 +1396,12 @@ class DatabaseWindow(QWidget):
             text_cursor.setPosition(0)
             self.TE_database_response.setTextCursor(text_cursor)
             total_string = f"-*-* {lang.msg(language, 13, 'DatabaseWindow')} {firstdate} {lang.msg(language, 14, 'DatabaseWindow')} {seconddate} *-*-\n"
+            if self.CB_sort_orders.currentIndex() == 0: detail_tot = dict(sorted(detail_tot.items(), key=lambda item: item[1]["total"])) # Ordinato per prezzo
+            if self.CB_sort_orders.currentIndex() == 1: detail_tot = dict(sorted(detail_tot.items(), key=lambda item: item[1]["quantity"])) # Ordinato per quantità
+            if self.CB_sort_orders.currentIndex() == 2: detail_tot = dict(sorted(detail_tot.items())) # Ordinato per descrizione
+            if self.CB_sort_orders.currentIndex() == 3: detail_tot = dict(sorted(detail_tot.items(), key=lambda item: item[1]["total"], reverse=True)) # Ordinato per prezzo (contrario)
+            if self.CB_sort_orders.currentIndex() == 4: detail_tot = dict(sorted(detail_tot.items(), key=lambda item: item[1]["quantity"], reverse=True)) # Ordinato per quantità (contrario)
+            if self.CB_sort_orders.currentIndex() == 5: detail_tot = dict(sorted(detail_tot.items(), reverse=True)) # Ordinato per descrizione (contrario)
             for detail in detail_tot: # Loop del dizionario con il totale vendite
                 total_string = total_string + f"\n{detail} - {lang.msg(language, 42, 'MainWindow')} {detail_tot[detail]['quantity']} - {lang.msg(language, 18, 'MainWindow')} {detail_tot[detail]['total']:.2f}"
             total_string = total_string + f"\n\n-*-* {lang.msg(language, 10, 'DatabaseWindow')} {lang.msg(language, 18, 'MainWindow')} {total_receipts:.2f} *-*-\n --------------------------\n\n\n"
