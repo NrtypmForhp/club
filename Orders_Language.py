@@ -1,25 +1,25 @@
 # MainWindow
 
-ita_mw = ["0@-@Opzioni","1@-@Creazione Categorie","2@-@Descrizione","3@-@Crea >>","4@-@Inserimento Prodotti","5@-@Prezzo","6@-@Inserisci >>","7@-@Impostazioni Festa",
+ita_mw = ["0@-@Opzioni","1@-@Creazione ed Eliminazione Categorie","2@-@Descrizione","3@-@Crea >>","4@-@Inserimento Prodotti","5@-@Prezzo","6@-@Inserisci >>","7@-@Impostazioni Festa",
           "8@-@Intestazione festa","9@-@Selezione Cliente e Numero Tavolo","10@-@Nome cliente","11@-@Note aggiuntive che appariranno alla fine dello scontrino",
           "12@-@Stampa o Salva Scontrino","13@-@Stampa","14@-@Salva","15@-@Apri il Database","16@-@Quantità","17@-@Totale","18@-@€","19@-@Errore",
-          "20@-@Il campo descrizione non può essere vuoto","21@-@Attenzione","22@-@La categoria inserita esiste già\nVuoi eliminarla?","23@-@Categoria non selezionata!",
+          "20@-@Il campo descrizione non può essere vuoto","21@-@Attenzione","22@-@Categoria già esistente!","23@-@Categoria non selezionata!",
           "24@-@Compilare i campi descrizione e prezzo!","25@-@Prezzo inserito non corretto!","26@-@Elimina","27@-@Sposta su","28@-@Sposta giù",
           "29@-@Aggiungi quantità specifica","30@-@Aggiungi +1 (doppio click sx)","31@-@Togli -1 (click dx)","32@-@Crea un menù",
           "33@-@Il prodotto selezionato si trova già nella prima casella!","34@-@Il prodotto selezionato si trova già nell'ultima casella","35@-@Quantità specifica",
           "36@-@Inserisci un numero intero che verrà aggiunto alla quantità nella tabella dello scontrino","37@-@Inserisci","38@-@Annulla",
           "39@-@Devi inserire un numero intero!","40@-@Cliente","41@-@Numero tavolo","42@-@qta","43@-@EUR",
-          "44@-@Invia automaticamente\nla categoria corrente","45@-@Nelle righe da inviare c'è qualcosa di sbagliato!\nCompilare come in questo esempio: 1-2-4 o 1-2:4-6",
+          "44@-@Invia automaticamente la categoria corrente","45@-@Nelle righe da inviare c'è qualcosa di sbagliato!\nCompilare come in questo esempio: 1-2-4 o 1-2:4-6",
           "46@-@Invio ordini","47@-@Controlla ordini","48@-@Connessione con il database fallita!\nControlla la connessione a internet!"]
-eng_mw = ["0@-@Options","1@-@Category Creation","2@-@Description","3@-@Create >>","4@-@Products Insert","5@-@Price","6@-@Insert >>","7@-@Party Settings",
+eng_mw = ["0@-@Options","1@-@Creating and Deleting Categories","2@-@Description","3@-@Create >>","4@-@Products Insert","5@-@Price","6@-@Insert >>","7@-@Party Settings",
           "8@-@Party name","9@-@Customer and Table Number Selection","10@-@Customer name","11@-@Additional notes that will appear at the end of the receipt",
           "12@-@Print or Save Receipt","13@-@Print","14@-@Save","15@-@Open Database","16@-@Quantity","17@-@Total","18@-@£","19@-@Error",
-          "20@-@Description field can't be empty","21@-@Caution","22@-@Category selected already exists\nDo you want to delete it?","23@-@Category not selected!",
+          "20@-@Description field can't be empty","21@-@Caution","22@-@Already existing category","23@-@Category not selected!",
           "24@-@Fill in the description and price fields!","25@-@Incorrect price entered","26@-@Delete","27@-@Move up","28@-@Move down","29@-@Add specific quantity",
           "30@-@Add +1 (double left click)","31@-@Remove -1 (right click)","32@-@Create a menu","33@-@Selected product is already in the first slot",
           "34@-@Selected product is already in the last slot","35@-@Specific quantity","36@-@Insert an integer number that will be added to the receipt table",
           "37@-@Insert","38@-@Cancel","39@-@You must insert an integer number!","40@-@Customer","41@-@Table number","42@-@qty","43@-@GBP",
-          "44@-@Automatically send\nthe current category","45@-@There's something wrong in the lines to send!\nFill in as in this example: 1-2-4 or 1-2:4-6",
+          "44@-@Automatically send the current category","45@-@There's something wrong in the lines to send!\nFill in as in this example: 1-2-4 or 1-2:4-6",
           "46@-@Sending orders","47@-@Check orders","48@-@Connection to database failed!\nCheck internet connection!"]
 
 # DatabaseWindow

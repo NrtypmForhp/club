@@ -11,7 +11,7 @@ from PyQt6.QtGui import QPixmap,QAction,QCursor,QTextCharFormat,QColor,QTextCurs
 import Orders_Language as lang
 if platform == "win32": import win32print # Importazione del modulo stampa per sistemi operativi Windows
 
-# Versione 1.0.2-r5
+# Versione 1.0.2-r6
 
 # Debug mode
 
@@ -71,7 +71,7 @@ class MainWindow(QWidget):
         self.B_options_menu.clicked.connect(self.options_menu_open)
         self.lay.addWidget(self.B_options_menu, 0, 4, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)
         
-        # Creazione categorie (Parte centrale sinistra)
+        # Creazione ed eliminazione categorie (Parte centrale sinistra)
         
         L_category_creation = QLabel(self, text=lang.msg(language, 1, "MainWindow"))
         L_category_creation.setAccessibleName("an_section_title")
@@ -79,11 +79,15 @@ class MainWindow(QWidget):
         
         self.LE_category_creation_description = QLineEdit(self)
         self.LE_category_creation_description.setPlaceholderText(lang.msg(language, 2, "MainWindow"))
-        self.lay.addWidget(self.LE_category_creation_description, 2, 0, 1, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.lay.addWidget(self.LE_category_creation_description, 2, 0, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         self.B_category_creation = QPushButton(self, text=lang.msg(language, 3, "MainWindow"))
         self.B_category_creation.clicked.connect(self.category_creation)
-        self.lay.addWidget(self.B_category_creation, 2, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.lay.addWidget(self.B_category_creation, 2, 1, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        
+        self.B_category_delete = QPushButton(self, text=lang.msg(language, 26, "MainWindow"))
+        self.B_category_delete.clicked.connect(self.delete_category)
+        self.lay.addWidget(self.B_category_delete, 2, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         # Inserimento prodotti (Parte sinistra centrale)
         
@@ -140,13 +144,10 @@ class MainWindow(QWidget):
         L_order_to_send.setAccessibleName("an_section_title")
         self.lay.addWidget(L_order_to_send, 10, 0, 1, 3, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
-        L_send_order = QLabel(self, text=lang.msg(language, 44, "MainWindow"))
-        self.lay.addWidget(L_send_order, 11, 0, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
-        
         self.list_category_to_send = []
-        self.ChB_category_to_send = QCheckBox(self)
+        self.ChB_category_to_send = QCheckBox(self, text=lang.msg(language, 44, "MainWindow"))
         self.ChB_category_to_send.stateChanged.connect(self.category_to_send_changed)
-        self.lay.addWidget(self.ChB_category_to_send, 11, 1, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
+        self.lay.addWidget(self.ChB_category_to_send, 11, 0, 1, 2, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignLeft)
         
         self.B_see_orders = QPushButton(self, text=lang.msg(language, 47, "MainWindow"))
         self.B_see_orders.clicked.connect(self.open_orders_table)
@@ -228,10 +229,16 @@ class MainWindow(QWidget):
         self.lay.addWidget(self.L_total_receipt, total_rows, 4, Qt.AlignmentFlag.AlignTop | Qt.AlignmentFlag.AlignRight)
         
         # Funzione Per riempimento iniziale combobox (lasciare sempre per ultima!)
-        col = self.db["maincategory"]
-        for category in col.find({}, {"_id": 0, "category": 1}):
-            if self.CB_category_selection.findText(category["category"]) == -1:
-                self.CB_category_selection.addItem(category["category"])
+        try: # Controllo della connessione al database
+            col = self.db["maincategory"]
+            for category in col.find({}, {"_id": 0, "category": 1}):
+                if self.CB_category_selection.findText(category["category"]) == -1:
+                    self.CB_category_selection.addItem(category["category"])
+        except:
+            err_msg = QMessageBox(self)
+            err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+            err_msg.setText(lang.msg(language, 48, "MainWindow"))
+            return err_msg.exec()
     
     # *-*-* Funzioni per il ridimensionamento della finestra *-*-*
 
@@ -241,7 +248,7 @@ class MainWindow(QWidget):
         
         try:
             # Creazione categorie
-            self.LE_category_creation_description.setMinimumWidth(int(W_width / 2))
+            self.LE_category_creation_description.setMinimumWidth(int(W_width / 2) - 40)
             # Inserimento dati
             self.LE_products_insert_description.setMinimumWidth(int((W_width / 2) - 40))
             self.LE_products_insert_price.setMinimumWidth(int((W_width / 3) - 40))
@@ -289,9 +296,6 @@ class MainWindow(QWidget):
             err_msg = QMessageBox(self)
             err_msg.setWindowTitle(lang.msg(language, 21, "MainWindow"))
             err_msg.setText(lang.msg(language, 22, "MainWindow"))
-            err_msg.setStandardButtons(QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.No)
-            err_msg.buttonClicked.connect(self.delete_category)
-            self.index_delete_category = self.CB_category_selection.findText(self.inserted_category)
             return err_msg.exec()
         
         self.CB_category_selection.addItem(self.inserted_category)
@@ -341,13 +345,25 @@ class MainWindow(QWidget):
         for row in range(rows):
             if self.inserted_category == self.T_products.item(row, 0).text():
                 self.T_products.setItem(row, 1, QTableWidgetItem(inserted_price))
-                col.update_one({"description": self.inserted_category, "category": self.CB_category_selection.currentText()}, {"$set": {"price": inserted_price}})
+                try: # Controllo della connessione al database
+                    col.update_one({"description": self.inserted_category, "category": self.CB_category_selection.currentText()}, {"$set": {"price": inserted_price}})
+                except:
+                    err_msg = QMessageBox(self)
+                    err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+                    err_msg.setText(lang.msg(language, 48, "MainWindow"))
+                    return err_msg.exec()
                 break
         else:
             self.T_products.insertRow(rows)
             self.T_products.setItem(rows, 0, QTableWidgetItem(self.inserted_category))
             self.T_products.setItem(rows, 1, QTableWidgetItem(inserted_price))
-            col.insert_one({"description": self.inserted_category, "price": inserted_price, "row": rows, "category": self.CB_category_selection.currentText()})
+            try: # Controllo della connessione al database
+                col.insert_one({"description": self.inserted_category, "price": inserted_price, "row": rows, "category": self.CB_category_selection.currentText()})
+            except:
+                err_msg = QMessageBox(self)
+                err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+                err_msg.setText(lang.msg(language, 48, "MainWindow"))
+                return err_msg.exec()
         
         # Pulizia campi
         
@@ -356,22 +372,27 @@ class MainWindow(QWidget):
     
     # Eliminazione categoria
     
-    def delete_category(self, button):
-        if button.text() == "&OK" or button.text() == "OK":
-            # Connessione alla collezione del database
-            
-            col = self.db["maincategory"]
-            
-            # Controllo presenza nel database ed eventuale eliminazione
+    def delete_category(self):
+        col = self.db["maincategory"]
+        
+        # Controllo presenza nel database ed eventuale eliminazione
 
+        try: # Controllo della connessione al database
             col.delete_many({"category": self.inserted_category})
-            
-            # Rimozione dalla ComboBox
-            
-            self.CB_category_selection.removeItem(self.index_delete_category)
-            
-            # Pulizia campo descrizione
-            self.LE_category_creation_description.setText("")
+        except:
+            err_msg = QMessageBox(self)
+            err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+            err_msg.setText(lang.msg(language, 48, "MainWindow"))
+            return err_msg.exec()
+        
+        # Rimozione dalla lista
+        
+        if self.CB_category_selection.currentText() in self.list_category_to_send:
+            self.list_category_to_send.pop(self.list_category_to_send.index(self.CB_category_selection.currentText()))
+        
+        # Rimozione dalla ComboBox
+        
+        self.CB_category_selection.removeItem(self.CB_category_selection.currentIndex())
     
     # Cambio categoria
     
@@ -387,11 +408,17 @@ class MainWindow(QWidget):
         
         # Aggiunta articoli se esistono nel database
         row_count = 0
-        for product in col.find({"category": self.CB_category_selection.currentText()}, {"_id": 0}).sort("row"):
-            self.T_products.insertRow(row_count)
-            self.T_products.setItem(row_count, 0, QTableWidgetItem(product["description"]))
-            self.T_products.setItem(row_count, 1, QTableWidgetItem(product["price"]))
-            row_count += 1
+        try: # Controllo della connessione al database
+            for product in col.find({"category": self.CB_category_selection.currentText()}, {"_id": 0}).sort("row"):
+                self.T_products.insertRow(row_count)
+                self.T_products.setItem(row_count, 0, QTableWidgetItem(product["description"]))
+                self.T_products.setItem(row_count, 1, QTableWidgetItem(product["price"]))
+                row_count += 1
+        except:
+            err_msg = QMessageBox(self)
+            err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+            err_msg.setText(lang.msg(language, 48, "MainWindow"))
+            return err_msg.exec()
         # Modifica della checkbox se la categoria è già stata segnata
         if self.CB_category_selection.currentText() in self.list_category_to_send: self.ChB_category_to_send.setChecked(True)
         else: self.ChB_category_to_send.setChecked(False)
@@ -453,14 +480,20 @@ class MainWindow(QWidget):
         
         # Eliminazione dal Database
         
-        col = self.db["maincategory"]
-        dbrow = col.find_one({"description": product, "category": self.CB_category_selection.currentText()})
-        dbrow = dbrow["row"]
-        col.delete_one({"description": product, "category": self.CB_category_selection.currentText()})
-        
-        # Update della riga degli altri
-        
-        col.update_many({"category": self.CB_category_selection.currentText(), "row": {"$gt": dbrow}}, {"$inc": {"row": -1}})
+        try: # Controllo della connessione al database
+            col = self.db["maincategory"]
+            dbrow = col.find_one({"description": product, "category": self.CB_category_selection.currentText()})
+            dbrow = dbrow["row"]
+            col.delete_one({"description": product, "category": self.CB_category_selection.currentText()})
+            
+            # Update della riga degli altri
+            
+            col.update_many({"category": self.CB_category_selection.currentText(), "row": {"$gt": dbrow}}, {"$inc": {"row": -1}})
+        except:
+            err_msg = QMessageBox(self)
+            err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+            err_msg.setText(lang.msg(language, 48, "MainWindow"))
+            return err_msg.exec()
     
     # Funzione sposta su
     
@@ -486,9 +519,15 @@ class MainWindow(QWidget):
         
         # Modifica nel database
         
-        col = self.db["maincategory"]
-        col.update_one({"description": product_desc, "category": self.CB_category_selection.currentText()}, {"$inc": {"row": -1}})
-        col.update_one({"description": product_desc_m, "category": self.CB_category_selection.currentText()}, {"$inc": {"row": 1}})
+        try: # Controllo della connessione al database
+            col = self.db["maincategory"]
+            col.update_one({"description": product_desc, "category": self.CB_category_selection.currentText()}, {"$inc": {"row": -1}})
+            col.update_one({"description": product_desc_m, "category": self.CB_category_selection.currentText()}, {"$inc": {"row": 1}})
+        except:
+            err_msg = QMessageBox(self)
+            err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+            err_msg.setText(lang.msg(language, 48, "MainWindow"))
+            return err_msg.exec()
         
         # Spostamento del prodotto
         
@@ -521,9 +560,15 @@ class MainWindow(QWidget):
         
         # Modifica nel database
         
-        col = self.db["maincategory"]
-        col.update_one({"description": product_desc, "category": self.CB_category_selection.currentText()}, {"$inc": {"row": 1}})
-        col.update_one({"description": product_desc_m, "category": self.CB_category_selection.currentText()}, {"$inc": {"row": -1}})
+        try: # Controllo della connessione al database
+            col = self.db["maincategory"]
+            col.update_one({"description": product_desc, "category": self.CB_category_selection.currentText()}, {"$inc": {"row": 1}})
+            col.update_one({"description": product_desc_m, "category": self.CB_category_selection.currentText()}, {"$inc": {"row": -1}})
+        except:
+            err_msg = QMessageBox(self)
+            err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
+            err_msg.setText(lang.msg(language, 48, "MainWindow"))
+            return err_msg.exec()
         
         # Spostamento del prodotto
         
