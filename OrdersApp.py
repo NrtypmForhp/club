@@ -12,22 +12,24 @@ from bson.objectid import ObjectId
 
 # Variabili Globali
 
-"""
-    Images and photos: READ_MEDIA_IMAGES
-    Videos: READ_MEDIA_VIDEO Audio
-    Audio files: READ_MEDIA_AUDIO
-"""
-
 mongodb_connection = "mongodb://localhost:27017/" # Stringa di connessione al database
 language = "IT" # Stringa di selezione lingua
 heading = "98 Ottani The Club" # Stringa di selezione titolo
 update_time = 30.0 # Tempo di update del database
 if platform == "android": # Suono di notifica
     from android.storage import primary_external_storage_path
+    from android.permissions import request_permissions, Permission
     dir = primary_external_storage_path()
     download_dir_path = os.path.join(dir, "Download")
     sound = SoundLoader.load(f"{download_dir_path}/beep.wav")
-else: sound = SoundLoader.load("beep.wav") # Suono di notifica
+else: sound = SoundLoader.load("beep.wav")
+
+def on_start(self):
+    if platform == "android":
+        request_permissions([Permission.WRITE_EXTERNAL_STORAGE,
+                            Permission.READ_EXTERNAL_STORAGE,
+                            Permission.READ_MEDIA_AUDIO,
+                            Permission.INTERNET])
 
 # Lingue
 
