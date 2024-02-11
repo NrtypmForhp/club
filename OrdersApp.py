@@ -2,21 +2,21 @@ from kivymd.app import MDApp
 from kivy.lang import Builder
 from kivy.clock import Clock
 from kivymd.uix.list import ThreeLineListItem
-from kivymd.uix.button import MDFlatButton
-from kivymd.uix.dialog import MDDialog
+from kivy.core.audio import SoundLoader
 from kivy.properties import StringProperty
 import pymongo, certifi
 from kivy.utils import platform
 from bson.objectid import ObjectId
 
-# Versione 1.0.0 r2
+# Versione 1.0.0 r3
 
 # Variabili Globali
 
 mongodb_connection = "mongodb://localhost:27017/" # Stringa di connessione al database
 language = "IT" # Stringa di selezione lingua
 heading = "98 Ottani The Club" # Stringa di selezione titolo
-update_time = 30.0 # Tempo di update del database
+update_time = 5.0 # Tempo di update del database
+sound = SoundLoader.load("beep.wav") # Suono di notifica
 
 # Lingue
 
@@ -38,6 +38,12 @@ class MainWindow(MDApp):
             for line in col.find().sort("_id", pymongo.DESCENDING):
                 status_st = ""
                 color_st = ""
+                if line["status"] == "now_ordered":
+                    status_st = lang(language, 4)
+                    color_st = "#BA681F"
+                    obj_instance = ObjectId(line["_id"])
+                    col.update_one({"_id": obj_instance}, {"$set": {"status": "ordered"}})
+                    sound.play()
                 if line["status"] == "ordered":
                     status_st = lang(language, 4)
                     color_st = "#BA681F"
@@ -49,7 +55,7 @@ class MainWindow(MDApp):
                     color_st = "#158B09"
                 customer_and_table = f"{lang(language, 9)}: {line['customer']} - {lang(language, 10)}: {line['table']}"
                 date_and_time = f"{lang(language, 11)}: {line['date'][6:]}/{line['date'][4:6]}/{line['date'][:4]} - {lang(language, 12)}: {line['time'][:2]}:{line['time'][2:4]}:{line['time'][4:]}"
-                list_item = ThreeLineListItem(text=f"ID: {line['_id']}",
+                list_item = ThreeLineListItem(text=f"[size=25]ID: {line['_id']}[/size]",
                                               secondary_text=f"{customer_and_table} - {date_and_time}",
                                               tertiary_text=f"{lang(language, 6)}: {status_st}",
                                               theme_text_color="Custom", text_color="#B0B006",
@@ -83,6 +89,11 @@ class MainWindow(MDApp):
         for line in col.find().sort("_id", pymongo.DESCENDING):
             status_st = ""
             color_st = ""
+            if line["status"] == "now_ordered":
+                status_st = lang(language, 4)
+                color_st = "#BA681F"
+                obj_instance = ObjectId(line["_id"])
+                col.update_one({"_id": obj_instance}, {"$set": {"status": "ordered"}})
             if line["status"] == "ordered":
                 status_st = lang(language, 4)
                 color_st = "#BA681F"
@@ -94,7 +105,7 @@ class MainWindow(MDApp):
                 color_st = "#158B09"
             customer_and_table = f"{lang(language, 9)}: {line['customer']} - {lang(language, 10)}: {line['table']}"
             date_and_time = f"{lang(language, 11)}: {line['date'][6:]}/{line['date'][4:6]}/{line['date'][:4]} - {lang(language, 12)}: {line['time'][:2]}:{line['time'][2:4]}:{line['time'][4:]}"
-            list_item = ThreeLineListItem(text=f"ID: {line['_id']}",
+            list_item = ThreeLineListItem(text=f"[size=25]ID: {line['_id']}[/size]",
                                             secondary_text=f"{customer_and_table} - {date_and_time}",
                                             tertiary_text=f"{lang(language, 6)}: {status_st}",
                                             theme_text_color="Custom", text_color="#B0B006",
@@ -124,7 +135,7 @@ class MainWindow(MDApp):
     
     def show_detailed_order(self, instance): # Visualizzazione dettagliata della comanda
         col = self.db["orders"]
-        obj_instance = ObjectId(instance.text[4:])
+        obj_instance = ObjectId(instance.text.replace("[size=25]","").replace("ID: ","").replace("[/size]",""))
         order = col.find_one({"_id": obj_instance})
         order_string = f"""[color=1F7F06]ID: {order['_id']}
 {lang(language, 9)}: {order["customer"]} - {lang(language, 10)}: {order["table"]}

@@ -11,7 +11,7 @@ from PyQt6.QtGui import QPixmap,QAction,QCursor,QTextCharFormat,QColor,QTextCurs
 import Orders_Language as lang
 if platform == "win32": import win32print # Importazione del modulo stampa per sistemi operativi Windows
 
-# Versione 1.0.2-r6
+# Versione 1.0.2-r7
 
 # Debug mode
 
@@ -803,7 +803,7 @@ class MainWindow(QWidget):
             
             try: # Controllo della connessione al database
                 col = self.db["orders"]
-                col.insert_one({"status":"ordered", "date": date, "time": time, "customer": customer, "table": table, "order": order, "order_note": order_note})
+                col.insert_one({"status":"now_ordered", "date": date, "time": time, "customer": customer, "table": table, "order": order, "order_note": order_note})
             except:
                 err_msg = QMessageBox(self)
                 err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
@@ -954,7 +954,7 @@ class MainWindow(QWidget):
             
             try: # Controllo della connessione al database
                 col = self.db["orders"]
-                col.insert_one({"status":"ordered", "date": date, "time": time, "customer": customer, "table": table, "order": order, "order_note": order_note})
+                col.insert_one({"status":"now_ordered", "date": date, "time": time, "customer": customer, "table": table, "order": order, "order_note": order_note})
             except:
                 err_msg = QMessageBox(self)
                 err_msg.setWindowTitle(lang.msg(language, 19, "MainWindow"))
@@ -1080,7 +1080,7 @@ class OrdersWindow(QWidget):
             for line in col.find().sort("_id", pymongo.DESCENDING):
                 date_time = f"{line['date'][6:]}/{line['date'][4:6]}/{line['date'][:4]} - {line['time'][:2]}:{line['time'][2:4]}:{line['time'][4:]}"
                 status_st = ""
-                if line["status"] == "ordered": status_st = lang.msg(language, 3, "OrdersWindow")
+                if line["status"] == "ordered" or line["status"] == "now_ordered": status_st = lang.msg(language, 3, "OrdersWindow")
                 if line["status"] == "in_progress": status_st = lang.msg(language, 4, "OrdersWindow")
                 if line["status"] == "done": status_st = lang.msg(language, 5, "OrdersWindow")
                 row = self.T_orders.rowCount()
