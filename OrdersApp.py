@@ -4,7 +4,7 @@ from kivy.clock import Clock
 from kivymd.uix.list import ThreeLineListItem
 from kivy.core.audio import SoundLoader
 from kivy.properties import StringProperty
-import pymongo, certifi
+import pymongo, certifi, os
 from kivy.utils import platform
 from bson.objectid import ObjectId
 
@@ -15,8 +15,13 @@ from bson.objectid import ObjectId
 mongodb_connection = "mongodb://localhost:27017/" # Stringa di connessione al database
 language = "IT" # Stringa di selezione lingua
 heading = "98 Ottani The Club" # Stringa di selezione titolo
-update_time = 5.0 # Tempo di update del database
-sound = SoundLoader.load("beep.wav") # Suono di notifica
+update_time = 30.0 # Tempo di update del database
+if platform == "android": # Suono di notifica
+    from android.storage import primary_external_storage_path
+    dir = primary_external_storage_path()
+    download_dir_path = os.path.join(dir, "Download")
+    sound = SoundLoader.load(f"{download_dir_path}/beep.wav")
+else: sound = SoundLoader.load("beep.wav") # Suono di notifica
 
 # Lingue
 
