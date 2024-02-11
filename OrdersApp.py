@@ -12,6 +12,12 @@ from bson.objectid import ObjectId
 
 # Variabili Globali
 
+"""
+    Images and photos: READ_MEDIA_IMAGES
+    Videos: READ_MEDIA_VIDEO Audio
+    Audio files: READ_MEDIA_AUDIO
+"""
+
 mongodb_connection = "mongodb://localhost:27017/" # Stringa di connessione al database
 language = "IT" # Stringa di selezione lingua
 heading = "98 Ottani The Club" # Stringa di selezione titolo
