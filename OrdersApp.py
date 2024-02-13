@@ -8,7 +8,7 @@ import pymongo, certifi, os
 from kivy.utils import platform
 from bson.objectid import ObjectId
 
-# Versione 1.0.0 r3
+# Versione 1.0.0 r4
 
 # Variabili Globali
 
@@ -61,9 +61,9 @@ class MainWindow(MDApp):
                     color_st = "#158B09"
                 customer_and_table = f"{lang(language, 9)}: {line['customer']} - {lang(language, 10)}: {line['table']}"
                 date_and_time = f"{lang(language, 11)}: {line['date'][6:]}/{line['date'][4:6]}/{line['date'][:4]} - {lang(language, 12)}: {line['time'][:2]}:{line['time'][2:4]}:{line['time'][4:]}"
-                list_item = ThreeLineListItem(text=f"[size=45]ID: {line['_id']}[/size]",
-                                              secondary_text=f"[size=35]{customer_and_table} - {date_and_time}[/size]",
-                                              tertiary_text=f"[size=35]{lang(language, 6)}: {status_st}[/size]",
+                list_item = ThreeLineListItem(text=f"[size=25dp]ID: {line['_id']}[/size]",
+                                              secondary_text=f"[size=20dp]{customer_and_table} - {date_and_time}[/size]",
+                                              tertiary_text=f"[size=20dp]{lang(language, 6)}: {status_st}[/size]",
                                               theme_text_color="Custom", text_color="#B0B006",
                                               secondary_theme_text_color="Custom", secondary_text_color="#B0B006",
                                               tertiary_theme_text_color="Custom", tertiary_text_color=color_st)
@@ -112,9 +112,9 @@ class MainWindow(MDApp):
                 color_st = "#158B09"
             customer_and_table = f"{lang(language, 9)}: {line['customer']} - {lang(language, 10)}: {line['table']}"
             date_and_time = f"{lang(language, 11)}: {line['date'][6:]}/{line['date'][4:6]}/{line['date'][:4]} - {lang(language, 12)}: {line['time'][:2]}:{line['time'][2:4]}:{line['time'][4:]}"
-            list_item = ThreeLineListItem(text=f"[size=45]ID: {line['_id']}[/size]",
-                                            secondary_text=f"[size=35]{customer_and_table} - {date_and_time}[/size]",
-                                            tertiary_text=f"[size=35]{lang(language, 6)}: {status_st}[/size]",
+            list_item = ThreeLineListItem(text=f"[size=25dp]ID: {line['_id']}[/size]",
+                                            secondary_text=f"[size=20dp]{customer_and_table} - {date_and_time}[/size]",
+                                            tertiary_text=f"[size=20dp]{lang(language, 6)}: {status_st}[/size]",
                                             theme_text_color="Custom", text_color="#B0B006",
                                             secondary_theme_text_color="Custom", secondary_text_color="#B0B006",
                                             tertiary_theme_text_color="Custom", tertiary_text_color=color_st)
@@ -160,7 +160,7 @@ class MainWindow(MDApp):
     
     def show_detailed_order(self, instance): # Visualizzazione dettagliata della comanda
         col = self.db["orders"]
-        obj_instance = ObjectId(instance.text.replace("[size=45]","").replace("ID: ","").replace("[/size]",""))
+        obj_instance = ObjectId(instance.text.replace("[size=25dp]","").replace("ID: ","").replace("[/size]",""))
         order = col.find_one({"_id": obj_instance})
         order_string = f"""[color=1F7F06]ID: {order['_id']}
 {lang(language, 9)}: {order["customer"]} - {lang(language, 10)}: {order["table"]}
