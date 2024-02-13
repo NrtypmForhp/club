@@ -18,18 +18,11 @@ heading = "98 Ottani The Club" # Stringa di selezione titolo
 update_time = 30.0 # Tempo di update del database
 if platform == "android": # Suono di notifica
     from android.storage import primary_external_storage_path
-    from android.permissions import request_permissions, Permission
+    from android.permissions import request_permissions, Permission, check_permission
     dir = primary_external_storage_path()
     download_dir_path = os.path.join(dir, "Download")
     sound = SoundLoader.load(f"{download_dir_path}/beep.wav")
 else: sound = SoundLoader.load("beep.wav")
-
-def on_start(self):
-    if platform == "android":
-        request_permissions([Permission.WRITE_EXTERNAL_STORAGE,
-                            Permission.READ_EXTERNAL_STORAGE,
-                            Permission.READ_MEDIA_AUDIO,
-                            Permission.INTERNET])
 
 # Lingue
 
@@ -68,9 +61,9 @@ class MainWindow(MDApp):
                     color_st = "#158B09"
                 customer_and_table = f"{lang(language, 9)}: {line['customer']} - {lang(language, 10)}: {line['table']}"
                 date_and_time = f"{lang(language, 11)}: {line['date'][6:]}/{line['date'][4:6]}/{line['date'][:4]} - {lang(language, 12)}: {line['time'][:2]}:{line['time'][2:4]}:{line['time'][4:]}"
-                list_item = ThreeLineListItem(text=f"[size=25]ID: {line['_id']}[/size]",
-                                              secondary_text=f"{customer_and_table} - {date_and_time}",
-                                              tertiary_text=f"{lang(language, 6)}: {status_st}",
+                list_item = ThreeLineListItem(text=f"[size=45]ID: {line['_id']}[/size]",
+                                              secondary_text=f"[size=35]{customer_and_table} - {date_and_time}[/size]",
+                                              tertiary_text=f"[size=35]{lang(language, 6)}: {status_st}[/size]",
                                               theme_text_color="Custom", text_color="#B0B006",
                                               secondary_theme_text_color="Custom", secondary_text_color="#B0B006",
                                               tertiary_theme_text_color="Custom", tertiary_text_color=color_st)
@@ -94,6 +87,7 @@ class MainWindow(MDApp):
             self.root.current = "database_connection"
             self.root.ids["L_connection"].text = lang(language, 2)
             return
+    
         
         self.root.ids["TAB_orders"].title = heading
         # Avvio degli ordini in corso
@@ -118,14 +112,32 @@ class MainWindow(MDApp):
                 color_st = "#158B09"
             customer_and_table = f"{lang(language, 9)}: {line['customer']} - {lang(language, 10)}: {line['table']}"
             date_and_time = f"{lang(language, 11)}: {line['date'][6:]}/{line['date'][4:6]}/{line['date'][:4]} - {lang(language, 12)}: {line['time'][:2]}:{line['time'][2:4]}:{line['time'][4:]}"
-            list_item = ThreeLineListItem(text=f"[size=25]ID: {line['_id']}[/size]",
-                                            secondary_text=f"{customer_and_table} - {date_and_time}",
-                                            tertiary_text=f"{lang(language, 6)}: {status_st}",
+            list_item = ThreeLineListItem(text=f"[size=45]ID: {line['_id']}[/size]",
+                                            secondary_text=f"[size=35]{customer_and_table} - {date_and_time}[/size]",
+                                            tertiary_text=f"[size=35]{lang(language, 6)}: {status_st}[/size]",
                                             theme_text_color="Custom", text_color="#B0B006",
                                             secondary_theme_text_color="Custom", secondary_text_color="#B0B006",
                                             tertiary_theme_text_color="Custom", tertiary_text_color=color_st)
             list_item.bind(on_release = lambda x, item=list_item: self.show_detailed_order(item))
             self.root.ids.LS_products.add_widget(list_item)
+            
+        Clock.schedule_once(self.scheduled_permissions_check, 3.0) # Controllo permessi
+    
+    def scheduled_permissions_check(self, dt): # Controllo permessi
+        if platform == "android": # Impostazioni permessi
+            def check_permissions(perms):
+                for perm in perms:
+                    if check_permission(perm) != True:
+                        return False
+                return True
+            
+            perms = [Permission.WRITE_EXTERNAL_STORAGE,
+                    Permission.READ_EXTERNAL_STORAGE,
+                    Permission.READ_MEDIA_AUDIO,
+                    Permission.INTERNET]    
+            if  check_permissions(perms)!= True:
+                request_permissions(perms)
+        else: pass
     
     def order_undo(self):
         self.root.current = "orders_table"
@@ -148,7 +160,7 @@ class MainWindow(MDApp):
     
     def show_detailed_order(self, instance): # Visualizzazione dettagliata della comanda
         col = self.db["orders"]
-        obj_instance = ObjectId(instance.text.replace("[size=25]","").replace("ID: ","").replace("[/size]",""))
+        obj_instance = ObjectId(instance.text.replace("[size=45]","").replace("ID: ","").replace("[/size]",""))
         order = col.find_one({"_id": obj_instance})
         order_string = f"""[color=1F7F06]ID: {order['_id']}
 {lang(language, 9)}: {order["customer"]} - {lang(language, 10)}: {order["table"]}
