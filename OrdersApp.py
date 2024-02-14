@@ -8,21 +8,23 @@ import pymongo, certifi, os
 from kivy.utils import platform
 from bson.objectid import ObjectId
 
-# Versione 1.0.0 r4
+# Versione 1.0.0 r5
 
 # Variabili Globali
+
+# Dimensione testo
+
+title_size = "[size=35dp]"
+list_title_size = "[size=25dp]"
+normal_size = "[size=20dp]"
 
 mongodb_connection = "mongodb://localhost:27017/" # Stringa di connessione al database
 language = "IT" # Stringa di selezione lingua
 heading = "98 Ottani The Club" # Stringa di selezione titolo
 update_time = 30.0 # Tempo di update del database
-if platform == "android": # Suono di notifica
+if platform == "android":
     from android.storage import primary_external_storage_path
     from android.permissions import request_permissions, Permission, check_permission
-    dir = primary_external_storage_path()
-    download_dir_path = os.path.join(dir, "Download")
-    sound = SoundLoader.load(f"{download_dir_path}/beep.wav")
-else: sound = SoundLoader.load("beep.wav")
 
 # Lingue
 
@@ -49,7 +51,7 @@ class MainWindow(MDApp):
                     color_st = "#BA681F"
                     obj_instance = ObjectId(line["_id"])
                     col.update_one({"_id": obj_instance}, {"$set": {"status": "ordered"}})
-                    sound.play()
+                    if self.sound != "-": self.sound.play()
                 if line["status"] == "ordered":
                     status_st = lang(language, 4)
                     color_st = "#BA681F"
@@ -61,9 +63,9 @@ class MainWindow(MDApp):
                     color_st = "#158B09"
                 customer_and_table = f"{lang(language, 9)}: {line['customer']} - {lang(language, 10)}: {line['table']}"
                 date_and_time = f"{lang(language, 11)}: {line['date'][6:]}/{line['date'][4:6]}/{line['date'][:4]} - {lang(language, 12)}: {line['time'][:2]}:{line['time'][2:4]}:{line['time'][4:]}"
-                list_item = ThreeLineListItem(text=f"[size=25dp]ID: {line['_id']}[/size]",
-                                              secondary_text=f"[size=20dp]{customer_and_table} - {date_and_time}[/size]",
-                                              tertiary_text=f"[size=20dp]{lang(language, 6)}: {status_st}[/size]",
+                list_item = ThreeLineListItem(text=f"{list_title_size}ID: {line['_id']}[/size]",
+                                              secondary_text=f"{normal_size}{customer_and_table} - {date_and_time}[/size]",
+                                              tertiary_text=f"{normal_size}{lang(language, 6)}: {status_st}[/size]",
                                               theme_text_color="Custom", text_color="#B0B006",
                                               secondary_theme_text_color="Custom", secondary_text_color="#B0B006",
                                               tertiary_theme_text_color="Custom", tertiary_text_color=color_st)
@@ -112,9 +114,9 @@ class MainWindow(MDApp):
                 color_st = "#158B09"
             customer_and_table = f"{lang(language, 9)}: {line['customer']} - {lang(language, 10)}: {line['table']}"
             date_and_time = f"{lang(language, 11)}: {line['date'][6:]}/{line['date'][4:6]}/{line['date'][:4]} - {lang(language, 12)}: {line['time'][:2]}:{line['time'][2:4]}:{line['time'][4:]}"
-            list_item = ThreeLineListItem(text=f"[size=25dp]ID: {line['_id']}[/size]",
-                                            secondary_text=f"[size=20dp]{customer_and_table} - {date_and_time}[/size]",
-                                            tertiary_text=f"[size=20dp]{lang(language, 6)}: {status_st}[/size]",
+            list_item = ThreeLineListItem(text=f"{list_title_size}ID: {line['_id']}[/size]",
+                                            secondary_text=f"{normal_size}{customer_and_table} - {date_and_time}[/size]",
+                                            tertiary_text=f"{normal_size}{lang(language, 6)}: {status_st}[/size]",
                                             theme_text_color="Custom", text_color="#B0B006",
                                             secondary_theme_text_color="Custom", secondary_text_color="#B0B006",
                                             tertiary_theme_text_color="Custom", tertiary_text_color=color_st)
@@ -124,7 +126,7 @@ class MainWindow(MDApp):
         Clock.schedule_once(self.scheduled_permissions_check, 3.0) # Controllo permessi
     
     def scheduled_permissions_check(self, dt): # Controllo permessi
-        if platform == "android": # Impostazioni permessi
+        if platform == "android":
             def check_permissions(perms):
                 for perm in perms:
                     if check_permission(perm) != True:
@@ -135,24 +137,31 @@ class MainWindow(MDApp):
                     Permission.READ_EXTERNAL_STORAGE,
                     Permission.READ_MEDIA_AUDIO,
                     Permission.INTERNET]    
-            if  check_permissions(perms)!= True:
+            if check_permissions(perms)!= True:
                 request_permissions(perms)
+            Clock.schedule_once(self.scheduled_audio_load, 15.0)
         else: pass
+    
+    def scheduled_audio_load(self, dt): # Caricamento suono di notifica
+        if platform == "android":
+            dir = primary_external_storage_path()
+            download_dir_path = os.path.join(dir, "Download")
+            self.sound = SoundLoader.load(f"{download_dir_path}/beep.wav")
     
     def order_undo(self):
         self.root.current = "orders_table"
     
     def order_change_state(self):
         col = self.db["orders"]
-        obj_instance = ObjectId(self.instance.text[4:])
+        obj_instance = ObjectId(self.instance.text.replace(f"{list_title_size}","").replace("ID: ","").replace("[/size]",""))
         order = col.find_one({"_id": obj_instance})
         if order["status"] == "ordered":
             col.update_one({"_id": obj_instance}, {"$set": {"status": "in_progress"}})
-            self.instance.tertiary_text = f"{lang(language, 6)}: {lang(language, 5)}"
+            self.instance.tertiary_text = f"{normal_size}{lang(language, 6)}: {lang(language, 5)}[/size]"
             self.instance.tertiary_text_color = "#08506D"
         if order["status"] == "in_progress":
             col.update_one({"_id": obj_instance}, {"$set": {"status": "done"}})
-            self.instance.tertiary_text = f"{lang(language, 6)}: {lang(language, 7)}"
+            self.instance.tertiary_text = f"{normal_size}{lang(language, 6)}: {lang(language, 7)}[/size]"
             self.instance.tertiary_text_color = "#158B09"
         if order["status"] == "done":
             self.remove_widget_instance(self.instance, self.list_item)
@@ -160,15 +169,15 @@ class MainWindow(MDApp):
     
     def show_detailed_order(self, instance): # Visualizzazione dettagliata della comanda
         col = self.db["orders"]
-        obj_instance = ObjectId(instance.text.replace("[size=25dp]","").replace("ID: ","").replace("[/size]",""))
+        obj_instance = ObjectId(instance.text.replace(f"{list_title_size}","").replace("ID: ","").replace("[/size]",""))
         order = col.find_one({"_id": obj_instance})
-        order_string = f"""[color=1F7F06]ID: {order['_id']}
-{lang(language, 9)}: {order["customer"]} - {lang(language, 10)}: {order["table"]}
+        order_string = f"""[color=1F7F06]{title_size}ID: {order['_id']}[/size]
+{list_title_size}{lang(language, 9)}: {order["customer"]} - {lang(language, 10)}: {order["table"]}
 {lang(language, 11)}: {order['date'][6:]}/{order['date'][4:6]}/{order['date'][:4]} - {lang(language, 12)}: {order['time'][:2]}:{order['time'][2:4]}:{order['time'][4:]}[/color]
 [color=DE7A10][b]-----------------------------------[/b][/color]
 [color=B0B006]{order["order"]}[/color]
 [color=DE7A10][b]-----------------------------------[/b][/color]
-[color=B29933]{order["order_note"]}[/color]"""
+[color=B29933]{order["order_note"]}[/size][/color]"""
         self.root.ids["L_order"].text = order_string
         self.instance = instance
         self.list_item = self.root.ids.LS_products
@@ -180,7 +189,7 @@ class MainWindow(MDApp):
     def remove_widget_instance(self, instance, parent_widget): # Eliminazione comanda alla pressione del tasto
         # Rimozione dal database
         col = self.db["orders"]
-        obj_instance = ObjectId(instance.text[4:])
+        obj_instance = ObjectId(instance.text.replace(f"{list_title_size}","").replace("ID: ","").replace("[/size]",""))
         col.delete_one({"_id": obj_instance})
         # Rimozione dall'interfaccia
         parent_widget.remove_widget(instance)
@@ -192,6 +201,10 @@ class MainWindow(MDApp):
         # Avvio delle funzioni del database
         Clock.schedule_once(self.scheduled_database_connection_1, 0.2) # Avvio della connessione al database
         Clock.schedule_interval(self.scheduled_function, update_time) # Controllo del database periodico
+        # Caricamento suono di notifica su pc
+        if platform != "android":
+            self.sound = SoundLoader.load("beep.wav")
+        else: self.sound = "-"
         
         self.KV = f"""
 ScreenManager:
