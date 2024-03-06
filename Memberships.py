@@ -704,6 +704,7 @@ class DatabaseWindow(QWidget):
                                                   lang.msg(language, 14, "MainWindow"), lang.msg(language, 29, "MainWindow")])
         self.T_results.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.T_results.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.T_results.doubleClicked.connect(self.show_detailed_person)
         self.T_results.customContextMenuRequested.connect(self.T_results_CM)
         self.T_results_headers = self.T_results.horizontalHeader()
         self.lay.addWidget(self.T_results, 2, 0, 1, 3, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
@@ -1076,14 +1077,17 @@ class DatabaseWindow(QWidget):
     def T_results_CM(self):
         if self.T_results.currentRow() == -1: return
         menu = QMenu(self)
+        detailed_show_action = QAction(lang.msg(language, 31, "DatabaseWindow"), self)
         delete_action = QAction(lang.msg(language, 1, "DatabaseWindow"), self)
         delete_action.triggered.connect(self.delete_person)
-        menu.addAction(delete_action)
+        detailed_show_action.triggered.connect(self.show_detailed_person)
+        menu.addActions([detailed_show_action, delete_action])
         menu.popup(QCursor.pos())
     
     # Funzione elimina
     
     def delete_person(self):
+        if self.T_results.currentRow() == -1: return
         # Ricerca della persona alla pressione del tasto
         
         row = self.T_results.currentRow()       
@@ -1098,6 +1102,43 @@ class DatabaseWindow(QWidget):
         
         self.T_results.removeRow(row)
         self.T_results.setCurrentCell(-1, -1)
+    
+    # Funzione visualizzazione dettagliata
+    
+    def show_detailed_person(self):
+        if self.T_results.currentRow() == -1: return
+        # Ricerca della persona alla pressione del tasto
+        
+        row = self.T_results.currentRow()       
+        tax_id_code = self.T_results.item(row, 0).text()
+        name = self.T_results.item(row, 1).text()
+        surname = self.T_results.item(row, 2).text()
+        
+        col = self.db["cards"] # Connessione alla collezione del database
+        person = col.find_one({"tax_id_code": tax_id_code, "name": name, "surname": surname})
+        
+        # Visualizzazione dettagliata della persona
+        
+        date_of_membership_st = "-"
+        if person["date_of_membership"] != "-":
+            date_of_membership_st = f"{person['date_of_membership'][6:]}/{person['date_of_membership'][4:6]}/{person['date_of_membership'][:4]}"
+        detailed_person_st = f"""{lang.msg(language, 3, "MainWindow")}: {person["tax_id_code"]}
+{lang.msg(language, 4, "MainWindow")}: {person["name"]}
+{lang.msg(language, 5, "MainWindow")}: {person["surname"]}
+{lang.msg(language, 6, "MainWindow")}: {person["date_of_birth"]}
+{lang.msg(language, 7, "MainWindow")}: {person["birth_place"]}
+{lang.msg(language, 28, "MainWindow")}: {person["sex"]}
+{lang.msg(language, 10, "MainWindow")}: {person["city_of_residence"]}
+{lang.msg(language, 11, "MainWindow")}: {person["residential_address"]}
+{lang.msg(language, 12, "MainWindow")}: {person["postal_code"]}
+{lang.msg(language, 13, "MainWindow")}: {person["email"]}
+{lang.msg(language, 14, "MainWindow")}: {person["card_number"]}
+{lang.msg(language, 29, "MainWindow")}: {date_of_membership_st}"""
+        
+        msg = QMessageBox(self)
+        msg.setWindowTitle(lang.msg(language, 32, "DatabaseWindow"))
+        msg.setText(detailed_person_st)       
+        return msg.exec()
     
     # -*-* Funzione di ridimensionamento finestra *-*-
     

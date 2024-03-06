@@ -25,13 +25,15 @@ ita_dw = ["0@-@Non tesserati","1@-@Elimina","2@-@Uguale a","3@-@Contiene","4@-@M
           "14@-@Parte del luogo di nascita","15@-@Casella non necessaria","16@-@Città di residenza completa","17@-@Parte della città di residenza",
           "18@-@Indirizzo di residenza completo","19@-@Parte dell'indirizzo di residenza","20@-@CAP completo","21@-@Parte del CAP","22@-@e-mail completa",
           "23@-@Parte della e-mail","24@-@Numero tessera specifico","25@-@Maggiore del numero inserito","26@-@Minore del numero inserito","27@-@Data non corretta!",
-          "28@-@CAP errato!","29@-@*** Libero ***","30@-@Stai per eliminare i dati selezionati dal database!\nL'operazione non è reversibile!\nSei sicuro?"]
+          "28@-@CAP errato!","29@-@*** Libero ***","30@-@Stai per eliminare i dati selezionati dal database!\nL'operazione non è reversibile!\nSei sicuro?",
+          "31@-@Visualizza dettagli (doppio click sx)","32@-@Visualizzazione dettagliata"]
 eng_dw = ["0@-@Not members","1@-@Delete","2@-@Equal to","3@-@Contains","4@-@Greater than","5@-@Less than","6@-@Complete tax id code","7@-@Part of tax code",
           "8@-@Complete name","9@-@Part of name","10@-@Complete surname","11@-@Part of surname","12@-@Example: 15/06/1982","13@-@Complete birth place",
           "14@-@Part of birth place","15@-@Field not necessary","16@-@Complete city of residence","17@-@Part of city of residence","18@-@Complete residential address",
           "19@-@Part of residential address","20@-@Complete postal code","21@-@Part of postal code","22@-@Complete e-mail","23@-@Part of e-mail","24@-@Specific card number",
           "25@-@Greater than the number entered","26@-@Less than the number entered","27@-@Incorrect date!","28@-@Incorrect postal code!","29@-@*** Free ***",
-          "30@-@You're going to delete the selected data from database!\nThe operation is not reversible!\nAre you sure?"]
+          "30@-@You're going to delete the selected data from database!\nThe operation is not reversible!\nAre you sure?",
+          "31@-@Show details (double left click)","32@-@Detailed view"]
 
 # ExcelWindow
 
