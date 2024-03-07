@@ -11,7 +11,7 @@ from PyQt6.QtGui import QPixmap,QAction,QCursor,QTextCharFormat,QColor,QTextCurs
 import Orders_Language as lang
 if platform == "win32": import win32print # Importazione del modulo stampa per sistemi operativi Windows
 
-# Versione 1.0.2-r7
+# Versione 1.0.2-r8
 
 # Debug mode
 
@@ -1728,8 +1728,8 @@ class OptionsMenu(QWidget):
         
         # Lettura file e impostazione variabili
     
-        if os.path.exists(f"{os.environ['HOME']}/Orders/options.txt"):
-            options_file = open(f"{os.environ['HOME']}/Orders/options.txt", "r")
+        if os.path.exists(f"{os.path.expanduser('~')}/Orders/options.txt"):
+            options_file = open(f"{os.path.expanduser('~')}/Orders/options.txt", "r")
             self.mongodb_connection = options_file.readline().replace("db_connection=", "").replace("\n", "")
             self.heading = options_file.readline().replace("heading=", "").replace("\n", "")
             self.interface_style = options_file.readline().replace("interface=", "").replace("\n", "")
@@ -1893,7 +1893,7 @@ class OptionsMenu(QWidget):
         
         # Salvataggio file
         
-        options_file = open(f"{os.environ['HOME']}/Orders/options.txt", "w")
+        options_file = open(f"{os.path.expanduser('~')}/Orders/options.txt", "w")
         options_file.write(f"db_connection={self.LE_database_connection.text()}\nheading={self.LE_heading.text()}\ninterface={self.CB_interface_style.currentText()}\nlogo={self.logo_path}\nicon={self.icon_path}\nlanguage={self.CB_language.currentText()}")
         options_file.close()
         
@@ -1901,7 +1901,7 @@ class OptionsMenu(QWidget):
         
         # Lettura file e impostazione variabili
     
-        options_file = open(f"{os.environ['HOME']}/Orders/options.txt", "r")
+        options_file = open(f"{os.path.expanduser('~')}/Orders/options.txt", "r")
         try:
             global dbclient
             dbclient = pymongo.MongoClient(options_file.readline().replace("db_connection=", "").replace("\n", ""))
@@ -1950,9 +1950,9 @@ class OptionsMenu(QWidget):
 
 # -*-* Avvio applicazione *-*-
 
-if os.path.exists(f"{os.environ['HOME']}/Orders") == False: os.mkdir(f"{os.environ['HOME']}/Orders")
+if os.path.exists(f"{os.path.expanduser('~')}/Orders") == False: os.mkdir(f"{os.path.expanduser('~')}/Orders")
 
-if os.path.exists(f"{os.environ['HOME']}/Orders/options.txt") == False: first_start_application = 1
+if os.path.exists(f"{os.path.expanduser('~')}/Orders/options.txt") == False: first_start_application = 1
     
 if __name__ == '__main__':
     app = QApplication(sys.argv)

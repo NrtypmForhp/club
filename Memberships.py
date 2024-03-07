@@ -9,7 +9,7 @@ from PyQt6.QtGui import QPixmap,QAction,QCursor,QIcon
 import Memberships_Language as lang
 import ItalyCityCode as ICC
 
-# Versione 1.0.2-r3
+# Versione 1.0.2-r4
 
 # Variabili globali
 
@@ -1672,11 +1672,11 @@ class ExcelWindow(QWidget):
         # Salvataggio file excel
         date = datetime.now()
         date = date.strftime("%Y%m%d")
-        wb.save(f"{os.environ['HOME']}/Memberships/template_{date}.xlsx")
+        wb.save(f"{os.path.expanduser('~')}/Memberships/template_{date}.xlsx")
         
         msg = QMessageBox(self)
         msg.setWindowTitle(lang.msg(language, 34, "ExcelWindow"))
-        msg.setText(f"{lang.msg(language, 35, 'ExcelWindow')}:\n{os.environ['HOME']}/Memberships/template_{date}.xlsx")
+        msg.setText(f"{lang.msg(language, 35, 'ExcelWindow')}:\n{os.path.expanduser('~')}/Memberships/template_{date}.xlsx")
         return msg.exec()
     
     # *-*-* Funzione controllo numeri *-*-*
@@ -1709,8 +1709,8 @@ class OptionsMenu(QWidget):
         
         # Lettura file e impostazione variabili
     
-        if os.path.exists(f"{os.environ['HOME']}/Memberships/options.txt"):
-            options_file = open(f"{os.environ['HOME']}/Memberships/options.txt", "r")
+        if os.path.exists(f"{os.path.expanduser('~')}/Memberships/options.txt"):
+            options_file = open(f"{os.path.expanduser('~')}/Memberships/options.txt", "r")
             self.mongodb_connection =options_file.readline().replace("db_connection=", "").replace("\n", "")
             self.heading = options_file.readline().replace("heading=", "").replace("\n", "")
             self.interface_style = options_file.readline().replace("interface=", "").replace("\n", "")
@@ -1874,7 +1874,7 @@ class OptionsMenu(QWidget):
         
         # Salvataggio file
         
-        options_file = open(f"{os.environ['HOME']}/Memberships/options.txt", "w")
+        options_file = open(f"{os.path.expanduser('~')}/Memberships/options.txt", "w")
         options_file.write(f"db_connection={self.LE_database_connection.text()}\nheading={self.LE_heading.text()}\ninterface={self.CB_interface_style.currentText()}\nlogo={self.logo_path}\nicon={self.icon_path}\nlanguage={self.CB_language.currentText()}")
         options_file.close()
         
@@ -1882,7 +1882,7 @@ class OptionsMenu(QWidget):
         
         # Lettura file e impostazione variabili
     
-        options_file = open(f"{os.environ['HOME']}/Memberships/options.txt", "r")
+        options_file = open(f"{os.path.expanduser('~')}/Memberships/options.txt", "r")
         try:
             global dbclient
             dbclient = pymongo.MongoClient(options_file.readline().replace("db_connection=", "").replace("\n", ""))
@@ -1919,9 +1919,9 @@ class OptionsMenu(QWidget):
 
 # -*-* Avvio applicazione *-*-
 
-if os.path.exists(f"{os.environ['HOME']}/Memberships") == False: os.mkdir(f"{os.environ['HOME']}/Memberships")
+if os.path.exists(f"{os.path.expanduser('~')}/Memberships") == False: os.mkdir(f"{os.path.expanduser('~')}/Memberships")
 
-if os.path.exists(f"{os.environ['HOME']}/Memberships/options.txt") == False: first_start_application = 1
+if os.path.exists(f"{os.path.expanduser('~')}/Memberships/options.txt") == False: first_start_application = 1
     
 if __name__ == '__main__':
     app = QApplication(sys.argv)
