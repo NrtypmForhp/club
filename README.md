@@ -1,3 +1,5 @@
+# Software is no longer updated!
+
 Software for small organisations like clubs.
 Simplify management of bar, kitchen, memberships and more.
 Made in Python.
